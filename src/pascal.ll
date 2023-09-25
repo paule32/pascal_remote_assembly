@@ -19,6 +19,14 @@
 # include "PascalParser.h"
 # include "PascalScanner.h"
 
+# include <libintl.h>
+# include <locale.h>
+# include <stdio.h>
+# include <stdlib.h>
+
+// -----------------------------------------------------------------
+// code helper, and shortner ...
+// -----------------------------------------------------------------
 extern std::istream * lexer_input;
 extern void yyerror(char * err);
 
@@ -35,6 +43,7 @@ extern void yyerror(char * err);
       break; \
     } \
   }
+# define _(String) gettext(String)
 %}
 
 A [Aa]
@@ -138,13 +147,13 @@ Z [Zz]
 <DEF_BLOCK_CONDITION>\}     { BEGIN(INITIAL);           }
 <DEF_BLOCK_CONDITION>\n     { column  = 1; line += 1;   }
 <DEF_BLOCK_CONDITION>.      {
-    std::cout << "invalide pre-processor command." << std::endl;
+    std::cout << _("not a valid pre-processor command.") << std::endl;
     yyterminate();
 }
 
 <DEF_BLOCK_CHECK_COMMENT>\} { BEGIN(INITIAL);  }
 <DEF_BLOCK_CHECK_COMMENT>.  {
-    std::cout << "invalide pre-processor command." << std::endl;
+    std::cout << _("not a valid pre-processor command.") << std::endl;
     yyterminate();
 }
 
@@ -205,7 +214,7 @@ Z [Zz]
 
 .            { column += 1;
     std::stringstream ss;
-    ss << "Ungültiges Zeichen: " << yytext[0];
+    ss << _("Invalide character: ") << yytext[0];
     val->string_val = strdup( ss.str().c_str() );
     
     return PascalParser::UNKNOWN;

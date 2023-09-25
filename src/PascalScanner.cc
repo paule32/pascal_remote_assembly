@@ -212,7 +212,7 @@ int read();
 #define DOX_BRIEF 12
 #define DOX_BUG 13
 #include "PascalScanner.h"
-#line 76 "pascal.ll"
+#line 85 "pascal.ll"
 #line 196 "E:\\msys64\\mingw64\\bin\\flexskel.cc"
 
 #define yy___stderr YY_PascalScanner_ERRFILE
@@ -672,15 +672,15 @@ static YY_CHAR *yy_last_accepting_cpos;
 #if YY_PascalScanner_DEBUG != 0
 static const short int yy_rule_linenum[83] =
     {   0,
-       78,   79,   80,   82,   83,   84,   85,   86,   87,   88,
-       89,   90,   91,   92,   94,   95,   97,   99,  100,  101,
-      105,  109,  113,  117,  118,  120,  124,  125,  127,  128,
-      129,  130,  131,  132,  133,  135,  136,  138,  139,  140,
-      145,  146,  151,  152,  153,  155,  156,  157,  158,  160,
-      162,  163,  164,  165,  166,  167,  169,  170,  171,  173,
-      174,  175,  177,  178,  179,  181,  182,  183,  185,  186,
-      187,  188,  189,  191,  193,  194,  196,  197,  198,  200,
-      206,  206
+       87,   88,   89,   91,   92,   93,   94,   95,   96,   97,
+       98,   99,  100,  101,  103,  104,  106,  108,  109,  110,
+      114,  118,  122,  126,  127,  129,  133,  134,  136,  137,
+      138,  139,  140,  141,  142,  144,  145,  147,  148,  149,
+      154,  155,  160,  161,  162,  164,  165,  166,  167,  169,
+      171,  172,  173,  174,  175,  176,  178,  179,  180,  182,
+      183,  184,  186,  187,  188,  190,  191,  192,  194,  195,
+      196,  197,  198,  200,  202,  203,  205,  206,  207,  209,
+      215,  215
     } ;
 
 #endif
@@ -846,344 +846,344 @@ do_action:      /* this label is used only to access EOF actions */
 	    goto yy_find_action;
 
 case 1:
-#line 78 "pascal.ll"
+#line 87 "pascal.ll"
 { column += 8;             }
 	YY_BREAK
 case 2:
-#line 79 "pascal.ll"
+#line 88 "pascal.ll"
 { column  = 1; line++;     }
 	YY_BREAK
 case 3:
-#line 80 "pascal.ll"
+#line 89 "pascal.ll"
 { column += strlen(yytext);             }
 	YY_BREAK
 case 4:
-#line 82 "pascal.ll"
+#line 91 "pascal.ll"
 { column += 5; return PascalParser::TOK_BEGIN;      }
 	YY_BREAK
 case 5:
-#line 83 "pascal.ll"
+#line 92 "pascal.ll"
 { column += 4; return PascalParser::TOK_BYTE;       }
 	YY_BREAK
 case 6:
-#line 84 "pascal.ll"
+#line 93 "pascal.ll"
 { column += 4; return PascalParser::TOK_CHAR;       }
 	YY_BREAK
 case 7:
-#line 85 "pascal.ll"
+#line 94 "pascal.ll"
 { column += 5; return PascalParser::TOK_CONST;      }
 	YY_BREAK
 case 8:
-#line 86 "pascal.ll"
+#line 95 "pascal.ll"
 { column += 3; return PascalParser::TOK_END;        }
 	YY_BREAK
 case 9:
-#line 87 "pascal.ll"
+#line 96 "pascal.ll"
 { column += 8; return PascalParser::TOK_FUNCTION;   }
 	YY_BREAK
 case 10:
-#line 88 "pascal.ll"
+#line 97 "pascal.ll"
 { column += 7; return PascalParser::TOK_INTEGER;    }
 	YY_BREAK
 case 11:
-#line 89 "pascal.ll"
+#line 98 "pascal.ll"
 { column += 9; return PascalParser::TOK_PROCEDURE;  }
 	YY_BREAK
 case 12:
-#line 90 "pascal.ll"
+#line 99 "pascal.ll"
 { column += 7; return PascalParser::TOK_PROGRAM;    }
 	YY_BREAK
 case 13:
-#line 91 "pascal.ll"
+#line 100 "pascal.ll"
 { column += 6; return PascalParser::TOK_STRING;     }
 	YY_BREAK
 case 14:
-#line 92 "pascal.ll"
+#line 101 "pascal.ll"
 { column += 3; return PascalParser::TOK_VAR;        }
 	YY_BREAK
 case 15:
-#line 94 "pascal.ll"
+#line 103 "pascal.ll"
 { column += strlen(yytext); val->string_val = strdup( yytext ); return PascalParser::TOK_IDENTIFIER; }
 	YY_BREAK
 case 16:
-#line 95 "pascal.ll"
+#line 104 "pascal.ll"
 { column += strlen(yytext); val->int_val = atoi(yytext); return PascalParser::TOK_CONSTANT;   }
 	YY_BREAK
 case 17:
-#line 97 "pascal.ll"
+#line 106 "pascal.ll"
 { column += strlen(yytext); }
 	YY_BREAK
 case 18:
-#line 99 "pascal.ll"
+#line 108 "pascal.ll"
 { BEGIN(DEF_BLOCK); }
 	YY_BREAK
 case 19:
-#line 100 "pascal.ll"
+#line 109 "pascal.ll"
 { BEGIN(INITIAL);   }
 	YY_BREAK
 case 20:
-#line 101 "pascal.ll"
+#line 110 "pascal.ll"
 {
     column += strlen(yytext);
     BEGIN(DEF_BLOCK_COMMENT);
 }
 	YY_BREAK
 case 21:
-#line 105 "pascal.ll"
+#line 114 "pascal.ll"
 {
     column += strlen(yytext);
     BEGIN(DEF_BLOCK_COMMENT);
 }
 	YY_BREAK
 case 22:
-#line 109 "pascal.ll"
+#line 118 "pascal.ll"
 {
     column += strlen(yytext);
     BEGIN(DEF_BLOCK_COMMENT);
 }
 	YY_BREAK
 case 23:
-#line 113 "pascal.ll"
+#line 122 "pascal.ll"
 {
     column += strlen(yytext);
     BEGIN(DEF_BLOCK_IFDEF);
 }
 	YY_BREAK
 case 24:
-#line 117 "pascal.ll"
+#line 126 "pascal.ll"
 { column = 1; line += 1; }
 	YY_BREAK
 case 25:
-#line 118 "pascal.ll"
+#line 127 "pascal.ll"
 { }
 	YY_BREAK
 case 26:
-#line 120 "pascal.ll"
+#line 129 "pascal.ll"
 {
     column += strlen(yytext);
     BEGIN(DEF_BLOCK_CONDITION);
 }
 	YY_BREAK
 case 27:
-#line 124 "pascal.ll"
+#line 133 "pascal.ll"
 { BEGIN(INITIAL);           }
 	YY_BREAK
 case 28:
-#line 125 "pascal.ll"
+#line 134 "pascal.ll"
 { column  = 1; line += 1;   }
 	YY_BREAK
 case 29:
-#line 127 "pascal.ll"
-{ column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
-	YY_BREAK
-case 30:
-#line 128 "pascal.ll"
-{ column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
-	YY_BREAK
-case 31:
-#line 129 "pascal.ll"
-{ column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
-	YY_BREAK
-case 32:
-#line 130 "pascal.ll"
-{ column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
-	YY_BREAK
-case 33:
-#line 131 "pascal.ll"
-{ column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
-	YY_BREAK
-case 34:
-#line 132 "pascal.ll"
-{ column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
-	YY_BREAK
-case 35:
-#line 133 "pascal.ll"
-{ column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
-	YY_BREAK
-case 36:
-#line 135 "pascal.ll"
-{ column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
-	YY_BREAK
-case 37:
 #line 136 "pascal.ll"
 { column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
 	YY_BREAK
-case 38:
+case 30:
+#line 137 "pascal.ll"
+{ column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
+	YY_BREAK
+case 31:
 #line 138 "pascal.ll"
+{ column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
+	YY_BREAK
+case 32:
+#line 139 "pascal.ll"
+{ column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
+	YY_BREAK
+case 33:
+#line 140 "pascal.ll"
+{ column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
+	YY_BREAK
+case 34:
+#line 141 "pascal.ll"
+{ column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
+	YY_BREAK
+case 35:
+#line 142 "pascal.ll"
+{ column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
+	YY_BREAK
+case 36:
+#line 144 "pascal.ll"
+{ column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
+	YY_BREAK
+case 37:
+#line 145 "pascal.ll"
+{ column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
+	YY_BREAK
+case 38:
+#line 147 "pascal.ll"
 { BEGIN(INITIAL);           }
 	YY_BREAK
 case 39:
-#line 139 "pascal.ll"
+#line 148 "pascal.ll"
 { column  = 1; line += 1;   }
 	YY_BREAK
 case 40:
-#line 140 "pascal.ll"
+#line 149 "pascal.ll"
 {
-    std::cout << "invalide pre-processor command." << std::endl;
+    std::cout << _("not a valid pre-processor command.") << std::endl;
     yyterminate();
 }
 	YY_BREAK
 case 41:
-#line 145 "pascal.ll"
+#line 154 "pascal.ll"
 { BEGIN(INITIAL);  }
 	YY_BREAK
 case 42:
-#line 146 "pascal.ll"
+#line 155 "pascal.ll"
 {
-    std::cout << "invalide pre-processor command." << std::endl;
+    std::cout << _("not a valid pre-processor command.") << std::endl;
     yyterminate();
 }
 	YY_BREAK
 case 43:
-#line 151 "pascal.ll"
+#line 160 "pascal.ll"
 { BEGIN(INITIAL);           }
 	YY_BREAK
 case 44:
-#line 152 "pascal.ll"
+#line 161 "pascal.ll"
 { column  = 1; line += 1;   }
 	YY_BREAK
 case 45:
-#line 153 "pascal.ll"
+#line 162 "pascal.ll"
 { }
 	YY_BREAK
 case 46:
-#line 155 "pascal.ll"
+#line 164 "pascal.ll"
 { BEGIN(NEW_COMMENT);       }
 	YY_BREAK
 case 47:
-#line 156 "pascal.ll"
+#line 165 "pascal.ll"
 { BEGIN(INITIAL);           }
 	YY_BREAK
 case 48:
-#line 157 "pascal.ll"
-{ column  = 1; line += 1;   }
-	YY_BREAK
-case 49:
-#line 158 "pascal.ll"
-{ }
-	YY_BREAK
-case 50:
-#line 160 "pascal.ll"
-{ BEGIN(DOX); }
-	YY_BREAK
-case 51:
-#line 162 "pascal.ll"
-{ BEGIN(DOX_FILE);    }
-	YY_BREAK
-case 52:
-#line 163 "pascal.ll"
-{ BEGIN(DOX_AUTHOR);  }
-	YY_BREAK
-case 53:
-#line 164 "pascal.ll"
-{ BEGIN(DOX_BRIEF);   }
-	YY_BREAK
-case 54:
-#line 165 "pascal.ll"
-{ BEGIN(DOX_BUG);     }
-	YY_BREAK
-case 55:
 #line 166 "pascal.ll"
 { column  = 1; line += 1;   }
 	YY_BREAK
-case 56:
+case 49:
 #line 167 "pascal.ll"
-{ std::cout << "ende" << std::endl; BEGIN(INITIAL);           }
+{ }
 	YY_BREAK
-case 57:
+case 50:
 #line 169 "pascal.ll"
-{ std::cout << "file  : " << yytext << std::endl; }
+{ BEGIN(DOX); }
 	YY_BREAK
-case 58:
-#line 170 "pascal.ll"
-{ std::cout << "ende" << std::endl; BEGIN(INITIAL);           }
-	YY_BREAK
-case 59:
+case 51:
 #line 171 "pascal.ll"
-{ column  = 1; line += 1;   }
+{ BEGIN(DOX_FILE);    }
 	YY_BREAK
-case 60:
+case 52:
+#line 172 "pascal.ll"
+{ BEGIN(DOX_AUTHOR);  }
+	YY_BREAK
+case 53:
 #line 173 "pascal.ll"
-{ std::cout << "author: " << yytext << std::endl; }
+{ BEGIN(DOX_BRIEF);   }
 	YY_BREAK
-case 61:
+case 54:
 #line 174 "pascal.ll"
-{ std::cout << "ende" << std::endl; BEGIN(INITIAL);           }
+{ BEGIN(DOX_BUG);     }
 	YY_BREAK
-case 62:
+case 55:
 #line 175 "pascal.ll"
 { column  = 1; line += 1;   }
 	YY_BREAK
+case 56:
+#line 176 "pascal.ll"
+{ std::cout << "ende" << std::endl; BEGIN(INITIAL);           }
+	YY_BREAK
+case 57:
+#line 178 "pascal.ll"
+{ std::cout << "file  : " << yytext << std::endl; }
+	YY_BREAK
+case 58:
+#line 179 "pascal.ll"
+{ BEGIN(INITIAL);           }
+	YY_BREAK
+case 59:
+#line 180 "pascal.ll"
+{ column  = 1; line += 1;   }
+	YY_BREAK
+case 60:
+#line 182 "pascal.ll"
+{ std::cout << "author: " << yytext << std::endl; }
+	YY_BREAK
+case 61:
+#line 183 "pascal.ll"
+{ BEGIN(INITIAL);           }
+	YY_BREAK
+case 62:
+#line 184 "pascal.ll"
+{ column  = 1; line += 1;   }
+	YY_BREAK
 case 63:
-#line 177 "pascal.ll"
+#line 186 "pascal.ll"
 { std::cout << "brief : " << yytext << std::endl; }
 	YY_BREAK
 case 64:
-#line 178 "pascal.ll"
-{ std::cout << "ende" << std::endl; BEGIN(INITIAL);           }
+#line 187 "pascal.ll"
+{ BEGIN(INITIAL);           }
 	YY_BREAK
 case 65:
-#line 179 "pascal.ll"
+#line 188 "pascal.ll"
 { column  = 1; line += 1;   }
 	YY_BREAK
 case 66:
-#line 181 "pascal.ll"
+#line 190 "pascal.ll"
 { std::cout << "bug   : " << yytext << std::endl; }
 	YY_BREAK
 case 67:
-#line 182 "pascal.ll"
-{ std::cout << "ende" << std::endl; BEGIN(INITIAL);           }
+#line 191 "pascal.ll"
+{ BEGIN(INITIAL);           }
 	YY_BREAK
 case 68:
-#line 183 "pascal.ll"
+#line 192 "pascal.ll"
 { column  = 1; line += 1;   }
 	YY_BREAK
 case 69:
-#line 185 "pascal.ll"
+#line 194 "pascal.ll"
 { BEGIN(PAS_COMMENT);       }
 	YY_BREAK
 case 70:
-#line 186 "pascal.ll"
+#line 195 "pascal.ll"
 { BEGIN(INITIAL);           }
 	YY_BREAK
 case 71:
-#line 187 "pascal.ll"
+#line 196 "pascal.ll"
 { }
 	YY_BREAK
 case 72:
-#line 188 "pascal.ll"
+#line 197 "pascal.ll"
 { column += 1;              }
 	YY_BREAK
 case 73:
-#line 189 "pascal.ll"
+#line 198 "pascal.ll"
 { column  = 1; line += 1;   }
 	YY_BREAK
 case 74:
-#line 191 "pascal.ll"
+#line 200 "pascal.ll"
 { column += 1; return PascalParser::SYM_EQUAL;      }
 	YY_BREAK
 case 75:
-#line 193 "pascal.ll"
+#line 202 "pascal.ll"
 { column += 1;         return PascalParser::SYM_SEMICOLON;  }
 	YY_BREAK
 case 76:
-#line 194 "pascal.ll"
+#line 203 "pascal.ll"
 { column  = 1; line++; return PascalParser::SYM_SEMICOLON;  }
 	YY_BREAK
 case 77:
-#line 196 "pascal.ll"
+#line 205 "pascal.ll"
 { column += 1; return PascalParser::SYM_COLON;      }
 	YY_BREAK
 case 78:
-#line 197 "pascal.ll"
+#line 206 "pascal.ll"
 { column += 1; return PascalParser::SYM_COMMA;      }
 	YY_BREAK
 case 79:
-#line 198 "pascal.ll"
+#line 207 "pascal.ll"
 { column += 1; return PascalParser::SYM_DOT;        }
 	YY_BREAK
 case 80:
-#line 200 "pascal.ll"
+#line 209 "pascal.ll"
 {
     column += strlen(yytext);
     val->string_val = strdup( yytext );
@@ -1191,10 +1191,10 @@ case 80:
 }
 	YY_BREAK
 case 81:
-#line 206 "pascal.ll"
+#line 215 "pascal.ll"
 { column += 1;
     std::stringstream ss;
-    ss << "Ungültiges Zeichen: " << yytext[0];
+    ss << _("Invalide character: ") << yytext[0];
     val->string_val = strdup( ss.str().c_str() );
     
     return PascalParser::UNKNOWN;
@@ -1214,11 +1214,11 @@ case YY_STATE_EOF(DOX_FILE):
 case YY_STATE_EOF(DOX_AUTHOR):
 case YY_STATE_EOF(DOX_BRIEF):
 case YY_STATE_EOF(DOX_BUG):
-#line 214 "pascal.ll"
+#line 223 "pascal.ll"
 { yyterminate(); }
 	YY_BREAK
 case 83:
-#line 215 "pascal.ll"
+#line 224 "pascal.ll"
 ECHO;
 	YY_BREAK
 #line 493 "E:\\msys64\\mingw64\\bin\\flexskel.cc"
@@ -1813,5 +1813,5 @@ void YY_PascalScanner_CLASS::YY_PascalScanner_INIT_BUFFER( YY_BUFFER_STATE b, YY
 
     b->yy_eof_status = EOF_NOT_SEEN;
     }
-#line 215 "pascal.ll"
+#line 224 "pascal.ll"
 

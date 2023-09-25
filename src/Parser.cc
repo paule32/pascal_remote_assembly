@@ -11,8 +11,9 @@
 # include <fstream>
 
 # include "Parser.h"
-using namespace std;
+# include "AnsiColor.h"
 
+using namespace std;
 std::istream * lexer_input;
 
 // -----------------------------------------------------------------
@@ -35,16 +36,18 @@ Parser::Parser( char *filename )
         lexer_input = new std::istringstream(buffer.str());
         
         initialize();
+        
+        locale_utf8 = new char[4];
     }
     else {
         if (parser_file->fail())
-        throw EPascalException_FileNotOpen ("parser file could not be open.");
-        throw EPascalException_FileNotFound("parser file dont exists.");
+        throw EPascalException_FileNotOpen (_("parser file could not be open."));
+        throw EPascalException_FileNotFound(_("parser file dont exists."));
     }
 }
 
 // -----------------------------------------------------------------
-// standard ctor
+// standard ctor, remove temporary files, and clean-up memory ...
 // -----------------------------------------------------------------
 Parser::~Parser()
 {
@@ -52,6 +55,27 @@ Parser::~Parser()
     delete parser_file;
     
     finalize();
+}
+
+// -----------------------------------------------------------------
+// clean up global storage ...
+// -----------------------------------------------------------------
+void parser_cleanup()
+{
+    std::cout << "please wait..." << std::endl;
+
+    if (!strcmp(locale_utf8,"de")) {
+        std::remove("locales/de_DE/LC_MESSAGES/de_DE_utf8.mo");
+    }   else
+    if (!strcmp(locale_utf8,"en")) {
+        std::remove("locales/en_US/LC_MESSAGES/en_US_utf8.mo");
+    }
+
+    if (nullptr != parser) delete parser;
+    if (nullptr != ansi  ) delete ansi;
+    
+    sleep(1);
+    std::cout << "\033[A\033[2KT\r              " << std::endl;
 }
 
 // -----------------------------------------------------------------

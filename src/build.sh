@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd po && ./build.sh && cd ..
+
 bison++ -d -hPascalParser.h  -oPascalParser.cc  pascal.yy
 flex++     -hPascalScanner.h -oPascalScanner.cc pascal.ll
 
@@ -15,6 +17,8 @@ g++ $FLAGS -c x86code.cc
 g++ $FLAGS -c parser.cc
 g++ $FLAGS -c start.cc
 
-g++ -O2 -o start.exe start.o parser.o x86code.o PascalScanner.o PascalParser.o -L./ -lasmjit
+g++ -O2 -o start.exe start.o parser.o x86code.o PascalScanner.o PascalParser.o -L./ -lasmjit -lintl
 
 strip start.exe
+
+cp start.exe ../exec/start.exe

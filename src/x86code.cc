@@ -35,10 +35,10 @@ using namespace std;
 void Parser::initialize()
 {
     env      = Environment::host();
-    Features = CpuInfo::host().features();
+    features = CpuInfo::host().features();
     uint64_t baseAddress = uint64_t(0x1974);
     
-    code.init(env,Features,baseAddress);
+    code.init(env,features,baseAddress);
     code.setLogger(&logger);
 
     formatFlags =

@@ -68,6 +68,14 @@
 # include "PascalParser.h"
 # include "PascalScanner.h"
 
+# include <libintl.h>
+# include <locale.h>
+# include <stdio.h>
+# include <stdlib.h>
+
+// -----------------------------------------------------------------
+// code helper, and shortner ...
+// -----------------------------------------------------------------
 extern std::istream * lexer_input;
 extern void yyerror(char * err);
 
@@ -84,7 +92,8 @@ extern void yyerror(char * err);
       break; \
     } \
   }
-#line 76 "pascal.ll"
+# define _(String) gettext(String)
+#line 85 "pascal.ll"
 #line 52 "E:\\msys64\\mingw64\\bin\\flexskel.h"
 
 #ifdef YY_USE_CLASS
@@ -411,7 +420,7 @@ class YY_PascalScanner_CLASS YY_PascalScanner_INHERIT
 /* declaration of externs for public use of yylex scanner */
 
 /* % here is the declaration from section2 %header{ */ 
-#line 215 "pascal.ll"
+#line 224 "pascal.ll"
 #endif
 #line 377 "E:\\msys64\\mingw64\\bin\\flexskel.h"
 
