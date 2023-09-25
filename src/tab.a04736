@@ -1,0 +1,157 @@
+
+/*  A Bison++ parser, made from pascal.yy  */
+
+ /* with Bison++ version bison++ Version 1.21-8, adapted from GNU bison by coetmeur@icdc.fr
+  */
+
+
+#line 1 "E:\\msys64\\mingw64\\bin\\bison.cc"
+/* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
+/* Skeleton output parser for bison,
+   Copyright (C) 1984, 1989, 1990 Bob Corbett and Richard Stallman
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 1, or (at your option)
+   any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+/* HEADER SECTION */
+#if defined( _MSDOS ) || defined(MSDOS) || defined(__MSDOS__) 
+#define __MSDOS_AND_ALIKE
+#endif
+#if defined(_WINDOWS) && defined(_MSC_VER)
+#define __HAVE_NO_ALLOCA
+#define __MSDOS_AND_ALIKE
+#endif
+
+#ifndef alloca
+#if defined( __GNUC__)
+#define alloca __builtin_alloca
+
+#elif (!defined (__STDC__) && defined (sparc)) || defined (__sparc__) || defined (__sparc)  || defined (__sgi)
+#include <alloca.h>
+
+#elif defined (__MSDOS_AND_ALIKE)
+#include <malloc.h>
+#ifndef __TURBOC__
+/* MS C runtime lib */
+#define alloca _alloca
+#endif
+
+#elif defined(_AIX)
+#include <malloc.h>
+#pragma alloca
+
+#elif defined(__hpux)
+#ifdef __cplusplus
+extern "C" {
+void *alloca (unsigned int);
+};
+#else /* not __cplusplus */
+void *alloca ();
+#endif /* not __cplusplus */
+
+#endif /* not _AIX  not MSDOS, or __TURBOC__ or _AIX, not sparc.  */
+#endif /* alloca not defined.  */
+#ifdef c_plusplus
+#ifndef __cplusplus
+#define __cplusplus
+#endif
+#endif
+#ifdef __cplusplus
+#ifndef YY_USE_CLASS
+#define YY_USE_CLASS
+#endif
+#else
+#ifndef __STDC__
+#define const
+#endif
+#endif
+#include <stdio.h>
+#define YYBISON 1  
+
+/* #line 73 "E:\\msys64\\mingw64\\bin\\bison.cc" */
+#line @
+#define YY_PascalParser_LSP_NEEDED 
+#define YY_PascalParser_ERROR_BODY  = 0
+#define YY_PascalParser_LEX_BODY  = 0
+#line 14 "pascal.yy"
+
+# include <stdio.h>
+# include <stdlib.h>
+# include <strings.h>
+# include <iostream>
+
+#line 21 "pascal.yy"
+typedef union {
+    int int_val;
+    char* string_val;
+} yy_PascalParser_stype;
+#define YY_PascalParser_STYPE yy_PascalParser_stype
+
+#line 73 "E:\\msys64\\mingw64\\bin\\bison.cc"
+/* %{ and %header{ and %union, during decl */
+#define YY_PascalParser_BISON 1
+#ifndef YY_PascalParser_COMPATIBILITY
+#ifndef YY_USE_CLASS
+#define  YY_PascalParser_COMPATIBILITY 1
+#else
+#define  YY_PascalParser_COMPATIBILITY 0
+#endif
+#endif
+
+#if YY_PascalParser_COMPATIBILITY != 0
+/* backward compatibility */
+#ifdef YYLTYPE
+#ifndef YY_PascalParser_LTYPE
+#define YY_PascalParser_LTYPE YYLTYPE
+#endif
+#endif
+#ifdef YYSTYPE
+#ifndef YY_PascalParser_STYPE 
+#define YY_PascalParser_STYPE YYSTYPE
+#endif
+#endif
+#ifdef YYDEBUG
+#ifndef YY_PascalParser_DEBUG
+#define  YY_PascalParser_DEBUG YYDEBUG
+#endif
+#endif
+#ifdef YY_PascalParser_STYPE
+#ifndef yystype
+#define yystype YY_PascalParser_STYPE
+#endif
+#endif
+/* use goto to be compatible */
+#ifndef YY_PascalParser_USE_GOTO
+#define YY_PascalParser_USE_GOTO 1
+#endif
+#endif
+
+/* use no goto to be clean in C++ */
+#ifndef YY_PascalParser_USE_GOTO
+#define YY_PascalParser_USE_GOTO 0
+#endif
+
+#ifndef YY_PascalParser_PURE
+
+/* #line 117 "E:\\msys64\\mingw64\\bin\\bison.cc" */
+#line @
+
+#line 117 "E:\\msys64\\mingw64\\bin\\bison.cc"
+/*  YY_PascalParser_PURE */
+#endif
+
+/* section apres lecture def, avant lecture grammaire S2 */
+
+/* #line 121 "E:\\msys64\\mingw64\\bin\\bison.cc" */
+#line @

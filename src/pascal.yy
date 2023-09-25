@@ -59,8 +59,14 @@ block_start_proc_func
 block_const_var
     :   /* empty */
     |   TOK_CONST block_const_idents SYM_SEMICOLON block_const_var
-    |   TOK_VAR   block_var_idents SYM_COLON block_var_type SYM_SEMICOLON block_var_chain block_const_var
-    |   TOK_VAR   TOK_IDENTIFIER   SYM_COLON block_var_type SYM_SEMICOLON block_var_chain block_const_var
+    |   TOK_CONST TOK_IDENTIFIER     SYM_EQUAL TOK_STRINGEXPR SYM_COMMA     block_const_chain block_const_var
+    |   TOK_VAR   block_var_idents   SYM_COLON block_var_type SYM_SEMICOLON block_var_chain   block_const_var
+    |   TOK_VAR   TOK_IDENTIFIER     SYM_COLON block_var_type SYM_SEMICOLON block_var_chain   block_const_var
+    ;
+block_const_chain
+    :   /* empty */
+    |   block_const_idents SYM_SEMICOLON block_const_chain
+    |   block_const_idents SYM_SEMICOLON
     ;
 block_var_chain
     :   /* empty */

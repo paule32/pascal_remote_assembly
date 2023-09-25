@@ -1,0 +1,95 @@
+
+#line 1 "E:\\msys64\\mingw64\\bin\\bison.h"
+/* before anything */
+#ifdef c_plusplus
+#ifndef __cplusplus
+#define __cplusplus
+#endif
+#endif
+#ifdef __cplusplus
+#ifndef YY_USE_CLASS
+#define YY_USE_CLASS
+#endif
+#else
+#endif
+#include <stdio.h>
+
+/* #line 14 "E:\\msys64\\mingw64\\bin\\bison.h" */
+#line @
+#define YY_PascalParser_LSP_NEEDED 
+#define YY_PascalParser_ERROR_BODY  = 0
+#define YY_PascalParser_LEX_BODY  = 0
+#line 14 "pascal.yy"
+
+# include <stdio.h>
+# include <stdlib.h>
+# include <strings.h>
+# include <iostream>
+
+#line 21 "pascal.yy"
+typedef union {
+    int int_val;
+    char* string_val;
+} yy_PascalParser_stype;
+#define YY_PascalParser_STYPE yy_PascalParser_stype
+
+#line 14 "E:\\msys64\\mingw64\\bin\\bison.h"
+ /* %{ and %header{ and %union, during decl */
+#ifndef YY_PascalParser_COMPATIBILITY
+#ifndef YY_USE_CLASS
+#define  YY_PascalParser_COMPATIBILITY 1
+#else
+#define  YY_PascalParser_COMPATIBILITY 0
+#endif
+#endif
+
+#if YY_PascalParser_COMPATIBILITY != 0
+/* backward compatibility */
+#ifdef YYLTYPE
+#ifndef YY_PascalParser_LTYPE
+#define YY_PascalParser_LTYPE YYLTYPE
+/* WARNING obsolete !!! user defined YYLTYPE not reported into generated header */
+/* use %define LTYPE */
+#endif
+#endif
+#ifdef YYSTYPE
+#ifndef YY_PascalParser_STYPE 
+#define YY_PascalParser_STYPE YYSTYPE
+/* WARNING obsolete !!! user defined YYSTYPE not reported into generated header */
+/* use %define STYPE */
+#endif
+#endif
+#ifdef YYDEBUG
+#ifndef YY_PascalParser_DEBUG
+#define  YY_PascalParser_DEBUG YYDEBUG
+/* WARNING obsolete !!! user defined YYDEBUG not reported into generated header */
+/* use %define DEBUG */
+#endif
+#endif
+#ifdef YY_PascalParser_STYPE
+#ifndef yystype
+#define yystype YY_PascalParser_STYPE
+#endif
+#endif
+/* use goto to be compatible */
+#ifndef YY_PascalParser_USE_GOTO
+#define YY_PascalParser_USE_GOTO 1
+#endif
+#endif
+
+/* use no goto to be clean in C++ */
+#ifndef YY_PascalParser_USE_GOTO
+#define YY_PascalParser_USE_GOTO 0
+#endif
+
+#ifndef YY_PascalParser_PURE
+
+/* #line 63 "E:\\msys64\\mingw64\\bin\\bison.h" */
+#line @
+
+#line 63 "E:\\msys64\\mingw64\\bin\\bison.h"
+/* YY_PascalParser_PURE */
+#endif
+
+/* #line 65 "E:\\msys64\\mingw64\\bin\\bison.h" */
+#line @

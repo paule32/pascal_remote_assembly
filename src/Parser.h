@@ -29,6 +29,13 @@
 # include "PascalParser.h"
 # include "PascalScanner.h"
 
+# include "x86.h"
+
+// -----------------------------------------------------------------
+// used global namespaces ...
+// -----------------------------------------------------------------
+using namespace asmjit;
+
 // -----------------------------------------------------------------
 // parser class for our Pascal parser ...
 // -----------------------------------------------------------------
@@ -46,11 +53,25 @@ public:
     
     std::ifstream * parser_file;
     
-    FILE * yyin;
-    FILE * yyout;
-    
     // dtor
     ~Parser();
+    
+    void initialize();
+    void finalize();
+    
+    // -------------------------------------------------------------
+    // remote assembly ...
+    // -------------------------------------------------------------
+    JitRuntime        rt;  // Runtime specialized for JIT code excution
+    Environment      env;
+    CpuFeatures Features;
+    
+    CodeHolder      code;  // Holds the code and relocation information
+    StringLogger  logger;  // Logger should always survice CodeHolder
+    
+    FormatFlags formatFlags;
+    x86::Compiler     cc;
+    Error            err;
 };
 // -----------------------------------------------------------------
 extern Parser *parser;

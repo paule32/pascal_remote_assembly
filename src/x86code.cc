@@ -9,28 +9,39 @@
 # include <stdlib.h>
 # include <strings.h>
 
+// -----------------------------------------------------------------
+// c++ header stuff
+// -----------------------------------------------------------------
 # include <iostream>
 # include <fstream>
 
+// -----------------------------------------------------------------
+// x86 remote assembly header
+// -----------------------------------------------------------------
 # include "x86.h"
 
+# include "Parser.h"
+
+// -----------------------------------------------------------------
+// used global namespace's ...
+// -----------------------------------------------------------------
 using namespace asmjit;
 using namespace x86;
 using namespace std;
 
-void create_output()
+// -----------------------------------------------------------------
+// prepare/init entry point function ...
+// -----------------------------------------------------------------
+void Parser::initialize()
 {
-    JitRuntime       rt;  // Runtime specialized for JIT code excution
-    CodeHolder     code;  // Holds the code and relocation information
-    StringLogger logger;
+    env      = Environment::host();
+    Features = CpuInfo::host().features();
+    uint64_t baseAddress = uint64_t(0x1974);
     
-    Error err = kErrorOk;
-    
-    code.init(rt.environment());
-        
+    code.init(env,Features,baseAddress);
     code.setLogger(&logger);
-    
-    FormatFlags formatFlags =
+
+    formatFlags =
     FormatFlags::kHexImms    |
     FormatFlags::kHexOffsets |
     FormatFlags::kExplainImms;
@@ -39,9 +50,13 @@ void create_output()
     
     FormatIndentationGroup indent;
     logger.setIndentation( indent, 4 );
+}
 
-    x86::Compiler cc(&code);
-    
+// -----------------------------------------------------------------
+// finish-up the output code creation ...
+// -----------------------------------------------------------------
+void Parser::finalize()
+{
     cc.ret();
     cc.endFunc();
     
@@ -52,5 +67,4 @@ void create_output()
     
     void *__func = nullptr;
     rt.add(&__func, &code);
-
 }

@@ -61,15 +61,7 @@
 #define YY_PascalScanner_CONSTRUCTOR_INIT  : line(1), column(1)
 #line 13 "pascal.ll"
 #define YY_PascalScanner_CLASS  PascalScanner
-#line 14 "pascal.ll"
-#define YY_PascalScanner_IN  yyin
-#line 15 "pascal.ll"
-#define YY_PascalScanner_OUT  yyout
 #line 16 "pascal.ll"
-#define YY_PascalScanner_IFILE  FILE
-#line 17 "pascal.ll"
-#define YY_PascalScanner_OFILE  FILE
-#line 20 "pascal.ll"
 # include <iostream>
 # include <sstream>
 
@@ -77,6 +69,7 @@
 # include "PascalScanner.h"
 
 extern std::istream * lexer_input;
+extern void yyerror(char * err);
 
 # undef  YY_INPUT
 # define YY_INPUT(buf, result, max_size)  \
@@ -91,7 +84,7 @@ extern std::istream * lexer_input;
       break; \
     } \
   }
-#line 43 "pascal.ll"
+#line 76 "pascal.ll"
 #line 52 "E:\\msys64\\mingw64\\bin\\flexskel.h"
 
 #ifdef YY_USE_CLASS
@@ -418,7 +411,7 @@ class YY_PascalScanner_CLASS YY_PascalScanner_INHERIT
 /* declaration of externs for public use of yylex scanner */
 
 /* % here is the declaration from section2 %header{ */ 
-#line 86 "pascal.ll"
+#line 215 "pascal.ll"
 #endif
 #line 377 "E:\\msys64\\mingw64\\bin\\flexskel.h"
 

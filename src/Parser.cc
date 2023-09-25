@@ -9,6 +9,7 @@
 # include <sstream>
 # include <istream>
 # include <fstream>
+
 # include "Parser.h"
 using namespace std;
 
@@ -27,9 +28,19 @@ Parser::Parser( char *filename )
     // try to open input file.
     // --------------------------------------------------------
     parser_file = new std::ifstream(filename);
-    std::stringstream buffer;
-    buffer << parser_file->rdbuf();
-    lexer_input = new std::istringstream(buffer.str());
+    if (parser_file->is_open())
+    {
+        std::stringstream buffer;
+        buffer << parser_file->rdbuf();
+        lexer_input = new std::istringstream(buffer.str());
+        
+        initialize();
+    }
+    else {
+        if (parser_file->fail())
+        throw EPascalException_FileNotOpen ("parser file could not be open.");
+        throw EPascalException_FileNotFound("parser file dont exists.");
+    }
 }
 
 // -----------------------------------------------------------------
@@ -39,6 +50,8 @@ Parser::~Parser()
 {
     parser_file->close();
     delete parser_file;
+    
+    finalize();
 }
 
 // -----------------------------------------------------------------
@@ -70,3 +83,5 @@ int Parser::yylex()
 
     return token;
 }
+
+void yyerror(char *err) { parser->yyerror(err); }

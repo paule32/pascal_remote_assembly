@@ -5,3 +5,5 @@
 *.dll
 src/build.bat
 asmjit
+
+src/dox
