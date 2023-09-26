@@ -107,3 +107,6 @@ msgstr "Locale für de_DE existiert nicht."
 
 msgid "can not get locale, use default en-en."
 msgstr "Locale kann nicht ermittelt werden. Standard ist en-en."
+
+msgid "please wait..."
+msgstr "Bitte warten..."

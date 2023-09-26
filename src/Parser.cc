@@ -62,7 +62,7 @@ Parser::~Parser()
 // -----------------------------------------------------------------
 void parser_cleanup()
 {
-    std::cout << "please wait..." << std::endl;
+    std::cout << _("please wait...") << std::endl;
 
     if (!strcmp(locale_utf8,"de")) {
         std::remove("locales/de_DE/LC_MESSAGES/de_DE_utf8.mo");
@@ -74,7 +74,7 @@ void parser_cleanup()
     if (nullptr != parser) delete parser;
     if (nullptr != ansi  ) delete ansi;
     
-    sleep(1);
+    usleep(500);
     std::cout << "\033[A\033[2KT\r              " << std::endl;
 }
 
