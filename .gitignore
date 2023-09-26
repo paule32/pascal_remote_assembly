@@ -6,6 +6,7 @@
 src/build.bat
 asmjit
 
+src/1
 src/dox
 src/po/1
 src/po/de_DE_utf8.mo

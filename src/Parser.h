@@ -25,6 +25,7 @@
 # include <fstream>
 # include <cstdio>
 # include <cstdlib>
+# include <functional>
 # include <locale>
 # include <exception>       // exception handler's
 

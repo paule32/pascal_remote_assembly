@@ -15,19 +15,44 @@ public:
     // -----------------------------------------
     // regular colors ...
     // -----------------------------------------
+    /// \~German
+    /// \brief Setzt die Vordergrund-Farbe für die Text-Ausgabe.
+    ///
+    /// \~English
+    /// \brief Set Foreground Color Flag for Text Output Style.
     static struct Normal {
+        /// \~German Farbe: schwarz \~English Color: black <tt>  -  ANSI-Escape:  \x1B[0;30m</tt>
         std::string black  () const { return "\x1B[0;30m"; }
+        
+        /// \~German Farbe: rot     \~English Color: red <tt>  -  ANSI-Escape:  \x1B[0;30m</tt>
         std::string red    () const { return "\x1B[0;31m"; }
+        
+        /// \~German Farbe: grün    \~English Color: green <tt>  -  ANSI-Escape:  \x1B[0;30m</tt>
         std::string green  () const { return "\x1B[0;32m"; }
+        
+        /// \~German Farbe: gelb    \~English Color: yellow <tt>  -  ANSI-Escape:  \x1B[0;30m</tt>
         std::string yellow () const { return "\x1B[0;33m"; }
+
+        /// \~German Farbe: blau    \~English Color: blue <tt>  -  ANSI-Escape:  \x1B[0;30m</tt>
         std::string blue   () const { return "\x1B[0;34m"; }
+        
+        /// \~German Farbe: violett \~English Color: purple <tt>  -  ANSI-Escape:  \x1B[0;30m</tt>
         std::string purple () const { return "\x1B[0;35m"; }
+        
+        /// \~German Farbe: türkis  \~English Color: cyan <tt>  -  ANSI-Escape:  \x1B[0;30m</tt>
         std::string cyan   () const { return "\x1B[0;36m"; }
+        
+        /// \~German Farbe: weis    \~English Color: white <tt>  -  ANSI-Escape:  \x1B[0;30m</tt>
         std::string white  () const { return "\x1B[0;37m"; }
     } Normal;
     // -----------------------------------------
     // bold colors ...
     // -----------------------------------------
+    /// \~German
+    /// \brief Setzt die Farbe für Text-Fett-Druck-Ausgabe.
+    ///
+    /// \~English
+    /// \brief Set bold Color Flag for Text Output Style.
     static struct Bold {
         std::string black  () const { return "\x1B[1;30m"; }
         std::string red    () const { return "\x1B[1;31m"; }
@@ -41,6 +66,11 @@ public:
     // -----------------------------------------
     // underline ...
     // -----------------------------------------
+    /// \~German
+    /// \brief Setzt die Farbe für unterstrichende Text-Ausgaben.
+    ///
+    /// \~English
+    /// \brief Set underline Color Flag for Text Output Style.
     static struct UnderLine {
         std::string black  () const { return "\x1B[4;30m"; }
         std::string red    () const { return "\x1B[4;31m"; }
@@ -54,6 +84,11 @@ public:
     // -----------------------------------------
     // background colors ...
     // -----------------------------------------
+    /// \~German
+    /// \brief Setzt die Hintergrund-Farbe für die Text-Ausgabe.
+    ///
+    /// \~English
+    /// \brief Set Background Color Flag for Text Output Style.
     static struct Background {
         std::string black  () const { return "\x1B[40m"; }
         std::string red    () const { return "\x1B[41m"; }
