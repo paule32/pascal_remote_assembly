@@ -17,10 +17,56 @@ using namespace std;
 std::istream * lexer_input;
 
 // -----------------------------------------------------------------
+// this function checks, if the application is run in console mode.
+// -----------------------------------------------------------------
+static bool win32_console()
+{
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    
+    if (!GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE),
+    &csbi)) {
+        stringstream ss;
+        ss << "GetConsoleScreenBufferInfo " << _("failed: ")
+           << GetLastError();
+        throw std::string( ss.str() );
+        return true;
+    }
+    
+    #if 0
+    DWORD procId;
+    DWORD count = GetConsoleProcessList(&procId, 1);
+    if (count != 1)
+    throw std::string("console mode");
+    #endif
+    
+    // --------------------------------------------------------
+    // if cursor position is (0,0) then we were launched in
+    // a separate console ...
+    // --------------------------------------------------------
+    if ((!csbi.dwCursorPosition.X) && (!csbi.dwCursorPosition.Y)) {
+        // console
+        return true;
+    }
+    else {
+        if (!GetConsoleTitle(NULL, 0) && GetLastError() == ERROR_SUCCESS) {
+            // console
+            return true;
+        }
+        else {
+            // GUI
+            return false;
+        }
+    }
+    return false;
+}
+
+// -----------------------------------------------------------------
 // default ctor
 // -----------------------------------------------------------------
 Parser::Parser()
 {
+    //if (win32_console())
+    //std::cout << "console mode" << std::endl;
 }
 
 Parser::Parser( char *filename )
@@ -36,8 +82,6 @@ Parser::Parser( char *filename )
         lexer_input = new std::istringstream(buffer.str());
         
         initialize();
-        
-        locale_utf8 = new char[4];
     }
     else {
         if (parser_file->fail())
@@ -51,10 +95,11 @@ Parser::Parser( char *filename )
 // -----------------------------------------------------------------
 Parser::~Parser()
 {
-    parser_file->close();
-    delete parser_file;
-    
     finalize();
+    
+    if (nullptr != cc    ) delete cc;
+    if (nullptr != code  ) delete code;
+    if (nullptr != logger) delete logger;
 }
 
 // -----------------------------------------------------------------
@@ -64,18 +109,29 @@ void parser_cleanup()
 {
     std::cout << _("please wait...") << std::endl;
 
-    if (!strcmp(locale_utf8,"de")) {
+    // -------------------------------------------------------------
+    // at terminating application, delete de-packed .mo file.
+    // this make space for other usage, with other application's ...
+    // TODO: check directory, and/or file.
+    // -------------------------------------------------------------
+    if (!strcmp(locale_utf8,"de")) {    // german
         std::remove("locales/de_DE/LC_MESSAGES/de_DE_utf8.mo");
     }   else
-    if (!strcmp(locale_utf8,"en")) {
+    if (!strcmp(locale_utf8,"en")) {    // english
         std::remove("locales/en_US/LC_MESSAGES/en_US_utf8.mo");
     }
 
+    // -------------------------------------------------------------
+    // now, try to free allocated memory ...
+    // -------------------------------------------------------------
     if (nullptr != parser) delete parser;
     if (nullptr != ansi  ) delete ansi;
     
+    // -------------------------------------------------------------
+    // delete last line \r -> "please wait..." :
+    // -------------------------------------------------------------
     usleep(500);
-    std::cout << "\033[A\033[2KT\r              " << std::endl;
+    //std::cout << "\033[A\033[2KT\r              " << std::endl;
 }
 
 // -----------------------------------------------------------------

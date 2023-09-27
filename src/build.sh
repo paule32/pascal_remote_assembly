@@ -17,7 +17,7 @@ FLAGS=$(echo "-std=c++17 -O2 " \
     "-DASMJIT_STATIC -DASMJIT_BUILD_RELEASE -DASMJIT_NO_AARCH64 " \
     "-I/E/msys64/mingw64/usr/include -I../asmjit")
 
-mkdir temp
+mkdir -p temp
 
 g++ $FLAGS -o temp/PascalParser.o  -c PascalParser.cc
 g++ $FLAGS -o temp/PascalScanner.o -c PascalScanner.cc
@@ -26,8 +26,13 @@ g++ $FLAGS -o temp/parser.o        -c parser.cc
 g++ $FLAGS -o temp/start.o         -c start.cc
 g++ $FLAGS -o temp/win32api.o      -c win32api.cc
 
-g++ -o start.exe \
-    start.o parser.o x86code.o PascalScanner.o PascalParser.o \
+g++ -o start.exe         \
+    temp/start.o         \
+    temp/win32api.o      \
+    temp/parser.o        \
+    temp/x86code.o       \
+    temp/PascalScanner.o \
+    temp/PascalParser.o  \
     -L./ -lasmjit -lintl
 
 strip start.exe

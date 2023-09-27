@@ -5,7 +5,32 @@
 //
 // only for education, and non-profit usage !
 // -----------------------------------------------------------------
+#ifndef PARSER__H_
+#define PARSER__H_
+
 #pragma once
+
+// -----------------------------------------------------------------
+// we support only GNU-C/C++ compilers ...
+// -----------------------------------------------------------------
+#if !defined(__GNUC__)
+#error only GNU-C/C++ Compiler supported.
+#endif
+
+// -----------------------------------------------------------------
+// the minimum requirements is a GNU C++ compiler ...
+// -----------------------------------------------------------------
+#if !defined(__cplusplus)
+#error C++ Compiler required.
+#endif
+
+// -----------------------------------------------------------------
+// a msys2 development environment is needed for this Application.
+// MSYS2 is a set of tool chain for Microsot Windows OS.
+// -----------------------------------------------------------------
+#if !defined(__MINGW32__) || !defined(__MINGW64__)
+#error This Applications was created under Microsoft-Windows...
+#else
 
 // -----------------------------------------------------------------
 // standard header stuff ...
@@ -85,19 +110,27 @@ public:
     // -------------------------------------------------------------
     // remote assembly ...
     // -------------------------------------------------------------
-    JitRuntime        rt;  // Runtime specialized for JIT code excution
-    Environment      env;
-    CpuFeatures features;
+    JitRuntime           rt;  // Runtime specialized for JIT code excution
+    Environment         env;
+    CpuFeatures    features;
     
-    CodeHolder      code;  // Holds the code and relocation information
-    StringLogger  logger;  // Logger should always survice CodeHolder
+    CodeHolder     *   code;  // Holds the code and relocation information
+    StringLogger   * logger;  // Logger should always survice CodeHolder
     
     FormatFlags formatFlags;
-    x86::Compiler     cc;
-    Error            err;
+    x86::Compiler  *     cc;
+    Error               err;
+    
+    // -------------------------------------------------------------
+    // Windows 32-Bit API ...
+    // -------------------------------------------------------------
+    void init_win32api();
 };
 // -----------------------------------------------------------------
 extern Parser * parser;
 extern char   * locale_utf8;
 
 extern void parser_cleanup();
+
+#endif   // __MINGW32__ || __MINGW64__
+#endif   // PARSER__H_

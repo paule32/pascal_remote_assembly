@@ -110,3 +110,9 @@ msgstr "Locale kann nicht ermittelt werden. Standard ist en-en."
 
 msgid "please wait..."
 msgstr "Bitte warten..."
+
+msgid "failed: "
+msgstr "fehlgeschlagen: "
+
+msgid "rt.add( ExitProcess ) error"
+msgstr "win32api Runtime add ExitProcess Fehler"

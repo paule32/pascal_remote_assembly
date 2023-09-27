@@ -21,6 +21,7 @@
 # include "x86.h"
 
 # include "Parser.h"
+# include "windows.h"
 
 // -----------------------------------------------------------------
 // used global namespace's ...
@@ -38,18 +39,28 @@ void Parser::initialize()
     features = CpuInfo::host().features();
     uint64_t baseAddress = uint64_t(0x1974);
     
-    code.init(env,features,baseAddress);
-    code.setLogger(&logger);
+    code   = new CodeHolder();
+    logger = new StringLogger();
+    
+    code->init(env, features, baseAddress);
+    code->setLogger(logger);
+    
+    cc = new x86::Compiler(code);
 
     formatFlags =
     FormatFlags::kHexImms    |
     FormatFlags::kHexOffsets |
     FormatFlags::kExplainImms;
     
-    logger.setFlags(formatFlags);
+    logger->setFlags(formatFlags);
     
     FormatIndentationGroup indent;
-    logger.setIndentation( indent, 4 );
+    logger->setIndentation( indent, 4 );
+    
+    // -------------------------------------------------------------
+    // Windows 32-Bit API ...
+    // -------------------------------------------------------------
+    init_win32api();
 }
 
 // -----------------------------------------------------------------
@@ -57,14 +68,97 @@ void Parser::initialize()
 // -----------------------------------------------------------------
 void Parser::finalize()
 {
-    cc.ret();
-    cc.endFunc();
+    {
+        cc->addFunc(FuncSignatureT<int,
+            HWND    ,
+            LPCTSTR ,
+            LPCTSTR ,
+            UINT    >());
+        
+        x86::Gp hwnd      = cc->newIntPtr("hwnd");
+        x86::Gp lpText    = cc->newIntPtr("lpText");
+        x86::Gp lpCaption = cc->newIntPtr("lpCaption");
+        x86::Gp uType     = cc->newIntPtr("uType");
+        
+        cc->push(uType);
+        cc->push(lpCaption);
+        cc->push(lpText);
+        cc->push(hwnd);
+        
+        cc->call(user32_MessageBox);
+        
+        cc->ret();
+        cc->endFunc();
+        cc->finalize();
+
+        String content = move(logger->content());
+        cout << content.data() << endl;
+        
+        typedef int (*Func)(
+            HWND    ,
+            LPCTSTR ,
+            LPCTSTR ,
+            UINT    );
+        Func fn;
+        Error err = rt.add(&fn, code);
+        
+        if (err)
+        std::cout << _("asmjit add function fail.") << std::endl;
     
-    cc.finalize();
+        fn(0,"tutu","tatata",0);
+        rt.release(fn);
+    }
     
-    String content = move(logger.content());
-    cout << content.data() << endl;
+    {
+        cc->addFunc(FuncSignatureT<int>());
+        cc->call(kernel32_ExitProcess);
+        cc->ret();
+        cc->endFunc();
+        cc->finalize();
+        
+        String content = move(logger->content());
+        cout << "contents: " << endl << content.data() << endl;
+        
+        typedef void (*Func)(void);
+        Func fn;
+        Error err = rt.add(&fn, code);
+        if (err) std::cout << "error111" << std::endl;
+        fn();
+    }
+
+    {
+        Label L_Enter = cc->newLabel();
+        Label L_Exit  = cc->newLabel();
+
+        cc->addFunc(FuncSignatureT<void, uint32_t>());
+        
+        x86::Gp addr  = cc->newInt32("addr");
+        
+        cc->test(addr,addr);
+        cc->jz(L_Exit);
+        
+        cc->bind(L_Enter);
+        
+        x86::Gp  tmp = cc->newInt32("tmp");
+        cc->mov (tmp, x86::dword_ptr(addr)); 
+        cc->call(tmp);
+        
+        cc->bind(L_Exit);
+    }
+    cc->endFunc();
     
-    void *__func = nullptr;
-    rt.add(&__func, &code);
+    cc->finalize();
+    
+    String content = move(logger->content());
+    cout << "contents: " << endl << content.data() << endl;
+
+    std::cout << "exec:" << std::endl;
+
+    typedef void (*Func)(void);
+    Func fn;
+    err = rt.add(&fn, code);
+    if (err) std::cout << "error" << std::endl;
+    fn();
+    
+    std::cout << "done." << std::endl;
 }
