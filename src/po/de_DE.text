@@ -114,5 +114,15 @@ msgstr "Bitte warten..."
 msgid "failed: "
 msgstr "fehlgeschlagen: "
 
+msgid "fail."
+msgstr "fehlgeschlagen."
+
 msgid "rt.add( ExitProcess ) error"
 msgstr "win32api Runtime add ExitProcess Fehler"
+
+msgid "add function fail."
+msgstr "Runtime-Add Function fehlgeschlagen."
+
+msgid "Runtime add: "
+msgstr "Laufzeit hinzufügen: "
+

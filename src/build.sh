@@ -26,8 +26,11 @@ g++ $FLAGS -o temp/parser.o        -c parser.cc
 g++ $FLAGS -o temp/start.o         -c start.cc
 g++ $FLAGS -o temp/win32api.o      -c win32api.cc
 
+gcc -O2 -o temp/CommandLineToArgvA.o -c CommandLineToArgvA.c
+
 g++ -o start.exe         \
     temp/start.o         \
+    temp/CommandLineToArgvA.o \
     temp/win32api.o      \
     temp/parser.o        \
     temp/x86code.o       \

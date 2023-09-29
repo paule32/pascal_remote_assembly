@@ -9,6 +9,8 @@
 
 # include "Parser.h"
 
+extern "C" PCHAR* CommandLineToArgvA(PCHAR CmdLine, int* _argc);
+
 // -----------------------------------------------------------------
 // win32api kernel32.dll calls ...
 // -----------------------------------------------------------------

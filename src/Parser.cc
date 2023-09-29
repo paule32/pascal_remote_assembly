@@ -96,10 +96,6 @@ Parser::Parser( char *filename )
 Parser::~Parser()
 {
     finalize();
-    
-    if (nullptr != cc    ) delete cc;
-    if (nullptr != code  ) delete code;
-    if (nullptr != logger) delete logger;
 }
 
 // -----------------------------------------------------------------

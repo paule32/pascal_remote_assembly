@@ -21,11 +21,49 @@ AnsiColor * ansi   = nullptr;
 
 char * locale_utf8;
 
+#if defined(_WIN32) || defined(_WIN64)
+# include "windows.h"
+HINSTANCE win32_hInstance = 0;
+#else
+uint32_t  win32_hInstance = 0;
+#endif
+
 // -----------------------------------------------------------------
 // console command line: main entry point:
 // -----------------------------------------------------------------
-int main(int argc, char **argv)
-{
+#if !defined(__MINGW32__) || !defined(__MINGW64__)
+int main(int argc, char **argv) {
+# define args.n argc
+# define args.p argv
+# define hinst  0
+#else
+    #if defined(_WIN32) || defined(_WIN64)
+    int WINAPI WinMain(
+        HINSTANCE hInstance,    // HANDLE TO AN INSTANCE.  This is the "handle" to YOUR PROGRAM ITSELF.
+        HINSTANCE hPrevInstance,// USELESS on modern windows (totally ignore hPrevInstance)
+        LPSTR szCmdLine,        // Command line arguments.  similar to argv in standard C programs
+        int iCmdShow )          // Start window maximized, minimized, etc.
+        {
+        win32_hInstance = hInstance;
+        struct Args
+        {
+            int n;
+            PCHAR* p;
+
+            Args(): p( ::CommandLineToArgvA( ::GetCommandLineA(), &n ) ) {}
+           ~Args() {
+               if( p != 0 ) {
+                   ::LocalFree( p );
+               }
+            }
+        };
+        Args args;
+        if (args.p == 0) {
+            ::MessageBoxA(0,_("argument empty."),_("Error"),0);
+            return EXIT_FAILURE;
+        }
+    #endif
+#endif
     uint8_t result = 1;
 
     // -------------------------------------------------------------
@@ -106,13 +144,13 @@ int main(int argc, char **argv)
         // ---------------------------------------------------------
         // check arguments, if a input file was found.
         // ---------------------------------------------------------
-        if (argc < 2)
+        if (args.n < 2)
         throw EPascalException_Argument(_("no input file given."));
 
         // ---------------------------------------------------------
         // start the race run ...
         // ---------------------------------------------------------
-        parser = new Parser( argv[1] );
+        parser = new Parser( args.p[1] );
         parser->yyparse();
 
         // ------------------------------------------------------------

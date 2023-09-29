@@ -68,7 +68,12 @@
 // -----------------------------------------------------------------
 // platform speciefic stuff ...
 // -----------------------------------------------------------------
+#if defined(_WIN32) || defined(_WIN64)
 # include <windows.h>
+extern HINSTANCE win32_hInstance;
+#else
+extern uint32_t  win32_hInstance;
+#endif
 
 // -----------------------------------------------------------------
 // code helper, and shortner ...
@@ -106,25 +111,39 @@ public:
     
     void initialize();
     void finalize();
-    
+
     // -------------------------------------------------------------
     // remote assembly ...
-    // -------------------------------------------------------------
-    JitRuntime           rt;  // Runtime specialized for JIT code excution
-    Environment         env;
-    CpuFeatures    features;
+    // -------------------------------------------------------------    
+    class ASM_Code {
+    private:
+        JitRuntime           rt;  // Runtime specialized for JIT code excution
+        Environment         env;
+        CpuFeatures    features;
     
-    CodeHolder     *   code;  // Holds the code and relocation information
-    StringLogger   * logger;  // Logger should always survice CodeHolder
+        CodeHolder     *   code;  // Holds the code and relocation information
+        StringLogger   * logger;  // Logger should always survice CodeHolder
     
-    FormatFlags formatFlags;
-    x86::Compiler  *     cc;
-    Error               err;
+        FormatFlags formatFlags;
+        x86::Compiler  *     cc;
+        Error               err;
+    public:
+        ASM_Code();
+       ~ASM_Code();
+
+        // -------------------------------------------------------------
+        // Windows 32-Bit API ...
+        // -------------------------------------------------------------
+        void init_win32api();
+        void code_end();
+        void code_display();
+        
+    private:        
+        bool code_user32_MessageBoxA();
+    };
     
-    // -------------------------------------------------------------
-    // Windows 32-Bit API ...
-    // -------------------------------------------------------------
-    void init_win32api();
+private:
+    ASM_Code  * asm_code;
 };
 // -----------------------------------------------------------------
 extern Parser * parser;

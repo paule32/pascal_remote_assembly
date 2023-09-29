@@ -30,10 +30,35 @@ using namespace asmjit;
 using namespace x86;
 using namespace std;
 
+extern void temptest();
+
 // -----------------------------------------------------------------
 // prepare/init entry point function ...
 // -----------------------------------------------------------------
 void Parser::initialize()
+{
+    // -------------------------------------------------------------
+    // Windows 32-Bit API ...
+    // -------------------------------------------------------------
+    asm_code = new ASM_Code();
+    asm_code->init_win32api();
+    
+    asm_code->code_display ();
+}
+
+// -----------------------------------------------------------------
+// finish-up the output code creation ...
+// -----------------------------------------------------------------
+void Parser::finalize()
+{
+    delete asm_code;
+    std::cout << "done." << std::endl;
+}
+
+// -----------------------------------------------------------------
+// constructor for assembly code ...
+// -----------------------------------------------------------------
+Parser::ASM_Code::ASM_Code()
 {
     env      = Environment::host();
     features = CpuInfo::host().features();
@@ -56,109 +81,71 @@ void Parser::initialize()
     
     FormatIndentationGroup indent;
     logger->setIndentation( indent, 4 );
-    
-    // -------------------------------------------------------------
-    // Windows 32-Bit API ...
-    // -------------------------------------------------------------
-    init_win32api();
 }
 
 // -----------------------------------------------------------------
-// finish-up the output code creation ...
+// just finalize the "code" emitter.
 // -----------------------------------------------------------------
-void Parser::finalize()
+void Parser::ASM_Code::code_end()
 {
-    {
-        cc->addFunc(FuncSignatureT<int,
-            HWND    ,
-            LPCTSTR ,
-            LPCTSTR ,
-            UINT    >());
-        
-        x86::Gp hwnd      = cc->newIntPtr("hwnd");
-        x86::Gp lpText    = cc->newIntPtr("lpText");
-        x86::Gp lpCaption = cc->newIntPtr("lpCaption");
-        x86::Gp uType     = cc->newIntPtr("uType");
-        
-        cc->push(uType);
-        cc->push(lpCaption);
-        cc->push(lpText);
-        cc->push(hwnd);
-        
-        cc->call(user32_MessageBox);
-        
-        cc->ret();
-        cc->endFunc();
-        cc->finalize();
-
-        String content = move(logger->content());
-        cout << content.data() << endl;
-        
-        typedef int (*Func)(
-            HWND    ,
-            LPCTSTR ,
-            LPCTSTR ,
-            UINT    );
-        Func fn;
-        Error err = rt.add(&fn, code);
-        
-        if (err)
-        std::cout << _("asmjit add function fail.") << std::endl;
-    
-        fn(0,"tutu","tatata",0);
-        rt.release(fn);
-    }
-    
-    {
-        cc->addFunc(FuncSignatureT<int>());
-        cc->call(kernel32_ExitProcess);
-        cc->ret();
-        cc->endFunc();
-        cc->finalize();
-        
-        String content = move(logger->content());
-        cout << "contents: " << endl << content.data() << endl;
-        
-        typedef void (*Func)(void);
-        Func fn;
-        Error err = rt.add(&fn, code);
-        if (err) std::cout << "error111" << std::endl;
-        fn();
-    }
-
-    {
-        Label L_Enter = cc->newLabel();
-        Label L_Exit  = cc->newLabel();
-
-        cc->addFunc(FuncSignatureT<void, uint32_t>());
-        
-        x86::Gp addr  = cc->newInt32("addr");
-        
-        cc->test(addr,addr);
-        cc->jz(L_Exit);
-        
-        cc->bind(L_Enter);
-        
-        x86::Gp  tmp = cc->newInt32("tmp");
-        cc->mov (tmp, x86::dword_ptr(addr)); 
-        cc->call(tmp);
-        
-        cc->bind(L_Exit);
-    }
-    cc->endFunc();
-    
     cc->finalize();
-    
+}
+
+// -----------------------------------------------------------------
+// get source content, and display it ...
+// -----------------------------------------------------------------
+void Parser::ASM_Code::code_display()
+{
     String content = move(logger->content());
-    cout << "contents: " << endl << content.data() << endl;
+    std::cout << content.data() << std::endl;
+}
 
-    std::cout << "exec:" << std::endl;
-
-    typedef void (*Func)(void);
-    Func fn;
-    err = rt.add(&fn, code);
-    if (err) std::cout << "error" << std::endl;
-    fn();
+// -----------------------------------------------------------------
+// destructor for assembly code ...
+// -----------------------------------------------------------------
+Parser::ASM_Code::~ASM_Code()
+{
+    rt.release(user32_MessageBox);
     
-    std::cout << "done." << std::endl;
+    if (nullptr != cc    ) delete cc;
+    if (nullptr != code  ) delete code;
+    if (nullptr != logger) delete logger;
+}
+
+template <typename T> class Array {
+public:
+    T data[ T::DIM ];
+    Array();
+   ~Array();
+   
+   void addArg( const Array< T > &t1 )
+   {
+       std::cout << "add: object" <<
+       std::endl ;
+   }
+};
+
+template <typename T> Array< T >:: Array() { std::cout << "ctor" << std::endl; }
+template <typename T> Array< T >::~Array() { std::cout << "dtor" << std::endl; }
+
+struct Args {
+    std::string name;
+    enum {
+        DIM = 10
+    };
+};
+
+void temptest()
+{
+    cout << "..." << endl;
+    
+    Array< Args > valid;
+    
+    Array< Args > arg1;
+    Array< Args > arg2;
+    
+    valid.addArg( arg1 );
+    valid.addArg( arg2 );
+    
+    cout << "..." << endl;
 }
