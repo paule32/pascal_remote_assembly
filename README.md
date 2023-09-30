@@ -1,2 +1,3 @@
 # pascal_remote_assembly
-transforms pascal code to asmjit remote assembly code
+Transforms pascal code to asmjit remote assembly code. Then the code will be prepare to compile with nasm. And the result is a test.asm, and test.o file.
+The source code is based on msys2 MingW64 GNU C/C++
