@@ -42,7 +42,7 @@ g++ -o pc.exe            \
     temp/x86code.o       \
     temp/PascalScanner.o \
     temp/PascalParser.o  \
-    -L./ -lasmjit -lintl
+    -L./ -lasmjit -lintl -lgmpxx
 
 # -----------------------------------------------------------------
 # strip debug informations, and copy file to exec directory ...

@@ -67,7 +67,7 @@ Parser::ASM_Code::ASM_Code()
     uint64_t baseAddress = uint64_t(0x1974);
     
     // todo:
-    if (!(logFile = fopen("temp.asm","w")))
+    if (!(logFile = fopen("test.asm","w")))
     throw std::string(_(".asm output file could not be created."));
 
     code   = new CodeHolder();
