@@ -69,8 +69,10 @@
 // platform speciefic stuff ...
 // -----------------------------------------------------------------
 #if defined(_WIN32) || defined(_WIN64)
+extern "C" {
 # include <windows.h>
 extern HINSTANCE win32_hInstance;
+};
 #else
 extern uint32_t  win32_hInstance;
 #endif
@@ -117,16 +119,20 @@ public:
     // -------------------------------------------------------------    
     class ASM_Code {
     private:
-        JitRuntime           rt;  // Runtime specialized for JIT code excution
-        Environment         env;
-        CpuFeatures    features;
+        JitRuntime            rt;  // Runtime specialized for JIT code excution
+        Environment          env;
+        CpuFeatures     features;
+
+        Section       * code_sec;  // code section
+        Section       * data_sec;  // data section
+        
+        CodeHolder    *     code;  // Holds the code and relocation information
+        FileLogger    *   logger;  // Logger should always survice CodeHolder
+        FILE          *  logFile;  // todo: assembly output
     
-        CodeHolder     *   code;  // Holds the code and relocation information
-        StringLogger   * logger;  // Logger should always survice CodeHolder
-    
-        FormatFlags formatFlags;
-        x86::Compiler  *     cc;
-        Error               err;
+        FormatFlags  formatFlags;
+        x86::Compiler *       cc;
+        Error                err;
     public:
         ASM_Code();
        ~ASM_Code();
@@ -135,8 +141,10 @@ public:
         // Windows 32-Bit API ...
         // -------------------------------------------------------------
         void init_win32api();
-        void code_end();
-        void code_display();
+
+        void code_end     ();
+        void code_exec    ();
+        void code_display ();
         
     private:        
         bool code_user32_MessageBoxA();

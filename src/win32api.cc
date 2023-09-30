@@ -29,7 +29,12 @@ namespace win32api
             LPCTSTR lpCaption,
             UINT    uType) {
             std::cout << "messageBox" << std::endl;
-            return ::MessageBoxA(hwnd,lpText,lpCaption,uType);
+            std::cout << lpText << std::endl;
+            std::cout << lpCaption << std::endl;
+            char * t1 = strdup(lpText);
+            char * t2 = strdup(lpCaption);
+            ::MessageBoxA(0, t1, t2, 0);
+            return 0;
         }
     }   // user32   namespace
 }       // win32api namespace
@@ -53,7 +58,6 @@ void Parser::ASM_Code::init_win32api()
     // add win32api user32.dll member func code
     // -----------------------------------------
     code_user32_MessageBoxA();
-    code_end();
 }
 
 // -----------------------------------------------------------------
@@ -66,7 +70,6 @@ win32_kernel32_ExitProcess kernel32_ExitProcess;
 // -----------------------------------------------------------------
 win32_user32_MessageBox user32_MessageBox;
 
-
 // -----------------------------------------------------------------
 // generator member: MessageBoxA - ANSI
 // -----------------------------------------------------------------
@@ -76,83 +79,75 @@ bool Parser::ASM_Code::code_user32_MessageBoxA()
         // -----------------------------------------
         // win32api: MessageBoxA
         // -----------------------------------------
-        std::string LS("MessageBoxA");
-        Label L1 = cc->newNamedLabel(LS.data(), LS.length(),
-        LabelType::kGlobal);
-
-        cc->bind(L1);
+        std::string S0("EntryPoint");
+        std::string S1("MessageBoxA");
+        std::string S2("Ldata_0");
+        
+        Label L0 = cc->newNamedLabel(S0.data(), S0.length(), LabelType::kGlobal);
+        Label L1 = cc->newNamedLabel(S1.data(), S1.length(), LabelType::kGlobal);
+        Label L2 = cc->newNamedLabel(S2.data(), S2.length(), LabelType::kGlobal);
+        
+        // -----------------------------------------
+        // .text EntryPoint
+        // -----------------------------------------
+        cc->section(code_sec);
+        cc->bind(L0);
 
         // -----------------------------------------
         // setup the signature of: MessageBoxA
         // -----------------------------------------
         FuncSignatureBuilder signature(CallConvId::kHost);
-        signature.setRetT< int >();
-            signature.addArgT< HWND    >();
-            signature.addArgT< LPCTSTR >();
-            signature.addArgT< LPCTSTR >();
-            signature.addArgT< UINT    >();
+        signature.setRetT< void >();
+        
+        signature.addArgT< HWND    >();
+        signature.addArgT< LPCTSTR >();
+        signature.addArgT< LPCTSTR >();
+        signature.addArgT< UINT    >();
+        
+        x86::Gp gpArg1 = cc->newInt64("gpArg1");
+        x86::Gp gpArg2 = cc->newInt64("gpArg2");
+        x86::Gp gpArg3 = cc->newInt64("gpArg3");
+        x86::Gp gpArg4 = cc->newInt64("gpArg4");
 
-        // -----------------------------------------
-        // add a new member function to asmjit code
-        // -----------------------------------------
         FuncNode* funcNode = cc->addFunc(signature);
         funcNode->frame().setPreservedFP();
         
-        // setup stack:
-        x86::Mem stack = cc->newStack(102400, 102400);
+        funcNode->setArg(0, gpArg1);
+        funcNode->setArg(1, gpArg2);
+        funcNode->setArg(2, gpArg3);
+        funcNode->setArg(3, gpArg4);
 
-        //  HWND
-        {
-            x86::Gp gpArg = cc->newIntPtr("gpArg1");
-            funcNode->setArg(0, gpArg);
-            cc->push(gpArg);
-        }
-        //  LPCTSTR
-        {
-            x86::Gp gpArg = cc->newIntPtr("gpArg2");
-            funcNode->setArg(0, gpArg);
-            cc->push(gpArg);
-        }
-        //  LPCTSTR
-        {
-            x86::Gp gpArg = cc->newIntPtr("gpArg3");
-            funcNode->setArg(2, gpArg);
-            cc->push(gpArg);
-        }
-        //  UINT
-        {
-            x86::Gp gpArg = cc->newIntPtr("gpArg4");
-            funcNode->setArg(3, gpArg);
-            cc->push(gpArg);
-        }
-        
         // -----------------------------------------
         // call the hook win32api member ...
         // -----------------------------------------
-        cc->call(user32_MessageBox);
+        cc->lea(gpArg2, x86::ptr(L2));
         
+        InvokeNode * invokeNode;
+        cc->invoke(& invokeNode,
+            imm((void*)user32_MessageBox),
+            signature);
+        
+        HWND hwnd = (HWND)0;
+        LPCSTR s3 = "Hallo Welt !!!";
+        LPCSTR s4 = "info";
+        UINT   mt = 0;
+        
+        invokeNode->setArg(0, hwnd);
+        invokeNode->setArg(1, gpArg2);
+        invokeNode->setArg(2, s4);
+        invokeNode->setArg(3, mt);
+
         cc->ret();
         cc->endFunc();
         
-        // if the line below commented, then rt.add throws - why ?
-        // I think, "finalize" is the last step of code generation ?
-        // or mark finalize the end of generation, and as such, I
-        // can not "call" partial code ... ?
-        cc->finalize();
+        // test:
+        cc->section(data_sec);
+        cc->bind(L2);
+        
+        std::string s1("Hello World !\0");
+        cc->embed(s1.c_str(), s1.length()+1);
 
-        // -----------------------------------------
-        // if any error - inform the user ...
-        // -----------------------------------------
-        win32_user32_MessageBox func;
-        Error err = rt.add(&func, code);
-        if (err != kErrorOk)
-        throw std::string(_("add function fail."));
-
-        func(0,"hallo","dudu",0);
         return true;
-    }
-    catch (std::string &ex) {
-        std::cout << ex << std::endl;
     }
     catch (std::exception &ex) {
         std::cout << ex.what() << std::endl;

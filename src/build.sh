@@ -19,6 +19,9 @@ FLAGS=$(echo "-std=c++17 -O2 " \
 
 mkdir -p temp
 
+# -----------------------------------------------------------------
+# create objects from .cc files ...
+# -----------------------------------------------------------------
 g++ $FLAGS -o temp/PascalParser.o  -c PascalParser.cc
 g++ $FLAGS -o temp/PascalScanner.o -c PascalScanner.cc
 g++ $FLAGS -o temp/x86Code.o       -c x86Code.cc
@@ -28,7 +31,10 @@ g++ $FLAGS -o temp/win32api.o      -c win32api.cc
 
 gcc -O2 -o temp/CommandLineToArgvA.o -c CommandLineToArgvA.c
 
-g++ -o start.exe         \
+# -----------------------------------------------------------------
+# combine all together to windows application ...
+# -----------------------------------------------------------------
+g++ -o pc.exe            \
     temp/start.o         \
     temp/CommandLineToArgvA.o \
     temp/win32api.o      \
@@ -38,5 +44,30 @@ g++ -o start.exe         \
     temp/PascalParser.o  \
     -L./ -lasmjit -lintl
 
-strip start.exe
-cp start.exe ../exec/start.exe
+# -----------------------------------------------------------------
+# strip debug informations, and copy file to exec directory ...
+# -----------------------------------------------------------------
+strip pc.exe
+cp    pc.exe ../exec/pc.exe
+
+# -----------------------------------------------------------------
+# switch to exec directory, and perform the tasks to assemble the
+# generated asmjit code with nasm.
+# nasm.exe is the netwide assembler that can generated a wide range
+# of different binary object file formats.
+# -----------------------------------------------------------------
+cd ../exec
+dir
+./pc.exe test.pas
+
+sed -i 's/\.section \.text {\#.*/section \.text/g' test.asm
+sed -i 's/\.section \.data {\#.*/section \.data/g' test.asm
+sed -i 's/\.db/db/g' test.asm
+
+nasm -f win64 -o test.o test.asm
+
+# -----------------------------------------------------------------
+# switch back to developer source path ...
+# -----------------------------------------------------------------
+cd ../src
+echo "done."

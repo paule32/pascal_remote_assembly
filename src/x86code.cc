@@ -43,7 +43,9 @@ void Parser::initialize()
     asm_code = new ASM_Code();
     asm_code->init_win32api();
     
+    asm_code->code_end     ();
     asm_code->code_display ();
+    asm_code->code_exec    ();
 }
 
 // -----------------------------------------------------------------
@@ -64,8 +66,12 @@ Parser::ASM_Code::ASM_Code()
     features = CpuInfo::host().features();
     uint64_t baseAddress = uint64_t(0x1974);
     
+    // todo:
+    if (!(logFile = fopen("temp.asm","w")))
+    throw std::string(_(".asm output file could not be created."));
+
     code   = new CodeHolder();
-    logger = new StringLogger();
+    logger = new FileLogger(logFile);
     
     code->init(env, features, baseAddress);
     code->setLogger(logger);
@@ -81,6 +87,19 @@ Parser::ASM_Code::ASM_Code()
     
     FormatIndentationGroup indent;
     logger->setIndentation( indent, 4 );
+    
+    // ---------------------------
+    // create used sections:
+    // ---------------------------
+    SectionFlags flags =
+    SectionFlags::kExecutable |
+    SectionFlags::kReadOnly   ;
+    
+    Error err1 = code->newSection(&code_sec, ".text", SIZE_MAX, flags, 8);
+    Error err2 = code->newSection(&data_sec, ".data", SIZE_MAX, flags, 8);
+    
+    if (err1) throw std::string(_("failed to create .text section."));
+    if (err2) throw std::string(_("failed to create .data section."));
 }
 
 // -----------------------------------------------------------------
@@ -96,8 +115,27 @@ void Parser::ASM_Code::code_end()
 // -----------------------------------------------------------------
 void Parser::ASM_Code::code_display()
 {
+    #if 0
     String content = move(logger->content());
     std::cout << content.data() << std::endl;
+    #endif
+}
+
+// -----------------------------------------------------------------
+// execute the generated assembly code ...
+// -----------------------------------------------------------------
+void Parser::ASM_Code::code_exec()
+{
+    // -----------------------------------------
+    // if any error - inform the user ...
+    // -----------------------------------------
+    typedef void (*Func)();
+    Func fun;
+    Error err = rt.add(&fun, code);
+    if (err != kErrorOk)
+    throw std::string(_("add function fail."));
+
+    fun();
 }
 
 // -----------------------------------------------------------------
@@ -106,6 +144,8 @@ void Parser::ASM_Code::code_display()
 Parser::ASM_Code::~ASM_Code()
 {
     rt.release(user32_MessageBox);
+    
+    fclose(logFile);
     
     if (nullptr != cc    ) delete cc;
     if (nullptr != code  ) delete code;

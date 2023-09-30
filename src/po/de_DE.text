@@ -126,3 +126,11 @@ msgstr "Runtime-Add Function fehlgeschlagen."
 msgid "Runtime add: "
 msgstr "Laufzeit hinzufügen: "
 
+msgid "failed to create .data section"
+msgstr ".data Section konnte nicht erstellt werden."
+
+msgid "failed to create .text section"
+msgstr ".text Section konnte nicht erstellt werden."
+
+msgid ".asm output file could not be created."
+msgstr ".asm Ausgabe-Datei konnte nicht erstellt werden."
