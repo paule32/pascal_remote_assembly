@@ -121,6 +121,10 @@ bool Parser::ASM_Code::code_user32_MessageBoxA()
         // call the hook win32api member ...
         // -----------------------------------------
         cc->lea(gpArg2, x86::ptr(L2));
+
+LPCTSTR s00 = "kokobanna";
+cc->mov(gpArg2, s00);
+cc->mov(x86::ptr(L2), gpArg2);
         
         InvokeNode * invokeNode;
         cc->invoke(& invokeNode,
@@ -131,7 +135,7 @@ bool Parser::ASM_Code::code_user32_MessageBoxA()
         LPCSTR s3 = "Hallo Welt !!!";
         LPCSTR s4 = "info";
         UINT   mt = 0;
-        
+
         invokeNode->setArg(0, hwnd);
         invokeNode->setArg(1, gpArg2);
         invokeNode->setArg(2, s4);
@@ -144,7 +148,7 @@ bool Parser::ASM_Code::code_user32_MessageBoxA()
         cc->section(data_sec);
         cc->bind(L2);
         
-        std::string s1("Hello World !\0");
+        std::string s1("Hello World !aaaa!\0");
         cc->embed(s1.c_str(), s1.length()+1);
 
         return true;

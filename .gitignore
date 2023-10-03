@@ -6,6 +6,14 @@
 src/build.bat
 asmjit
 
+src/dox/*
+
+exec/dox/dox/*
+exec/bak/*
+exec/locales/de_DE/LC_MESSAGES/de_DE_utf8.mo.gz
+exec/locales/en_US/LC_MESSAGES/en_US_utf8.mo.gz
+exec/1
+
 src/1
 src/dox
 src/po/1
@@ -13,6 +21,5 @@ src/po/de_DE_utf8.mo
 src/po/de_DE_utf8.mo.gz
 src/po/de_DE_utf8.po
 src/po/de_DE_utf8.pot
-exec/locales/de_DE/LC_MESSAGES/de_DE_utf8.mo.gz
-exec/locales/en_US/LC_MESSAGES/en_US_utf8.mo.gz
-exec/1
+
+src/warnings.txt

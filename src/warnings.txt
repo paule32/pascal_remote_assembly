@@ -1,8 +1,8 @@
-E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/pascal.yy.cc:571: warning: no matching class member found for 
-  int yyFlexLexer::yylex()
-Possible candidates:
-  'virtual int Parser::yylex()' at line 73 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Parser.h
-
+E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Application.h:26: warning: missing title after \defgroup int
+E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Application.h:33: warning: missing title after \defgroup double
+E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Parser.cc:66: warning: documented symbol 'Parser::Parser' was not declared or defined.
+E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Parser.cc:72: warning: documented symbol 'Parser::Parser' was not declared or defined.
+E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Parser.cc:96: warning: documented symbol 'Parser::~Parser' was not declared or defined.
 E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/pascal.yy.cc:942: warning: no matching file member found for 
 yyFlexLexer::yyFlexLexer(std::istream *arg_yyin, std::ostream *arg_yyout)
 Possible candidates:
@@ -29,27 +29,28 @@ E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/pascal.yy.cc:1297: w
 E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/pascal.yy.cc:1369: warning: no matching file member found for 
 void yyFlexLexer::yyrestart(std::istream &input_file)
 Possible candidates:
- 'void yyrestart(FILE *input_file)' at line 282 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Lexer.cpp 'void yyrestart(FILE *input_file)' at line 186 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Lexer.h 'void yyrestart()' at line 246 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/PascalScanner.h
+ 'void yyrestart(FILE *input_file)' at line 282 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Lexer.cpp 'void yyrestart(FILE *input_file)' at line 186 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Lexer.h 'void yyrestart(input_file) FILE *input_file' at line 1661 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/PascalScanner.cc 'void yyrestart()' at line 246 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/PascalScanner.h
 E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/pascal.yy.cc:1387: warning: no matching file member found for 
 void yyFlexLexer::yyrestart(std::istream *input_file)
 Possible candidates:
- 'void yyrestart(FILE *input_file)' at line 282 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Lexer.cpp 'void yyrestart(FILE *input_file)' at line 186 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Lexer.h 'void yyrestart()' at line 246 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/PascalScanner.h
-E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/pascal.yy.cc:1444: warning: no matching file member found for 
-YY_BUFFER_STATE yyFlexLexer::yy_create_buffer(std::istream &file, int size)
-Possible candidates:
- 'YY_BUFFER_STATE yy_create_buffer(FILE *file, int size)' at line 284 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Lexer.cpp 'YY_BUFFER_STATE yy_create_buffer(FILE *file, int size)' at line 188 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Lexer.h 'YY_BUFFER_STATE yy_create_buffer()' at line 249 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/PascalScanner.h
-E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/pascal.yy.cc:1474: warning: no matching file member found for 
-YY_BUFFER_STATE yyFlexLexer::yy_create_buffer(std::istream *file, int size)
-Possible candidates:
- 'YY_BUFFER_STATE yy_create_buffer(FILE *file, int size)' at line 284 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Lexer.cpp 'YY_BUFFER_STATE yy_create_buffer(FILE *file, int size)' at line 188 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Lexer.h 'YY_BUFFER_STATE yy_create_buffer()' at line 249 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/PascalScanner.h
+ 'void yyrestart(FILE *input_file)' at line 282 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Lexer.cpp 'void yyrestart(FILE *input_file)' at line 186 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Lexer.h 'void yyrestart(input_file) FILE *input_file' at line 1661 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/PascalScanner.cc 'void yyrestart()' at line 246 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/PascalScanner.h
 E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/pascal.yy.cc:1502: warning: no matching file member found for 
 void yyFlexLexer::yy_init_buffer(yy_buffer_state b, std::istream &file)
 Possible candidates:
- 'static void yy_init_buffer(YY_BUFFER_STATE b, FILE *file)' at line 292 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Lexer.cpp 'void yy_init_buffer()' at line 251 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/PascalScanner.h
+ 'static void yy_init_buffer(YY_BUFFER_STATE b, FILE *file)' at line 292 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/Lexer.cpp 'yy_init_buffer(b, file)' at line 1757 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/PascalScanner.cc 'void yy_init_buffer()' at line 251 of file E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/PascalScanner.h
 E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/pascal.yy.cc:1650: warning: documented symbol 'void yyFlexLexer::yy_push_state' was not declared or defined.
 E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/pascal.yy.cc:1675: warning: documented symbol 'void yyFlexLexer::yy_pop_state' was not declared or defined.
 E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/pascal.yy.cc:1683: warning: documented symbol 'int yyFlexLexer::yy_top_state' was not declared or defined.
 E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/pascal.yy.cc:1692: warning: documented symbol 'void yyFlexLexer::LexerError' was not declared or defined.
+E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/win32api.cc:45: warning: documented symbol 'void Parser::ASM_Code::init_win32api' was not declared or defined.
+E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/win32api.cc:76: warning: documented symbol 'bool Parser::ASM_Code::code_user32_MessageBoxA' was not declared or defined.
+E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/x86code.cc:38: warning: documented symbol 'void Parser::initialize' was not declared or defined.
+E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/x86code.cc:54: warning: documented symbol 'void Parser::finalize' was not declared or defined.
+E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/x86code.cc:63: warning: documented symbol 'Parser::ASM_Code::ASM_Code' was not declared or defined.
+E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/x86code.cc:108: warning: documented symbol 'void Parser::ASM_Code::code_end' was not declared or defined.
+E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/x86code.cc:116: warning: documented symbol 'void Parser::ASM_Code::code_display' was not declared or defined.
+E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/x86code.cc:127: warning: documented symbol 'void Parser::ASM_Code::code_exec' was not declared or defined.
+E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/x86code.cc:144: warning: documented symbol 'Parser::ASM_Code::~ASM_Code' was not declared or defined.
 E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/AnsiColor.h:30: warning: Found unknown command '\x1B'
 E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/AnsiColor.h:39: warning: Found unknown command '\x1B'
 E:/Projekte/RAD11Components/Help/pascal_remote_assembly/src/AnsiColor.h:33: warning: Found unknown command '\x1B'
