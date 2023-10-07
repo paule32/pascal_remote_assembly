@@ -93,11 +93,60 @@ bool Parser::ASM_Code::code_user32_MessageBoxA()
         cc->section(code_sec);
         cc->bind(L0);
 
+        FuncNode * mainFunc = cc->addFunc(
+        FuncSignatureT<void, void*, const void*, const void*>(CallConvId::kHost));
+        mainFunc->frame().setAvxEnabled();
+        mainFunc->frame().setAvxCleanup();
+
+        FuncNode* helperFunc = cc->newFunc(
+        FuncSignatureT<void, void*, const void*>(CallConvId::kX64Windows));
+        helperFunc->frame().setAvxEnabled();
+        helperFunc->frame().setAvxCleanup();
+
+        x86::Gp dPtr = cc->newIntPtr("dPtr");
+        x86::Gp aPtr = cc->newIntPtr("aPtr");
+        x86::Gp bPtr = cc->newIntPtr("bPtr");
+        x86::Gp tPtr = cc->newIntPtr("tPtr");
+        x86::Ymm acc[8];
+        x86::Mem stack = cc->newStack(32, 1, "stack");        
+        
+        mainFunc->setArg(0, dPtr);
+        mainFunc->setArg(1, aPtr);
+        mainFunc->setArg(2, bPtr);
+        
+        cc->lea(tPtr, stack);
+
+        for (int i = 0; i < 8; i++) {
+            acc[i] = cc->newYmm("acc%zu", i);
+            cc->vmovdqu(acc[i], x86::ptr(aPtr));
+        }      
+
+        InvokeNode * entryNode;
+        Error err  = cc->invoke(& entryNode, &L1,
+        FuncSignatureT<void, void*, const void*>(CallConvId::kX64Windows));
+        if (err != kErrorOk) {
+            printf("ssss\n");
+            std::stringstream ss;
+            ss << "InvokeNode entryNode: "
+               << DebugUtils::errorAsString(err);
+            std::cerr << ss.str() << std::endl;
+            throw ss.str();
+        }
+        
+        LPCTSTR lpc = "haloooo";
+        entryNode->setArg(0, lpc);
+        
+        cc->ret();
+        cc->endFunc();
+        
         // -----------------------------------------
         // setup the signature of: MessageBoxA
         // -----------------------------------------
         FuncSignatureBuilder signature(CallConvId::kHost);
         signature.setRetT< void >();
+        
+        cc->section(code_sec);
+        cc->bind(L1);
         
         signature.addArgT< HWND    >();
         signature.addArgT< LPCTSTR >();
@@ -120,12 +169,8 @@ bool Parser::ASM_Code::code_user32_MessageBoxA()
         // -----------------------------------------
         // call the hook win32api member ...
         // -----------------------------------------
-        cc->lea(gpArg2, x86::ptr(L2));
+        cc->mov(gpArg2, x86::rdx);
 
-LPCTSTR s00 = "kokobanna";
-cc->mov(gpArg2, s00);
-cc->mov(x86::ptr(L2), gpArg2);
-        
         InvokeNode * invokeNode;
         cc->invoke(& invokeNode,
             imm((void*)user32_MessageBox),
@@ -156,12 +201,14 @@ cc->mov(x86::ptr(L2), gpArg2);
     catch (std::exception &ex) {
         std::cout << ex.what() << std::endl;
     }
-    catch (...) {
+    catch (std::string &e) {
         std::stringstream ss;
         ss  << _("Runtime add: ")
-            << "MessageBoxA"  << std::endl
-            << _("fail.");
-        std::cout << ss.str() << std::endl;
+            << "MessageBoxA  "
+            << _("fail.")      << std::endl
+            << _("Error: ")
+            << e               << std::endl;
+        std::cout << ss.str()  << std::endl;
     }
     
     return false;

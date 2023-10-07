@@ -32,6 +32,13 @@ using namespace std;
 
 extern void temptest();
 
+void Parser::ASM_Code::MyErrorHandler::handleError(
+    Error err,
+    const char* message,
+    BaseEmitter* origin) {
+    std::cerr << _("AsmJit error: ") << message << std::endl;
+}
+
 // -----------------------------------------------------------------
 // prepare/init entry point function ...
 // -----------------------------------------------------------------
@@ -64,16 +71,20 @@ Parser::ASM_Code::ASM_Code()
 {
     env      = Environment::host();
     features = CpuInfo::host().features();
+    
     uint64_t baseAddress = uint64_t(0x1974);
     
     // todo:
     if (!(logFile = fopen("test.asm","w")))
     throw std::string(_(".asm output file could not be created."));
 
+    myErrorHandler = new MyErrorHandler();
+
     code   = new CodeHolder();
     logger = new FileLogger(logFile);
     
     code->init(env, features, baseAddress);
+    code->setErrorHandler(myErrorHandler);
     code->setLogger(logger);
     
     cc = new x86::Compiler(code);
@@ -144,12 +155,13 @@ void Parser::ASM_Code::code_exec()
 Parser::ASM_Code::~ASM_Code()
 {
     rt.release(user32_MessageBox);
-    
     fclose(logFile);
     
     if (nullptr != cc    ) delete cc;
     if (nullptr != code  ) delete code;
     if (nullptr != logger) delete logger;
+
+    if (nullptr != myErrorHandler) delete myErrorHandler;
 }
 
 template <typename T> class Array {

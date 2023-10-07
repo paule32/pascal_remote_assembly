@@ -116,23 +116,31 @@ public:
 
     // -------------------------------------------------------------
     // remote assembly ...
-    // -------------------------------------------------------------    
+    // -------------------------------------------------------------
     class ASM_Code {
     private:
-        JitRuntime            rt;  // Runtime specialized for JIT code excution
-        Environment          env;
-        CpuFeatures     features;
+        class MyErrorHandler : public ErrorHandler {
+        public:
+            void handleError(Error err, const char*, BaseEmitter*) override;
+            //MyErrorHandler();
+        };
 
-        Section       * code_sec;  // code section
-        Section       * data_sec;  // data section
+        JitRuntime             rt;  // Runtime specialized for JIT code excution
+        Environment           env;
+        CpuFeatures      features;
+
+        Section        * code_sec;  // code section
+        Section        * data_sec;  // data section
         
-        CodeHolder    *     code;  // Holds the code and relocation information
-        FileLogger    *   logger;  // Logger should always survice CodeHolder
-        FILE          *  logFile;  // todo: assembly output
+        CodeHolder     *     code;  // Holds the code and relocation information
+        FileLogger     *   logger;  // Logger should always survice CodeHolder
+        FILE           *  logFile;  // todo: assembly output
     
         FormatFlags  formatFlags;
-        x86::Compiler *       cc;
-        Error                err;
+        x86::Compiler  *       cc;
+        Error                 err;
+        
+        MyErrorHandler * myErrorHandler;
     public:
         ASM_Code();
        ~ASM_Code();

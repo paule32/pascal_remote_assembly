@@ -4,22 +4,20 @@
 *.exe
 *.dll
 src/build.bat
-asmjit
 
-src/dox/*
+doc/html/*
 
-exec/dox/dox/*
-exec/bak/*
-exec/locales/de_DE/LC_MESSAGES/de_DE_utf8.mo.gz
-exec/locales/en_US/LC_MESSAGES/en_US_utf8.mo.gz
-exec/1
+exec/*
 
 src/1
 src/dox
 src/po/1
-src/po/de_DE_utf8.mo
-src/po/de_DE_utf8.mo.gz
-src/po/de_DE_utf8.po
-src/po/de_DE_utf8.pot
+src/po/*.mo
+src/po/*.gz
+src/po/*.po
+src/po/*.pot
+src/temp/*
+src/defs.*
+src/warnings.txt
 
 src/warnings.txt
