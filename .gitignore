@@ -7,7 +7,7 @@ src/build.bat
 
 doc/html/*
 
-exec/*
+exec
 
 src/1
 src/dox
