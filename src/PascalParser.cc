@@ -90,9 +90,8 @@ void *alloca ();
 # include <stdio.h>
 # include <stdlib.h>
 # include <strings.h>
-# include <iostream>
 
-#line 21 "pascal.yy"
+#line 20 "pascal.yy"
 typedef union {
     int int_val;
     char* string_val;
@@ -146,7 +145,7 @@ typedef union {
 #ifndef YY_PascalParser_PURE
 
 /* #line 117 "E:\\msys64\\mingw64\\bin\\bison.cc" */
-#line 150 "PascalParser.cc"
+#line 149 "PascalParser.cc"
 
 #line 117 "E:\\msys64\\mingw64\\bin\\bison.cc"
 /*  YY_PascalParser_PURE */
@@ -155,14 +154,14 @@ typedef union {
 /* section apres lecture def, avant lecture grammaire S2 */
 
 /* #line 121 "E:\\msys64\\mingw64\\bin\\bison.cc" */
-#line 159 "PascalParser.cc"
+#line 158 "PascalParser.cc"
 
 #line 121 "E:\\msys64\\mingw64\\bin\\bison.cc"
 /* prefix */
 #ifndef YY_PascalParser_DEBUG
 
 /* #line 123 "E:\\msys64\\mingw64\\bin\\bison.cc" */
-#line 166 "PascalParser.cc"
+#line 165 "PascalParser.cc"
 
 #line 123 "E:\\msys64\\mingw64\\bin\\bison.cc"
 /* YY_PascalParser_DEBUG */
@@ -172,7 +171,7 @@ typedef union {
 #ifndef YY_PascalParser_LSP_NEEDED
 
 /* #line 128 "E:\\msys64\\mingw64\\bin\\bison.cc" */
-#line 176 "PascalParser.cc"
+#line 175 "PascalParser.cc"
 
 #line 128 "E:\\msys64\\mingw64\\bin\\bison.cc"
  /* YY_PascalParser_LSP_NEEDED*/
@@ -285,7 +284,7 @@ typedef
 /* TOKEN C */
 
 /* #line 236 "E:\\msys64\\mingw64\\bin\\bison.cc" */
-#line 289 "PascalParser.cc"
+#line 288 "PascalParser.cc"
 #define	UNKNOWN	258
 #define	TOK_PROGRAM	259
 #define	TOK_IDENTIFIER	260
@@ -356,7 +355,7 @@ public:
 /* static const int token ... */
 
 /* #line 280 "E:\\msys64\\mingw64\\bin\\bison.cc" */
-#line 360 "PascalParser.cc"
+#line 359 "PascalParser.cc"
 static const int UNKNOWN;
 static const int TOK_PROGRAM;
 static const int TOK_IDENTIFIER;
@@ -386,7 +385,7 @@ static const int TOK_YYEOF;
 enum YY_PascalParser_ENUM_TOKEN { YY_PascalParser_NULL_TOKEN=0
 
 /* #line 283 "E:\\msys64\\mingw64\\bin\\bison.cc" */
-#line 390 "PascalParser.cc"
+#line 389 "PascalParser.cc"
 	,UNKNOWN=258
 	,TOK_PROGRAM=259
 	,TOK_IDENTIFIER=260
@@ -444,7 +443,7 @@ public:
 #if YY_PascalParser_USE_CONST_TOKEN != 0
 
 /* #line 314 "E:\\msys64\\mingw64\\bin\\bison.cc" */
-#line 448 "PascalParser.cc"
+#line 447 "PascalParser.cc"
 const int YY_PascalParser_CLASS::UNKNOWN=258;
 const int YY_PascalParser_CLASS::TOK_PROGRAM=259;
 const int YY_PascalParser_CLASS::TOK_IDENTIFIER=260;
@@ -482,7 +481,7 @@ YY_PascalParser_CONSTRUCTOR_CODE;
 #endif
 
 /* #line 325 "E:\\msys64\\mingw64\\bin\\bison.cc" */
-#line 486 "PascalParser.cc"
+#line 485 "PascalParser.cc"
 
 
 #define	YYFINAL		73
@@ -547,9 +546,9 @@ static const short yyrhs[] = {    -1,
 
 #if YY_PascalParser_DEBUG != 0
 static const short yyrline[] = { 0,
-    41,    42,    46,    50,    54,    55,    56,    60,    61,    62,
-    63,    64,    67,    68,    69,    72,    73,    74,    77,    78,
-    81,    82,    86,    87,    88,    89,    93
+    40,    41,    45,    49,    53,    54,    55,    59,    60,    61,
+    62,    63,    66,    67,    68,    71,    72,    73,    76,    77,
+    80,    81,    85,    86,    87,    88,    92
 };
 
 static const char * const yytname[] = {   "$","error","$illegal.","UNKNOWN",
@@ -1117,7 +1116,7 @@ YYLABEL(yyreduce)
 
 
 /* #line 811 "E:\\msys64\\mingw64\\bin\\bison.cc" */
-#line 1121 "PascalParser.cc"
+#line 1120 "PascalParser.cc"
 
   switch (yyn) {
 
@@ -1325,7 +1324,7 @@ YYLABEL(yyerrhandle)
 /* END */
 
 /* #line 1010 "E:\\msys64\\mingw64\\bin\\bison.cc" */
-#line 1329 "PascalParser.cc"
-#line 96 "pascal.yy"
+#line 1328 "PascalParser.cc"
+#line 95 "pascal.yy"
 
 

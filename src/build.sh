@@ -6,13 +6,17 @@
 #
 # only for education, and non-profit usage !
 # -----------------------------------------------------------------
+PWD=$(pwd)
+SRC=$(echo "${PWD}")
+TEMP="temp"
+TMP=$(echo "${PWD}/${TEMP}")
 FLAGS=$(echo "-std=c++17 -O2 -fPIC " \
     "-Wno-register      "      \
     "-Wno-write-strings "      \
     "-DASMJIT_STATIC    "      \
     "-DASMJIT_BUILD_RELEASE "  \
     "-DASMJIT_NO_AARCH64 " \
-    "-I/usr/include -I../asmjit")
+    "-I/E/msys64/mingw64/usr/include -I${SRC}/asmjit -I${TMP}")
 # -----------------------------------------------------------------
 ST1="s/\\\"Last\\-Translator\\: .*\\n\\\"/\\\"Last-Translator\\:"
 ST2="Jens Kallup \\<paule32\\.jk\\@gmail\\.com\\>\\n\\\"/g"
@@ -21,10 +25,9 @@ ATXT="| awk '{print \$3}' | cut -d '=' -f 2"
 # -----------------------------------------------------------------
 # prepare compilation tasks ...
 # -----------------------------------------------------------------
-TEMP="temp"
-PWD=$(pwd)
-SRC=$(echo "${PWD}")
-TMP=$(echo "${PWD}/${TEMP}")
+obj_array=("PascalParser" "PascalScanner" "x86Code" "parser" \
+"start" "win32api")
+# -----------------------------------------------------------------
 WMKD=$(which mkdir)
 WGCC=$(which gcc)
 WGXX=$(which g++)
@@ -103,7 +106,7 @@ function run_build_asmjit () {
     run_check $? "make"
 
     rm ${TMP}/asmjit/*.o
-    #strip ${TMP}/asmjit/asmjit.dll
+    strip ${TMP}/asmjit/asmjit.dll
     echo " ok. =]"
 }
 # -----------------------------------------------------------------
@@ -140,8 +143,11 @@ function run_build_locales () {
 # -----------------------------------------------------------------
 function run_build_parser () {
     printf "[= create parser: "
-    bison++ -d -h${TMP}/PascalParser.h  -o${TMP}/PascalParser.cc  ${SRC}/pascal.yy 2> /dev/null && run_check $? "pascal.yy"
-    flex++     -h${TMP}/PascalScanner.h -o${TMP}/PascalScanner.cc ${SRC}/pascal.ll 2> /dev/null && run_check $? "pascal.ll"
+    bison++ -d -h${TMP}/PascalParser.h  -o${TMP}/PascalParser.cc  \
+    ${SRC}/pascal.yy 2> /dev/null && run_check $? "pascal.yy"
+    
+    flex++     -h${TMP}/PascalScanner.h -o${TMP}/PascalScanner.cc \
+    ${SRC}/pascal.ll 2> /dev/null && run_check $? "pascal.ll"
     echo "ok. =]"
 }
 # -----------------------------------------------------------------
@@ -149,10 +155,6 @@ function run_build_parser () {
 # -----------------------------------------------------------------
 function run_build_object_files () {
     printf "[= create object files: "
-
-    obj_array=("PascalParser" "PascalScanner" "x86Code" "parser" \
-    "start" "win32api")
-    
     for i in ${!obj_array[@]}; do
         DAT="${obj_array[$i]}"
         
@@ -162,7 +164,9 @@ function run_build_object_files () {
         run_check $? "${DAT}.o"
     done
 
-    ${GCC} -O2 -o ${TMP}/CommandLineToArgvA.o -c ${SRC}/CommandLineToArgvA.c
+    ${GCC} -O2 -o ${TMP}/CommandLineToArgvA.o -c \
+    ${SRC}/CommandLineToArgvA.c
+
     run_check $? "CommandLineToArgvA.o"
     echo "ok. =]"
 }
@@ -171,24 +175,24 @@ function run_build_object_files () {
 # -----------------------------------------------------------------
 function run_build_exec () {
     printf "[= create executable: "
-    ${GXX} -o ${TMP}/pc.exe    \
-        ${TMP}/start.o         \
-        ${TMP}/CommandLineToArgvA.o \
-        ${TMP}/win32api.o      \
-        ${TMP}/parser.o        \
-        ${TMP}/x86code.o       \
-        ${TMP}/PascalScanner.o \
-        ${TMP}/PascalParser.o  \
-        -L${TMP}/asmjit -lasmjit -lintl -lgmpxx
+    DAT=""
+
+    for i in ${!obj_array[@]}; do
+        DAT="${DAT} ${TMP}/${obj_array[$i]}.o"
+    done
+    DAT="${DAT} ${TMP}/CommandLineToArgvA.o"
+    ${GXX} -o ${TMP}/pc.exe ${DAT} \
+        -L${TMP}/asmjit -lasmjit   \
+        -lintl -lgmpxx
     run_check $? "pc.exe"
 
     # -----------------------------------------------------------------
     # strip debug informations, and copy file to exec directory ...
     # -----------------------------------------------------------------
-    #strip ${TMP}/pc.exe
-    #run_check $? "pc.exe"
+    strip ${TMP}/pc.exe
+    run_check $? "pc.exe"
     
-    rm ${TMP}/*.o && rm ${TMP}/*.cc && rm ${TMP}/*.h
+    #rm ${TMP}/*.o && rm ${TMP}/*.cc && rm ${TMP}/*.h
     echo "ok. =]"
 }
 # -----------------------------------------------------------------

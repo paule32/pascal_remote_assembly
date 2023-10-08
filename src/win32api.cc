@@ -70,6 +70,10 @@ win32_kernel32_ExitProcess kernel32_ExitProcess;
 // -----------------------------------------------------------------
 win32_user32_MessageBox user32_MessageBox;
 
+void calledProc(HWND h, LPCTSTR t1, LPCTSTR t2, UINT m) {
+    std::cout << "-------------------" << std::endl;
+    ::MessageBoxA(h,t1,t2,m);
+}
 // -----------------------------------------------------------------
 // generator member: MessageBoxA - ANSI
 // -----------------------------------------------------------------
@@ -86,115 +90,85 @@ bool Parser::ASM_Code::code_user32_MessageBoxA()
         Label L0 = cc->newNamedLabel(S0.data(), S0.length(), LabelType::kGlobal);
         Label L1 = cc->newNamedLabel(S1.data(), S1.length(), LabelType::kGlobal);
         Label L2 = cc->newNamedLabel(S2.data(), S2.length(), LabelType::kGlobal);
-        
+
         // -----------------------------------------
-        // .text EntryPoint
+        // signature of: EntryPoint
         // -----------------------------------------
-        cc->section(code_sec);
-        cc->bind(L0);
+        FuncNode * mainFunc = cc->newFunc(
+        FuncSignatureT<void,void >(CallConvId::kHost));
+        mainFunc->frame().setPreservedFP();
 
-        FuncNode * mainFunc = cc->addFunc(
-        FuncSignatureT<void, void*, const void*, const void*>(CallConvId::kHost));
-        mainFunc->frame().setAvxEnabled();
-        mainFunc->frame().setAvxCleanup();
+        // -----------------------------------------
+        // signature of: MessageBoxA
+        // -----------------------------------------
+        FuncNode * messageBoxA = cc->newFunc(
+        FuncSignatureT<int, HWND, LPCTSTR, LPCTSTR, UINT>(CallConvId::kHost));
+        messageBoxA->frame().setPreservedFP();
 
-        FuncNode* helperFunc = cc->newFunc(
-        FuncSignatureT<void, void*, const void*>(CallConvId::kX64Windows));
-        helperFunc->frame().setAvxEnabled();
-        helperFunc->frame().setAvxCleanup();
+        {
+            // -----------------------------------------
+            // .text EntryPoint
+            // -----------------------------------------
+            cc->section(code_sec);
+            cc->bind(L0);
+            cc->addFunc(mainFunc);
+            
+            size_t i;
 
-        x86::Gp dPtr = cc->newIntPtr("dPtr");
-        x86::Gp aPtr = cc->newIntPtr("aPtr");
-        x86::Gp bPtr = cc->newIntPtr("bPtr");
-        x86::Gp tPtr = cc->newIntPtr("tPtr");
-        x86::Ymm acc[8];
-        x86::Mem stack = cc->newStack(32, 1, "stack");        
-        
-        mainFunc->setArg(0, dPtr);
-        mainFunc->setArg(1, aPtr);
-        mainFunc->setArg(2, bPtr);
-        
-        cc->lea(tPtr, stack);
+            x86::Mem stack = cc->newStack(8, 1, "stack");        
+            
+            InvokeNode * invokeNode;
+            cc->invoke(& invokeNode,
+                messageBoxA->label(),
+                FuncSignatureT<void, HWND, LPCTSTR, LPCTSTR, UINT>(
+                CallConvId::kX64Windows));
 
-        for (int i = 0; i < 8; i++) {
-            acc[i] = cc->newYmm("acc%zu", i);
-            cc->vmovdqu(acc[i], x86::ptr(aPtr));
-        }      
-
-        InvokeNode * entryNode;
-        Error err  = cc->invoke(& entryNode, &L1,
-        FuncSignatureT<void, void*, const void*>(CallConvId::kX64Windows));
-        if (err != kErrorOk) {
-            printf("ssss\n");
-            std::stringstream ss;
-            ss << "InvokeNode entryNode: "
-               << DebugUtils::errorAsString(err);
-            std::cerr << ss.str() << std::endl;
-            throw ss.str();
+            cc->ret();
+            cc->endFunc();
         }
-        
-        LPCTSTR lpc = "haloooo";
-        entryNode->setArg(0, lpc);
-        
-        cc->ret();
-        cc->endFunc();
-        
-        // -----------------------------------------
-        // setup the signature of: MessageBoxA
-        // -----------------------------------------
-        FuncSignatureBuilder signature(CallConvId::kHost);
-        signature.setRetT< void >();
-        
-        cc->section(code_sec);
-        cc->bind(L1);
-        
-        signature.addArgT< HWND    >();
-        signature.addArgT< LPCTSTR >();
-        signature.addArgT< LPCTSTR >();
-        signature.addArgT< UINT    >();
-        
-        x86::Gp gpArg1 = cc->newInt64("gpArg1");
-        x86::Gp gpArg2 = cc->newInt64("gpArg2");
-        x86::Gp gpArg3 = cc->newInt64("gpArg3");
-        x86::Gp gpArg4 = cc->newInt64("gpArg4");
+        {
+            // -----------------------------------------
+            // .text MessageBoxA
+            // -----------------------------------------
+            cc->section(code_sec);
+            cc->bind(L1);
+            cc->addFunc(messageBoxA);
 
-        FuncNode* funcNode = cc->addFunc(signature);
-        funcNode->frame().setPreservedFP();
-        
-        funcNode->setArg(0, gpArg1);
-        funcNode->setArg(1, gpArg2);
-        funcNode->setArg(2, gpArg3);
-        funcNode->setArg(3, gpArg4);
+            //x86::Mem gpArg1 = cc->newInt64Const(ConstPoolScope::kLocal,42);
+            
+            x86::Gp gpArg1 = cc->newInt64("gpArg1");
+            x86::Gp gpArg2 = cc->newInt64("gpArg2");
+            x86::Gp gpArg3 = cc->newInt64("gpArg3");
+            x86::Gp gpArg4 = cc->newInt64("gpArg4");
 
-        // -----------------------------------------
-        // call the hook win32api member ...
-        // -----------------------------------------
-        cc->mov(gpArg2, x86::rdx);
+            // -----------------------------------------
+            // call the hook win32api member ...
+            // -----------------------------------------
+            HWND hwnd = (HWND)0;
+            LPCSTR s3 = "Hallo Welt !!!";
+            LPCSTR s4 = "info";
+            UINT   mt = 0;
 
-        InvokeNode * invokeNode;
-        cc->invoke(& invokeNode,
-            imm((void*)user32_MessageBox),
-            signature);
-        
-        HWND hwnd = (HWND)0;
-        LPCSTR s3 = "Hallo Welt !!!";
-        LPCSTR s4 = "info";
-        UINT   mt = 0;
+            InvokeNode * invokeNode;
+            cc->invoke(& invokeNode,
+                imm((void*)calledProc),
+                FuncSignatureT<void, HWND, LPCTSTR, LPCTSTR, UINT>(
+                CallConvId::kX64Windows));
+            invokeNode->setArg(0, hwnd);
+            invokeNode->setArg(1, s3);
+            invokeNode->setArg(2, s4);
+            invokeNode->setArg(3, mt);
 
-        invokeNode->setArg(0, hwnd);
-        invokeNode->setArg(1, gpArg2);
-        invokeNode->setArg(2, s4);
-        invokeNode->setArg(3, mt);
-
-        cc->ret();
-        cc->endFunc();
-        
-        // test:
-        cc->section(data_sec);
-        cc->bind(L2);
-        
-        std::string s1("Hello World !aaaa!\0");
-        cc->embed(s1.c_str(), s1.length()+1);
+            cc->ret(gpArg4);
+            cc->endFunc();
+            
+            // test:
+            cc->section(data_sec);
+            cc->bind(L2);
+            
+            std::string s1("Hello World !aaaa!\0");
+            cc->embed(s1.c_str(), s1.length()+1);
+        }
 
         return true;
     }

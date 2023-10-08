@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------
-// File:   Pascall.ll
+// File:   Pascal.ll
 // Author: (c) 2023 Jens Kallup - paule32
 // All rights reserved
 //
@@ -13,20 +13,19 @@
 %define CLASS PascalScanner
 
 %header{
+# include <stdio.h>
+# include <libintl.h>
+# include <locale.h>
+# include <stdlib.h>
+# include <strings.h>
+
 # include <iostream>
 # include <sstream>
+# include <cstring>
 
 # include "PascalParser.h"
 # include "PascalScanner.h"
 
-# include <libintl.h>
-# include <locale.h>
-# include <stdio.h>
-# include <stdlib.h>
-
-// -----------------------------------------------------------------
-// code helper, and shortner ...
-// -----------------------------------------------------------------
 extern std::istream * lexer_input;
 extern void yyerror(char * err);
 

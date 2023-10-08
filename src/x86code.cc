@@ -127,8 +127,8 @@ void Parser::ASM_Code::code_end()
 void Parser::ASM_Code::code_display()
 {
     #if 0
-    String content = move(logger->content());
-    std::cout << content.data() << std::endl;
+    //String content = move(logger->content());
+    //std::cout << content.data() << std::endl;
     #endif
 }
 
