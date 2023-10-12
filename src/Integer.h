@@ -9,6 +9,8 @@
 
 # include <iostream>
 # include <vector>
+# include <map>
+# include <unordered_map>
 # include <any>
 # include <memory>
 # include <cxxabi.h>
@@ -51,6 +53,34 @@ auto cppDemangle(const std::string abiName)
     return retval;
 }
 
+std::unordered_map< std::string, std::unordered_map< std::string, std::any > > Parameters;
+
+void testfunc_2(
+    std::unordered_map<
+        std::string, std::unordered_map<
+            std::string, std::any
+        >
+    > &p) {
+    int i = 0;
+    for (auto it1 = p.begin(); it1 != p.end(); ++it1) {
+        std::cout << std::endl;
+        std::cout << it1->first << " = " <<
+        std::endl ;
+        for (auto &[key, val] : it1->second) {
+            std::cout << "   Arg: " << ++i << " = ";
+
+            if (val.type() == typeid( int         )) std::cout << "int          : " << std::any_cast< int         >(val); else
+            if (val.type() == typeid( double      )) std::cout << "double       : " << std::any_cast< double      >(val); else
+            if (val.type() == typeid( float       )) std::cout << "float        : " << std::any_cast< float       >(val); else
+            if (val.type() == typeid( char        )) std::cout << "char         : " << std::any_cast< char        >(val); else
+            if (val.type() == typeid( char const* )) std::cout << "const char * : " << std::any_cast< char const* >(val); else
+            if (val.type() == typeid( std::string )) std::cout << "std::string  : " << std::any_cast< std::string >(val);
+            
+            std::cout << std::endl;
+        }
+    }
+}
+
 std::vector< std::any    > ParamsValue;
 std::vector< std::string > ParamsType;
 
@@ -82,4 +112,25 @@ template <typename ...Args> void f(const Args&... args) {
 
     std::cout << std::endl; getArgsValue(args...);
     std::cout << std::endl; gget();
+    
+    std::cout << std::endl;
+    std::unordered_map< std::string, std::unordered_map< std::string, std::any > > p = {
+        {
+            "outer1",
+            {
+                { "inner1a", 3   },
+                { "inner1b", 3.4 }
+            }
+        },
+        {
+            "outer2",
+            {
+                { "inner2a", "foo" },
+                { "inner2b", 'x'   },
+                { "inner2c", 42    }
+            }
+        }
+    };
+    Parameters = p;
+    testfunc_2(Parameters);
 }
