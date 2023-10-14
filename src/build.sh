@@ -31,16 +31,40 @@ obj_array=("PascalParser" "PascalScanner" "x86Code" "parser" \
 WMKD=$(which mkdir)
 WGCC=$(which gcc)
 WGXX=$(which g++)
+XLTP=$(which xsltproc)
 MKD=$(echo "${WMKD}")
 GCC=$(echo "${WGCC}")
 GXX=$(echo "${WGXX}")
+XLT=$(echo "${XLTP}")
 # -----------------------------------------------------------------
-function run_prepare () {
+# localization strings for this script ...
+# -----------------------------------------------------------------
+msg_de_DE_0000="Fehler: "
+msg_en_US_0000="Error: "
+# -----------------------------------------------------------------
+arrloc=( \
+'de_DE=("${msg_de_DE_0000}" "v2" "v3")' \
+'en_US=(e1 e2 e3)' )
+# -----------------------------------------------------------------
+function run_build_prepare () {
+    loc=$(locale | grep LC_CTYPE | cut -d= -f2 | cut -d. -f1 | sed 's/"//g')
+    printf "[= Install Language: "
+    case "$loc" in
+        de_DE) printf "Deutsch" ;;
+        en_US) printf "English" ;;
+        *)     printf "English as alternative"
+    esac
+    echo " =]"
+    for elt in "${arrloc[@]}";do eval $elt;done
+    echo "${de_DE[0]}"
+    exit 1
+
     printf "[= check storage structure: "
 
-    [[ -z "${WMKD}" ]] && { echo "Error: mkdir not found. =]"; exit 1; }
-    [[ -z "${WGCC}" ]] && { echo "Error: gcc not found. =]";   exit 1; }
-    [[ -z "${WGXX}" ]] && { echo "Error: g++ not found. =]";   exit 1; }
+    [[ -z "${WMKD}" ]] && { echo "Error: mkdir not found. =]";    exit 1; }
+    [[ -z "${WGCC}" ]] && { echo "Error: gcc not found. =]";      exit 1; }
+    [[ -z "${WGXX}" ]] && { echo "Error: g++ not found. =]";      exit 1; }
+    [[ -z "${XLTP}" ]] && { echo "Error: xsltproc not found. =]"; exit 1; }
 
     [[ -z "${TMP}" ]] && mkdir -p ${TMP}
     echo " ok. =]"
@@ -213,8 +237,21 @@ function run_build_nasm_source () {
     echo "ok. =]"
 }
 # -----------------------------------------------------------------
+# create the documentation to this project/package:
+# DEU = German
+# ENU = English
+# -----------------------------------------------------------------
+function build_doc_xml () {
+echo $1
+}
+# -----------------------------------------------------------------
 # switch back to developer source path ...
 # -----------------------------------------------------------------
+run_build_prepare
+
+run_build_doc_xml deu
+run_build_doc_xml enu
+
 run_build_locales
 run_build_parser
 run_build_object_files

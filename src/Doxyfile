@@ -13,7 +13,7 @@ CREATE_SUBDIRS         = YES
 CREATE_SUBDIRS_LEVEL   = 8
 
 ALLOW_UNICODE_NAMES    = YES
-OUTPUT_LANGUAGE        = English
+OUTPUT_LANGUAGE        = German
 
 BRIEF_MEMBER_DESC      = YES
 REPEAT_BRIEF           = NO
@@ -49,7 +49,8 @@ SEPARATE_MEMBER_PAGES  = NO
 
 TAB_SIZE               = 8
 
-ALIASES += b_colortext{2}="\htmlonly <font color='\1'><b>\2</b></font> \endhtmlonly"
+ALIASES += b_colortext{2}="\htmlonly <font color='\1'><b>\2</b></font>\endhtmlonly"
+ALIASES += myproject="Projekt 1.1"
 
 OPTIMIZE_OUTPUT_FOR_C  = YES
 OPTIMIZE_OUTPUT_JAVA   = NO
