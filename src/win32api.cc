@@ -74,6 +74,7 @@ void calledProc(HWND h, LPCTSTR t1, LPCTSTR t2, UINT m) {
     std::cout << "-------------------" << std::endl;
     ::MessageBoxA(h,t1,t2,m);
 }
+
 // -----------------------------------------------------------------
 // generator member: MessageBoxA - ANSI
 // -----------------------------------------------------------------
@@ -134,32 +135,26 @@ bool Parser::ASM_Code::code_user32_MessageBoxA()
             cc->bind(L1);
             cc->addFunc(messageBoxA);
 
-            //x86::Mem gpArg1 = cc->newInt64Const(ConstPoolScope::kLocal,42);
-            
-            x86::Gp gpArg1 = cc->newInt64("gpArg1");
-            x86::Gp gpArg2 = cc->newInt64("gpArg2");
-            x86::Gp gpArg3 = cc->newInt64("gpArg3");
-            x86::Gp gpArg4 = cc->newInt64("gpArg4");
-
             // -----------------------------------------
             // call the hook win32api member ...
             // -----------------------------------------
-            HWND hwnd = (HWND)0;
-            LPCSTR s3 = "Hallo Welt !!!";
-            LPCSTR s4 = "info";
-            UINT   mt = 0;
+            HWND * hwnd = (HWND*)0;
+            LPCSTR   s3 = "Hallo Welt !!!";
+            LPCSTR   s4 = "info";
+            UINT *   mt = 0;
 
             InvokeNode * invokeNode;
             cc->invoke(& invokeNode,
                 imm((void*)calledProc),
                 FuncSignatureT<void, HWND, LPCTSTR, LPCTSTR, UINT>(
                 CallConvId::kX64Windows));
+
             invokeNode->setArg(0, hwnd);
             invokeNode->setArg(1, s3);
             invokeNode->setArg(2, s4);
             invokeNode->setArg(3, mt);
 
-            cc->ret(gpArg4);
+            cc->ret();
             cc->endFunc();
             
             // test:
@@ -168,6 +163,15 @@ bool Parser::ASM_Code::code_user32_MessageBoxA()
             
             std::string s1("Hello World !aaaa!\0");
             cc->embed(s1.c_str(), s1.length()+1);
+            
+            char* buffer = new char[1024];
+            sprintf(buffer,
+            "; T 0x%p caller\n"
+            "; T 0x%p hwnd\n"
+            "; T 0x%p s3\n"
+            "; T 0x%p s4\n"
+            "; T 0x%p mt\n", calledProc, hwnd, s3, s4, mt);
+            FuncTableStream << buffer;
         }
 
         return true;

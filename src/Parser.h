@@ -52,6 +52,7 @@
 # include <cstdlib>
 # include <functional>
 # include <locale>
+# include <iomanip>
 # include <exception>       // exception handler's
 
 // -----------------------------------------------------------------
@@ -118,7 +119,7 @@ public:
     // remote assembly ...
     // -------------------------------------------------------------
     class ASM_Code {
-    private:
+    public:
         class MyErrorHandler : public ErrorHandler {
         public:
             void handleError(Error err, const char*, BaseEmitter*) override;
@@ -141,6 +142,8 @@ public:
         Error                 err;
         
         MyErrorHandler * myErrorHandler;
+
+        std::stringstream FuncTableStream;  // experimental
     public:
         ASM_Code();
        ~ASM_Code();
@@ -158,7 +161,7 @@ public:
         bool code_user32_MessageBoxA();
     };
     
-private:
+public:
     ASM_Code  * asm_code;
 };
 // -----------------------------------------------------------------

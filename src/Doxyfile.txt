@@ -1,3 +1,90 @@
+Hallo,
+
+bevor man mit Fließkomma-Zahlen anfängt, würde ich vorschlagen,
+mit der Prozent-Rechnung anzufangen.
+Zum Beispiel:
+
+geg.:
+-----
+10 Liter kosten 0.50 Cent - wieviel Kosten dann 5 Liter ?
+
+Lsg.:
+-----
+ 5 Dinge  entsprechen   0.70 Geld-Einheiten
+50 Dinge  entsprechen      x Geld-Einheiten
+
+=>  50 * 0.70  =  3.50
+
+=> 4,50 Geld-Einheiten dividiert durch 50 Geld-Einheiten = x GE
+
+=> man betrachtet die 50 Dinge, und erkennt, das es in die Zehner
+   Zahlen geht. Man wischt (denkt sich) das Komma weg und weil Zehner
+   Zahlen "eine" null haben, setzt man an den Nenner (also die Zahl
+   unter dem Bruchstrich zusatzlich eine null (0)
+
+=> aus 3,50 erhält man dann 350  sowie  50
+
+=> daraus wird dann 350 / 50
+
+=> bei der Division kann man nun die rechten Nullen abschneiden, sofern
+   diese weder oberhalb oder unterhalb des Bruchstriches begrenzt werden
+   (sprich, andere Zahlen dort stehen).
+
+=> immer darauf achten, bei Mathematik in der Grundschule Kästchenpapier
+   verwenden, und von rechts nach links die Zahlen untereinander in den
+   Kästchen schreiben (eventuell die Rechen-Operation vor der Rechnung
+   auf Höhe des Bruchstriches schreiben) !
+
+   Beispiel:
+   ---------
+
+   => man schaut zuerst, ob der Zähler größer ist als der Nenner
+      - im diesen Beispiel ist der Zähler die 350
+      - in diesen Beispiel ist der Nenner die  50
+
+   => man kann erkennen, das der Nenner kleiner ist, also wird da zu
+      setzende Komma um eine Stelle nach links verschoben, so dass man
+      35,0  und:  5,0   erhält.
+
+   => Da es um Geld-Einheiten geht, weiß man, das es 1 Cent (Einer) und
+      10 Cent (Zehner) gibt. Also fügt man zur besseren Betrachtung noch
+      eine null am rechten Rand (also an der zweite Stelle nach dem
+      Komma), noch eine null (0) hinzu.
+
+      Hinweis;
+      - der geübte Mathematiker kann natürlich das Komma und die
+        zwei nullen (,00) gleich wegdenken.
+   
+   Term 1:
+
+        35,00 |    <----  die 00 am rechten Rand kann hier weg
+   div ------ |
+         5,00 |    <----  die 00 am rechten Rand kann hier weg
+
+   Term 2:
+
+         35 |
+   div  --- |
+          5 |
+
+   => 35 : 5  oder:  35 / 5
+
+   => Ergebnis ist 7 Geld-Einheiten
+
+   => im letzten Schritt werden das Komma und die (weggedachten) nullen
+      wieder hinzugefügt (in diesen Beispiel "zwei") hinter der 7 wieder
+      hinzu geschrieben.
+
+   => voila wir haben die Geld-Einheiten für 7 Dinge(r).
+
+Zum schmökkern empfehle ich folgende zwei Bücher:
+
+
+
+Euer Schreiberling, Jens
+
+
+
 # Doxyfile 1.9.6
 
 DOXYFILE_ENCODING      = UTF-8

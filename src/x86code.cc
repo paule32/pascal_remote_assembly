@@ -154,6 +154,7 @@ void Parser::ASM_Code::code_exec()
 // -----------------------------------------------------------------
 Parser::ASM_Code::~ASM_Code()
 {
+    fprintf(logFile,FuncTableStream.str().data());
     rt.release(user32_MessageBox);
     fclose(logFile);
     
