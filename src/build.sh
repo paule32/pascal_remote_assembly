@@ -11,11 +11,12 @@ SRC=$(echo "${PWD}")
 TEMP="temp"
 TMP=$(echo "${PWD}/${TEMP}")
 FLAGS=$(echo "-std=c++17 -O2 -fPIC " \
-    "-Wno-register      "      \
-    "-Wno-write-strings "      \
-    "-DASMJIT_STATIC    "      \
-    "-DASMJIT_BUILD_RELEASE "  \
-    "-DASMJIT_NO_AARCH64 " \
+    "-Wno-pmf-conversions   " \
+    "-Wno-register          " \
+    "-Wno-write-strings     " \
+    "-DASMJIT_STATIC        " \
+    "-DASMJIT_BUILD_RELEASE " \
+    "-DASMJIT_NO_AARCH64    " \
     "-I/E/msys64/mingw64/usr/include -I${SRC}/asmjit -I${TMP}")
 # -----------------------------------------------------------------
 ST1="s/\\\"Last\\-Translator\\: .*\\n\\\"/\\\"Last-Translator\\:"
@@ -31,7 +32,7 @@ obj_array=("PascalParser" "PascalScanner" "x86Code" "parser" \
 WMKD=$(which mkdir)
 WGCC=$(which gcc)
 WGXX=$(which g++)
-XLTP=$(which libxslt 2&> /)
+XLTP=$(which libxslt 2&> /dev/null)
 TDLG=$(which dialog)
 # -----------------------------------------------------------------
 MKD=$(echo "${WMKD}")   # mkdir
@@ -66,6 +67,13 @@ msg_de_DE_0017="\nBinde binäre Daten zur Anwendung."
 msg_de_DE_0018="Erstellen der Objekt-Dateien"
 msg_de_DE_0019="\nDie binären Objekt-Dateien werden erstellt.\n"
 msg_de_DE_0019+="Dies kann einen Moment dauern, Bitte haben Sie Geduld..."
+msg_de_DE_0020="Dokumentation"
+msg_de_DE_0021="\nDokumentation wird aufbereitet/erstellt.\n"
+msg_de_DE_0021+="Dies kann etwas dauern..."
+msg_de_DE_0022="Übersetzung abgeschloßen"
+msg_de_DE_0023="\nDas Programm/Package wurde erfolgreich erstellt."
+msg_de_DE_0024="Erfolgreich"
+msg_de_DE_0025="\nAlle Aufgaben wurden erfolgreich ausgeführt."
 # -----------------------------------------------------------------
 msg_en_US_0000="English"
 msg_en_US_0001="gattering setup data..."
@@ -89,6 +97,14 @@ msg_en_US_0017="\nLink object files to executable."
 msg_en_US_0018="Create object files"
 msg_en_US_0019="\ncreate the binary project object files.\n"
 msg_en_US_0019+="This can take a while..."
+msg_en_US_0020="Create documentation"
+msg_en_US_0021="\nSetup create the documentation.\n"
+msg_en_US_0021+="This can take a while..."
+msg_en_US_0022="Compiler done"
+msg_en_US_0023="\nThe Compiler return successfully.\n"
+msg_en_US_0023+="Application/Package was built."
+msg_en_US_0024="Successfull"
+msg_en_US_0025="\nAll task's was built successfully."
 # -----------------------------------------------------------------
 xlen=$(tput cols)
 ylen=$(tput lines)
@@ -141,7 +157,7 @@ function run_build_prepare () {
     # --------------------------------------
     # fill the localization array with text:
     # --------------------------------------
-    for cnt in {0..19}; do
+    for cnt in {0..27}; do
         number=$(printf "%04d" $cnt)
         eval "Z=msg_${build_locale}_\$number"
         errloc+=("${Z}")
@@ -334,7 +350,7 @@ function run_build_locales () {
     if [[ -n "${DLG}" ]]; then
         printf '\033[8;%d;%dt' $rows $cols
         dlg="(exit 1) | $dlgs --title \"${!errloc[17]}\" \
-        --gauge \"${!errloc[18]}\" 10 79 15"
+        --gauge \"${!errloc[18]}\" 10 79 $1"
         eval "$dlg"
     else
         printf "[= create localization files: "
@@ -372,7 +388,7 @@ function run_build_parser () {
     if [[ -n "${DLG}" ]]; then
         printf '\033[8;%d;%dt' $rows $cols
         dlg="(exit 1) | $dlgs --title \"${!errloc[17]}\" \
-        --gauge \"${!errloc[18]}\" 10 79 15"
+        --gauge \"${!errloc[18]}\" 10 79 $1"
         eval "$dlg"
     else
         printf "[= create parser: "
@@ -395,7 +411,7 @@ function run_build_object_files () {
     if [[ -n "${DLG}" ]]; then
         printf '\033[8;%d;%dt' $rows $cols
         dlg="(exit 1) | $dlgs --title \"${!errloc[17]}\" \
-        --gauge \"${!errloc[18]}\" 10 79 15"
+        --gauge \"${!errloc[18]}\" 10 79 $1"
         eval "$dlg"
     else
         printf "[= create object files: "
@@ -424,7 +440,7 @@ function run_build_exec () {
     if [[ -n "${DLG}" ]]; then
         printf '\033[8;%d;%dt' $rows $cols
         dlg="(exit 1) | $dlgs --title \"${!errloc[19]}\" \
-        --gauge \"${!errloc[20]}\" 10 79 16"
+        --gauge \"${!errloc[20]}\" 10 79 $1"
         eval "$dlg"
     else
         printf "[= create executable: "
@@ -441,7 +457,7 @@ function run_build_exec () {
     run_check $? "pc.exe"
 
     # -----------------------------------------------------------------
-    # strip debug informations, and copy file to exec directory ...
+    # strip debug informations, and copy file to exec directory: ...
     # -----------------------------------------------------------------
     strip ${TMP}/pc.exe
     run_check $? "pc.exe"
@@ -462,7 +478,7 @@ function run_build_nasm_source () {
     if [[ -n "${DLG}" ]]; then
         printf '\033[8;%d;%dt' $rows $cols
         dlg="(exit 1) | $dlgs --title \"${!errloc[15]}\" \
-        --gauge \"${!errloc[16]}\" 10 79 90"
+        --gauge \"${!errloc[16]}\" 10 79 98"
         eval "$dlg"
     else
         printf "[= create nasm source: "
@@ -506,16 +522,16 @@ function run_build_nasm_source () {
 #   echo "$maplist"
     eval "$maplist"
 
-    asmtxt=""
-    for el in ${tmp_array_func[@]}; do
-        asmtxt+="extern $el\n"
-    done
-    asmdat=$(cat test2.asm)
-    asmdat+="\n$asmtxt\n"
-    echo -e "$asmdat" > test3.asm
+    #asmtxt=""
+    #for el in ${tmp_array_func[@]}; do
+    #    asmtxt+="extern $el\n"
+    #done
+    #asmdat=$(cat test2.asm)
+    #asmdat+="\n$asmtxt\n"
+    #echo -e "$asmdat" > test3.asm
     
-    nasm -f win64 -o test3.o test3.asm
-    run_check $? "nasm test3.asm"
+    nasm -f win64 -o test2.o test2.asm
+    run_check $? "nasm test2.asm"
     
     if [[ -z "${DLG}" ]]; then
         echo "ok. =]"
@@ -528,7 +544,12 @@ function run_build_nasm_source () {
 # -----------------------------------------------------------------
 function run_build_doc_xml () {
     if [[ -z "${DLG}" ]]; then
-        echo $1
+        echo "$1"
+    else
+        printf '\033[8;%d;%dt' $rows $cols
+        dlg="(exit 1) | $dlgs --title \"${!errloc[21]}\" \
+        --gauge \"${!errloc[22]}\" 10 79 $2"
+        eval "$dlg"
     fi
 }
 # -----------------------------------------------------------------
@@ -537,31 +558,55 @@ function run_build_doc_xml () {
 cd ${TMP}
 run_build_prepare
 
-run_build_doc_xml deu
-run_build_doc_xml enu
+run_build_doc_xml deu  20
+run_build_doc_xml enu  22
 
-run_build_locales
-run_build_parser
-run_build_object_files
-run_build_exec
+run_build_locales      30
+run_build_parser       32
+run_build_object_files 40
+run_build_exec         42
 
 cd ${TMP}
 if [[ -z "${DLG}" ]]; then
-  printf "done.\n\n"
+    printf "done.\n\n"
+else
+    printf '\033[8;%d;%dt' $rows $cols
+    dlg="(exit 1) | $dlgs --title \"${!errloc[23]}\" \
+    --gauge \"${!errloc[24]}\" 10 79 94"
+    eval "$dlg"
 fi
 
 # -----------------------------------------------------------------
 # when all is done, then start a test ...
 # -----------------------------------------------------------------
 if [[ -z "${DLG}" ]]; then
-  printf "[= start test: "
+    clear
+    printf "[= start test: "
+else
+    printf '\033[8;%d;%dt' $rows $cols
+    dlg="(exit 1) | $dlgs --title \"${!errloc[23]}\" \
+    --gauge \"${!errloc[24]}\" 10 79 96"
+    eval "$dlg"
 fi
 LD_LIBRARY_PATH=./asmjit;./pc.exe ${SRC}/test.pas
+#&> /dev/null
 run_check $? "pc.exe"
 if [[ -z "${DLG}" ]]; then
-  echo "ok. =]"
+    echo "ok. =]"
+else
+    printf '\033[8;%d;%dt' $rows $cols
+    dlg="(exit 1) | $dlgs --title \"${!errloc[23]}\" \
+    --gauge \"${!errloc[24]}\" 10 79 98"
+    eval "$dlg"
 fi
 
 run_build_nasm_source test
 
+if [[ -n "${DLG}" ]]; then
+    printf '\033[8;%d;%dt' $rows $cols
+    dlg="(sleep 4 ; exit 1) | $dlgs --title \"${!errloc[25]}\" \
+    --msgbox \"${!errloc[26]}\" 10 79"
+    eval "$dlg"
+fi
 cd ${SRC}
+clear

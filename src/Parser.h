@@ -50,6 +50,11 @@
 # include <fstream>
 # include <cstdio>
 # include <cstdlib>
+# include <vector>
+# include <unordered_map>
+# include <map>
+# include <any>
+# include <memory>
 # include <functional>
 # include <locale>
 # include <iomanip>
@@ -134,16 +139,31 @@ public:
         Section        * data_sec;  // data section
         
         CodeHolder     *     code;  // Holds the code and relocation information
-        FileLogger     *   logger;  // Logger should always survice CodeHolder
+        StringLogger   *   logger;  // Logger should always survice CodeHolder
         FILE           *  logFile;  // todo: assembly output
     
-        FormatFlags  formatFlags;
+        FormatFlags   formatFlags;
         x86::Compiler  *       cc;
         Error                 err;
         
         MyErrorHandler * myErrorHandler;
 
         std::stringstream FuncTableStream;  // experimental
+        
+        std::map< std::string, FuncNode* > FuncNodeMap;
+        
+        // -----------------------------------------------
+        // this map is used to hold the source code small-
+        // there, we hold a list of asmjit callables...
+        // -----------------------------------------------
+        std::unordered_map< std::string,
+        std::unordered_map< std::string, std::any > > FuncArgs;
+        
+        void mapArgumentsList( );
+        void mapArguments    (
+             std::unordered_map< std::string,
+             std::unordered_map< std::string, std::any > > &p );
+
     public:
         ASM_Code();
        ~ASM_Code();
@@ -153,16 +173,14 @@ public:
         // -------------------------------------------------------------
         void init_win32api();
 
-        void code_end     ();
-        void code_exec    ();
-        void code_display ();
+        void code_end   ();
+        void code_exec  ();
+        void code_write ();
         
-    private:        
-        bool code_user32_MessageBoxA();
+        bool user32_MessageBox();
     };
     
-public:
-    ASM_Code  * asm_code;
+    class ASM_Code * asm_code = nullptr;
 };
 // -----------------------------------------------------------------
 extern Parser * parser;

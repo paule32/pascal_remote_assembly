@@ -19,5 +19,4 @@ src/po/*.pot
 src/temp/*
 src/defs.*
 src/warnings.txt
-
-src/warnings.txt
+src/1.cc

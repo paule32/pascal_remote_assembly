@@ -79,8 +79,10 @@ Parser::Parser( char *filename )
     {
         std::stringstream buffer;
         buffer << parser_file->rdbuf();
-        lexer_input = new std::istringstream(buffer.str());
         
+        lexer_input = new std::istringstream(buffer.str());
+        asm_code    = new Parser::ASM_Code();
+
         initialize();
     }
     else {
@@ -128,6 +130,61 @@ void parser_cleanup()
     // -------------------------------------------------------------
     usleep(500);
     //std::cout << "\033[A\033[2KT\r              " << std::endl;
+}
+
+// -----------------------------------------------------------------
+// adjust the arguments to the "setArgT" member of asmjit ...
+// -----------------------------------------------------------------
+void
+Parser::ASM_Code::mapArguments(
+    std::unordered_map< std::string,
+    std::unordered_map< std::string, std::any > > &p) {
+    int i = 0;
+    for (auto it1 = p.begin(); it1 != p.end(); ++it1) {
+        std::cout << std::endl;
+        std::cout << it1->first << " = " <<
+        std::endl ;
+        for (auto &[key, val] : it1->second) {
+            std::cout << "   Arg: " << ++i << " = ";
+
+            if (val.type() == typeid( int         )) std::cout << "int          : " << std::any_cast< int         >(val); else
+            if (val.type() == typeid( double      )) std::cout << "double       : " << std::any_cast< double      >(val); else
+            if (val.type() == typeid( float       )) std::cout << "float        : " << std::any_cast< float       >(val); else
+            if (val.type() == typeid( char        )) std::cout << "char         : " << std::any_cast< char        >(val); else
+            if (val.type() == typeid( char const* )) std::cout << "const char * : " << std::any_cast< char const* >(val); else
+            if (val.type() == typeid( std::string )) std::cout << "std::string  : " << std::any_cast< std::string >(val); else
+            if (val.type() == typeid( HWND        )) std::cout << "HWND         : " << std::any_cast< HWND        >(val); else
+            if (val.type() == typeid( LPCTSTR     )) std::cout << "LPCTSTR      : " << std::any_cast< LPCTSTR     >(val); else
+            if (val.type() == typeid( UINT        )) std::cout << "UINT         : " << std::any_cast< UINT        >(val); else
+            if (val.type() == typeid( uint32_t    )) std::cout << "uint32_t     : " << std::any_cast< uint32_t    >(val);
+            
+            std::cout << std::endl;
+        }
+    }
+}
+// -----------------------------------------------------------------
+// create the internal function map argument list ...
+// -----------------------------------------------------------------
+void Parser::ASM_Code::mapArgumentsList()
+{
+    FuncArgs = {
+    {
+        "MessageBoxA",
+        {
+            { "hwnd"     , "HWND"    },
+            { "lpText"   , "LPCTSTR" },
+            { "lpCaption", "LPCTSTR" },
+            { "mbType"   , "UINT"    },
+        }
+    },
+    {
+        "ExitProcess",
+        {
+            { "code", "uint32_t" },
+        }
+    }
+    };
+    mapArguments(FuncArgs);
 }
 
 // -----------------------------------------------------------------

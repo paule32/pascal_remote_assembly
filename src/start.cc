@@ -151,7 +151,7 @@ int main(int argc, char **argv) {
         // start the race run ...
         // ---------------------------------------------------------
         parser = new Parser( args.p[1] );
-        parser->yyparse();
+        //parser->yyparse();
 
         // ------------------------------------------------------------
         // after all, close opened file handles, and try to free memory

@@ -47,12 +47,11 @@ void Parser::initialize()
     // -------------------------------------------------------------
     // Windows 32-Bit API ...
     // -------------------------------------------------------------
-    asm_code = new ASM_Code();
     asm_code->init_win32api();
     
-    asm_code->code_end     ();
-    asm_code->code_display ();
-    asm_code->code_exec    ();
+    asm_code->code_end   ();
+    asm_code->code_write ();
+    asm_code->code_exec  ();
 }
 
 // -----------------------------------------------------------------
@@ -60,7 +59,6 @@ void Parser::initialize()
 // -----------------------------------------------------------------
 void Parser::finalize()
 {
-    delete asm_code;
     std::cout << "done." << std::endl;
 }
 
@@ -81,7 +79,7 @@ Parser::ASM_Code::ASM_Code()
     myErrorHandler = new MyErrorHandler();
 
     code   = new CodeHolder();
-    logger = new FileLogger(logFile);
+    logger = new StringLogger();
     
     code->init(env, features, baseAddress);
     code->setErrorHandler(myErrorHandler);
@@ -99,18 +97,15 @@ Parser::ASM_Code::ASM_Code()
     FormatIndentationGroup indent;
     logger->setIndentation( indent, 4 );
     
-    // ---------------------------
-    // create used sections:
-    // ---------------------------
-    SectionFlags flags =
-    SectionFlags::kExecutable |
-    SectionFlags::kReadOnly   ;
-    
-    Error err1 = code->newSection(&code_sec, ".text", SIZE_MAX, flags, 8);
-    Error err2 = code->newSection(&data_sec, ".data", SIZE_MAX, flags, 8);
-    
-    if (err1) throw std::string(_("failed to create .text section."));
-    if (err2) throw std::string(_("failed to create .data section."));
+    code_sec  = code->textSection();
+    Error err = code->newSection(&data_sec,
+        ".data",                // section name
+        SIZE_MAX,               // name length
+        SectionFlags::kNone,    // section flags
+        8,                      // alignment
+        0);                     // order, default: 0
+
+    if (err) throw std::string(_("failed to create .data section."));
 }
 
 // -----------------------------------------------------------------
@@ -124,12 +119,10 @@ void Parser::ASM_Code::code_end()
 // -----------------------------------------------------------------
 // get source content, and display it ...
 // -----------------------------------------------------------------
-void Parser::ASM_Code::code_display()
+void Parser::ASM_Code::code_write()
 {
-    #if 0
-    //String content = move(logger->content());
-    //std::cout << content.data() << std::endl;
-    #endif
+    asmjit::String content = std::move( logger->content() );
+    fprintf( logFile,"%s\n", content.data() );
 }
 
 // -----------------------------------------------------------------
@@ -137,12 +130,21 @@ void Parser::ASM_Code::code_display()
 // -----------------------------------------------------------------
 void Parser::ASM_Code::code_exec()
 {
+    fprintf(logFile,FuncTableStream.str().data());
+    fclose (logFile);
+    
+    // -----------------------------------------
+    // shrink runtime ...
+    // -----------------------------------------
+    rt.release(user32_MessageBox);
+    
     // -----------------------------------------
     // if any error - inform the user ...
     // -----------------------------------------
     typedef void (*Func)();
     Func fun;
     Error err = rt.add(&fun, code);
+    
     if (err != kErrorOk)
     throw std::string(_("add function fail."));
 
@@ -154,51 +156,10 @@ void Parser::ASM_Code::code_exec()
 // -----------------------------------------------------------------
 Parser::ASM_Code::~ASM_Code()
 {
-    fprintf(logFile,FuncTableStream.str().data());
-    rt.release(user32_MessageBox);
-    fclose(logFile);
-    
-    if (nullptr != cc    ) delete cc;
-    if (nullptr != code  ) delete code;
-    if (nullptr != logger) delete logger;
+    if (nullptr != parser->asm_code->cc    ) delete parser->asm_code->cc;
+    if (nullptr != parser->asm_code->code  ) delete parser->asm_code->code;
+    if (nullptr != parser->asm_code->logger) delete parser->asm_code->logger;
 
-    if (nullptr != myErrorHandler) delete myErrorHandler;
-}
-
-template <typename T> class Array {
-public:
-    T data[ T::DIM ];
-    Array();
-   ~Array();
-   
-   void addArg( const Array< T > &t1 )
-   {
-       std::cout << "add: object" <<
-       std::endl ;
-   }
-};
-
-template <typename T> Array< T >:: Array() { std::cout << "ctor" << std::endl; }
-template <typename T> Array< T >::~Array() { std::cout << "dtor" << std::endl; }
-
-struct Args {
-    std::string name;
-    enum {
-        DIM = 10
-    };
-};
-
-void temptest()
-{
-    cout << "..." << endl;
-    
-    Array< Args > valid;
-    
-    Array< Args > arg1;
-    Array< Args > arg2;
-    
-    valid.addArg( arg1 );
-    valid.addArg( arg2 );
-    
-    cout << "..." << endl;
+    if (nullptr != parser->asm_code->myErrorHandler)
+       delete      parser->asm_code->myErrorHandler;
 }
