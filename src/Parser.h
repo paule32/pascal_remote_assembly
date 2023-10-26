@@ -47,6 +47,8 @@
 // -----------------------------------------------------------------
 # include <iostream>        // std c++ signatures
 # include <string>
+# include <sstream>
+# include <istream>
 # include <fstream>
 # include <cstdio>
 # include <cstdlib>

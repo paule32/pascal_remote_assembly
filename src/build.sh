@@ -26,16 +26,19 @@ ATXT="| awk '{print \$3}' | cut -d '=' -f 2"
 # -----------------------------------------------------------------
 # prepare compilation tasks ...
 # -----------------------------------------------------------------
-obj_array=("PascalParser" "PascalScanner" "x86Code" "parser" \
+obj_array1=("PascalParser" "PascalScanner" "x86Code" "parser" \
 "start" "win32api")
+obj_array2=("interpreter")
 # -----------------------------------------------------------------
 WMKD=$(which mkdir)
+NASM=$(which nasm)
 WGCC=$(which gcc)
 WGXX=$(which g++)
 XLTP=$(which libxslt 2&> /dev/null)
 TDLG=$(which dialog)
 # -----------------------------------------------------------------
 MKD=$(echo "${WMKD}")   # mkdir
+ASM=$(echo "${NASM}")   # nasm
 GCC=$(echo "${WGCC}")   # gcc
 GXX=$(echo "${WGXX}")   # g++
 XLT=$(echo "${XLTP}")   # xsltproc
@@ -252,6 +255,25 @@ function run_build_prepare () {
             fi
         fi
     fi
+    
+    # ---------------------
+    # nasm assembler:
+    # ---------------------
+    if [[ -z "${NASM}" ]]; then
+        if [[ -n "${DLG}" ]]; then
+            printf '\033[8;%d;%dt' $rows $cols
+            dlg="(exit 1) | $dlgs --title \"${!errloc[13]}\" "
+            dlg+="--gauge \"${!errloc[14]}\" 10 79 12"
+            eval "$dlg"
+            yes | pacman -Sy mingw-w64-x86_64-nasm 2&> /dev/null
+        else
+            XLTP=$(which xsltproc)
+            if [[ -z "${XLTP}" ]]; then
+                echo "${!errloc[3]} nasm: ${!errloc[7]} =]"
+                run_abort
+            fi
+        fi
+    fi
 
     # ---------------------
     # create temporary dir:
@@ -416,8 +438,8 @@ function run_build_object_files () {
     else
         printf "[= create object files: "
     fi
-    for i in ${!obj_array[@]}; do
-        DAT="${obj_array[$i]}"
+    for i in ${!obj_array1[@]}; do
+        DAT="${obj_array1[$i]}"
         
         ${GXX} ${FLAGS} -o ${TMP}/${DAT}.o \
         -c ${SRC}/${DAT}.cc
@@ -446,9 +468,8 @@ function run_build_exec () {
         printf "[= create executable: "
     fi
     DAT=""
-
-    for i in ${!obj_array[@]}; do
-        DAT="${DAT} ${TMP}/${obj_array[$i]}.o"
+    for i in ${!obj_array1[@]}; do
+        DAT="${DAT} ${TMP}/${obj_array1[$i]}.o"
     done
     DAT="${DAT} ${TMP}/CommandLineToArgvA.o"
     ${GXX} -o ${TMP}/pc.exe ${DAT} \
@@ -555,58 +576,95 @@ function run_build_doc_xml () {
 # -----------------------------------------------------------------
 # switch back to developer source path ...
 # -----------------------------------------------------------------
-cd ${TMP}
-run_build_prepare
+while getopts "a:d:t: " option; do
+    case "${option}" in
+        a) built_app=${OPTARG};;
+        d) built_dis=${OPTARG};;
+        t) built_tst=${OPTARG};;
+        ?) echo "usage: build.sh [[-a], [-i], [-d]] file.src"
+           echo "Expected -a, -i or -d"
+           exit 1;;
+    esac
+done
+# ----------------------------------------
+# compile application ...
+# ----------------------------------------
+if [[ -n "${built_app}" ]]; then
+    cd ${TMP}
+    run_build_prepare
 
-run_build_doc_xml deu  20
-run_build_doc_xml enu  22
+    run_build_doc_xml deu  20
+    run_build_doc_xml enu  22
 
-run_build_locales      30
-run_build_parser       32
-run_build_object_files 40
-run_build_exec         42
+    run_build_locales      30
+    run_build_parser       32
+    run_build_object_files 40
+    run_build_exec         42
 
-cd ${TMP}
-if [[ -z "${DLG}" ]]; then
-    printf "done.\n\n"
-else
-    printf '\033[8;%d;%dt' $rows $cols
-    dlg="(exit 1) | $dlgs --title \"${!errloc[23]}\" \
-    --gauge \"${!errloc[24]}\" 10 79 94"
-    eval "$dlg"
-fi
+    cd ${TMP}
+    if [[ -z "${DLG}" ]]; then
+        printf "done.\n\n"
+    else
+        printf '\033[8;%d;%dt' $rows $cols
+        dlg="(exit 1) | $dlgs --title \"${!errloc[23]}\" \
+        --gauge \"${!errloc[24]}\" 10 79 94"
+        eval "$dlg"
+    fi
 
-# -----------------------------------------------------------------
-# when all is done, then start a test ...
-# -----------------------------------------------------------------
-if [[ -z "${DLG}" ]]; then
+    run_build_nasm_source ${built_app}
+
+    if [[ -n "${DLG}" ]]; then
+        printf '\033[8;%d;%dt' $rows $cols
+        dlg="(sleep 4 ; exit 1) | $dlgs --title \"${!errloc[25]}\" \
+        --msgbox \"${!errloc[26]}\" 10 79"
+        eval "$dlg"
+    fi
+    cd ${SRC}
     clear
-    printf "[= start test: "
-else
-    printf '\033[8;%d;%dt' $rows $cols
-    dlg="(exit 1) | $dlgs --title \"${!errloc[23]}\" \
-    --gauge \"${!errloc[24]}\" 10 79 96"
-    eval "$dlg"
+    exit 1
 fi
-LD_LIBRARY_PATH=./asmjit;./pc.exe ${SRC}/test.pas
-#&> /dev/null
-run_check $? "pc.exe"
-if [[ -z "${DLG}" ]]; then
-    echo "ok. =]"
-else
-    printf '\033[8;%d;%dt' $rows $cols
-    dlg="(exit 1) | $dlgs --title \"${!errloc[23]}\" \
-    --gauge \"${!errloc[24]}\" 10 79 98"
-    eval "$dlg"
+# ----------------------------------------
+# revert: disassembler ...
+# ----------------------------------------
+if [[ -n "${built_dis}" ]]; then
+    cd ${TMP}
+    echo "compile disassemler..."
+    for i in ${!obj_array2[@]}; do
+        DAT="${obj_array2[$i]}"
+        
+        ${GXX} ${FLAGS} -o ${TMP}/${DAT}.o \
+        -c ${SRC}/${DAT}.cc
+        
+        run_check $? "${DAT}.o"
+    done
+    DAT=""
+    for i in ${!obj_array2[@]}; do
+        DAT="${DAT} ${TMP}/${obj_array2[$i]}.o"
+    done
+    ${GXX} -o ${TMP}/diss.exe ${DAT} \
+        -L${TMP}/asmjit -lasmjit   \
+        -lintl -lgmpxx
+    run_check $? "diss.exe"
+    printf "done.\n\n${built_dis}:\n"
+    ./diss.exe ${built_dis}
+    cd ${SRC}
+    exit 1
 fi
 
-run_build_nasm_source test
-
-if [[ -n "${DLG}" ]]; then
-    printf '\033[8;%d;%dt' $rows $cols
-    dlg="(sleep 4 ; exit 1) | $dlgs --title \"${!errloc[25]}\" \
-    --msgbox \"${!errloc[26]}\" 10 79"
-    eval "$dlg"
+# ----------------------------------------
+# when all is done, then start a test ...
+# ----------------------------------------
+if [[ -n "${built_tst}" ]]; then
+    cd ${TMP}
+    LD_LIBRARY_PATH=./asmjit;./pc.exe ${SRC}/test.pas
+    run_check $? "pc.exe"
+    cd ${SRC}
+    exit 1
 fi
-cd ${SRC}
-clear
+
+# ----------------------------------------
+# we should never reach this, if all done:
+# ----------------------------------------
+echo "usage: build.sh [[-a], [-d], [-t]] file.src"
+echo "no given file."
+exit 1

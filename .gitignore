@@ -20,3 +20,4 @@ src/temp/*
 src/defs.*
 src/warnings.txt
 src/1.cc
+src/2.c
