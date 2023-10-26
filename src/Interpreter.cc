@@ -47,6 +47,17 @@ int main(int argc, char **argv)
         // ----------------------------
         IMAGE_FILE_HEADER hdr;
         fh.read((char*)&hdr, sizeof(IMAGE_FILE_HEADER));
+        if (sizeof(hdr) != 20) {
+            std::stringstream ss;
+            ss << "IMAGE_FILE_HEADER has invalid size.";
+            throw ss.str();
+        }
+        
+        if (hdr.Characteristics & IMAGE_FILE_EXECUTABLE_IMAGE) {
+            std::cout << "file is execute able."
+                      << std::endl
+                      << std::endl;
+        }
         
         std::cout << "File Image Header:" << std::endl
                   << "------------------" << std::endl;
@@ -62,14 +73,14 @@ int main(int argc, char **argv)
         // ----------------------------
         // 64-bit
         // ----------------------------
-        if (hdr.Machine == IMAGE_FILE_MACHINE_IA64) {
+        if (hdr.Machine == IMAGE_FILE_MACHINE_AMD64) {
             std::cout << "Intel/AMD x64 - 64 bit" << std::endl;
         }   else
         
         // ----------------------------
         // Intel Itanium
         // ----------------------------
-        if (hdr.Machine == IMAGE_FILE_MACHINE_AMD64) {
+        if (hdr.Machine == IMAGE_FILE_MACHINE_IA64) {
             std::cout << "Intel Itanium" << std::endl;
         }   else {
             std::stringstream ss;
@@ -139,9 +150,9 @@ int main(int argc, char **argv)
         // ----------------------------
         // characteristics...
         // ----------------------------
-        WORD Characteristics = hdr.Characteristics;
-        
-        std::cout << "Characterisics       : " << Characteristics << std::endl;
+        std::cout << "Characterisics       : "
+                  << hdr.Characteristics
+                  << std::endl;
         
         // ---------------------------------------------------------
         // Relocation information was stripped from the file.
@@ -149,75 +160,98 @@ int main(int argc, char **argv)
         // If the base address is not available, the loader reports
         // an error ...
         // ---------------------------------------------------------
-        if (Characteristics & IMAGE_FILE_RELOCS_STRIPPED) {
+        if (hdr.Characteristics & IMAGE_FILE_RELOCS_STRIPPED) {
             std::cout << std::tab << "IMAGE_FILE_RELOCS_STRIPPED" <<
             std::endl ;
         }
-        if (Characteristics & IMAGE_FILE_EXECUTABLE_IMAGE) {
+        if (hdr.Characteristics & IMAGE_FILE_EXECUTABLE_IMAGE) {
             std::cout << std::tab << "IMAGE_FILE_EXECUTABLE_IMAGE" <<
             std::endl ;
         }
-        if (Characteristics & IMAGE_FILE_LINE_NUMS_STRIPPED) {
+        if (hdr.Characteristics & IMAGE_FILE_LINE_NUMS_STRIPPED) {
             std::cout << std::tab << "IMAGE_FILE_LINE_NUMS_STRIPPED" <<
             std::endl ;
         }
-        if (Characteristics & IMAGE_FILE_LOCAL_SYMS_STRIPPED) {
+        if (hdr.Characteristics & IMAGE_FILE_LOCAL_SYMS_STRIPPED) {
             std::cout << std::tab << "IMAGE_FILE_LOCAL_SYMS_STRIPPED" <<
             std::endl ;
         }
-        if (Characteristics & IMAGE_FILE_AGGRESIVE_WS_TRIM) {
+        if (hdr.Characteristics & IMAGE_FILE_AGGRESIVE_WS_TRIM) {
             std::cout << std::tab << "IMAGE_FILE_AGGRESIVE_WS_TRIM" <<
             std::endl ;
         }
-        if (Characteristics & IMAGE_FILE_LARGE_ADDRESS_AWARE) {
+        if (hdr.Characteristics & IMAGE_FILE_LARGE_ADDRESS_AWARE) {
             std::cout << std::tab << "IMAGE_FILE_LARGE_ADDRESS_AWARE" <<
             std::endl ;
         }
-        if (Characteristics & IMAGE_FILE_BYTES_REVERSED_LO) {
+        if (hdr.Characteristics & IMAGE_FILE_BYTES_REVERSED_LO) {
             std::cout << std::tab << "IMAGE_FILE_BYTES_REVERSED_LO" <<
             std::endl ;
         }
-        if (Characteristics & IMAGE_FILE_32BIT_MACHINE) {
+        if (hdr.Characteristics & IMAGE_FILE_32BIT_MACHINE) {
             std::cout << std::tab << "IMAGE_FILE_32BIT_MACHINE" <<
             std::endl ;
         }
-        if (Characteristics & IMAGE_FILE_DEBUG_STRIPPED) {
+        if (hdr.Characteristics & IMAGE_FILE_DEBUG_STRIPPED) {
             std::cout << std::tab << "IMAGE_FILE_DEBUG_STRIPPED" <<
             std::endl ;
         }
-        if (Characteristics & IMAGE_FILE_REMOVABLE_RUN_FROM_SWAP) {
+        if (hdr.Characteristics & IMAGE_FILE_REMOVABLE_RUN_FROM_SWAP) {
             std::cout << std::tab << "IMAGE_FILE_REMOVABLE_RUN_FROM_SWAP" <<
             std::endl ;
         }
-        if (Characteristics & IMAGE_FILE_NET_RUN_FROM_SWAP) {
+        if (hdr.Characteristics & IMAGE_FILE_NET_RUN_FROM_SWAP) {
             std::cout << std::tab << "IMAGE_FILE_NET_RUN_FROM_SWAP" <<
             std::endl ;
         }
-        if (Characteristics & IMAGE_FILE_SYSTEM) {
+        if (hdr.Characteristics & IMAGE_FILE_SYSTEM) {
             std::cout << std::tab << "IMAGE_FILE_SYSTEM" <<
             std::endl ;
         }
-        if (Characteristics & IMAGE_FILE_DLL) {
+        if (hdr.Characteristics & IMAGE_FILE_DLL) {
             std::cout << std::tab << "IMAGE_FILE_DLL" <<
             std::endl ;
         }
-        if (Characteristics & IMAGE_FILE_UP_SYSTEM_ONLY) {
+        if (hdr.Characteristics & IMAGE_FILE_UP_SYSTEM_ONLY) {
             std::cout << std::tab << "IMAGE_FILE_UP_SYSTEM_ONLY" <<
             std::endl ;
         }
-        if (Characteristics & IMAGE_FILE_BYTES_REVERSED_HI) {
+        if (hdr.Characteristics & IMAGE_FILE_BYTES_REVERSED_HI) {
             std::cout << std::tab << "IMAGE_FILE_BYTES_REVERSED_HI" <<
             std::endl ;
         }   std::cout << std::endl;
         
         
-        // TODO: optional header check
+        // ------------------------------------------------------
+        // if optional flag > 0 => check, if 32-, or 64-bit ...
+        // ------------------------------------------------------
+        if (hdr.SizeOfOptionalHeader > 0)
+        {
+            IMAGE_OPTIONAL_HEADER32 opthdr32;
+            IMAGE_OPTIONAL_HEADER64 opthdr64;
+
+            if (hdr.Machine == IMAGE_FILE_MACHINE_I386) {
+                fh.read((char*)&opthdr32, sizeof(IMAGE_OPTIONAL_HEADER32));
+                if (sizeof(opthdr32) != 20) {
+                    std::stringstream ss;
+                    ss << "IMAGE_OPTIONAL_HEADER32 invalid size.";
+                    throw ss.str();
+                }
+            }   else {
+                fh.read((char*)&opthdr64, sizeof(IMAGE_OPTIONAL_HEADER64));
+                if (sizeof(opthdr64) != 20) {
+                    std::stringstream ss;
+                    ss << "IMAGE_OPTIONAL_HEADER64 invalid size.";
+                    throw ss.str();
+                }
+            }
+        }
         
         // ----------------------------
         // read section header:
         // ----------------------------
-        std::cout << "Optional Header:" << std::endl
-                  << "----------------" << std::endl;
+        std::cout << "Section Header:" << std::endl
+                  << "---------------" << std::endl;
 
         IMAGE_SECTION_HEADER sechdr;
         fh.read((char*)&sechdr, sizeof(IMAGE_SECTION_HEADER));
@@ -414,10 +448,44 @@ int main(int argc, char **argv)
             std::cout << std::tab << "IMAGE_SCN_MEM_WRITE"
                       << std::endl;
         }
+
         
-//        std::cout << "Flags                : "
-//                  << sechdr.f
+        struct COFFSymbol {
+            char name[8];
+            uint32_t value;
+            uint16_t section;
+            uint16_t type;
+        };
+        
+        size_t recordSize = sizeof(COFFSymbol);
+        std::vector<COFFSymbol> symbols;
+        COFFSymbol symbol;
+
+        fh.seekg(hdr.PointerToSymbolTable,fh.beg);
+        fh.read(reinterpret_cast<char*>(&symbol), recordSize);
+        symbols.push_back(symbol);
+        
+        for (int i = 0; i < hdr.NumberOfSymbols-2; ++i) {
+            fh.seekg(hdr.PointerToSymbolTable
+            + (sizeof(uint32_t) * (i + 1))
+            + (sizeof(uint16_t) * (i + 1))
+            + (sizeof(uint16_t) * (i + 1)) + (((i + 1) * 10)),
+            fh.beg);
+            fh.read((char*)&symbol, recordSize);
+            symbols.push_back(symbol);
+        }
+        
+        for (const COFFSymbol& symbol : symbols) {
+            std::cout << std::endl;
+            std::cout << "Name    : "   <<             symbol.name    << std::endl;
+            std::cout << "Value   : 0x" << std::hex << symbol.value   << std::endl;
+            std::cout << "Section : "   <<             symbol.section << std::endl;
+            std::cout << "Type    : 0x" << std::hex << symbol.type    << std::endl;
+        }
+        
+        
         fh.close();
+        
     }
     // ----------------------------
     // we use try catch for errors:
