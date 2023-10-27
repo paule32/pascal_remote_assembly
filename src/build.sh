@@ -29,6 +29,7 @@ ATXT="| awk '{print \$3}' | cut -d '=' -f 2"
 obj_array1=("PascalParser" "PascalScanner" "x86Code" "parser" \
 "start" "win32api")
 obj_array2=("interpreter")
+obj_array3=("AssemblerParser" "AssemblerScanner")
 # -----------------------------------------------------------------
 WMKD=$(which mkdir)
 NASM=$(which nasm)
@@ -43,6 +44,9 @@ GCC=$(echo "${WGCC}")   # gcc
 GXX=$(echo "${WGXX}")   # g++
 XLT=$(echo "${XLTP}")   # xsltproc
 DLG=$(echo "${TDLG}")   # dialog
+# -----------------------------------------------------------------
+BISON="bison++"
+FLEX="flex++"
 # -----------------------------------------------------------------
 # localization strings for this script ...
 # -----------------------------------------------------------------
@@ -416,10 +420,10 @@ function run_build_parser () {
         printf "[= create parser: "
     fi
 
-    bison++ -d -h${TMP}/PascalParser.h  -o${TMP}/PascalParser.cc  \
+    ${BISON} -d -h${TMP}/PascalParser.h  -o${TMP}/PascalParser.cc  \
     ${SRC}/pascal.yy 2&> /dev/null && run_check $? "pascal.yy"
     
-    flex++     -h${TMP}/PascalScanner.h -o${TMP}/PascalScanner.cc \
+    ${FLEX}     -h${TMP}/PascalScanner.h -o${TMP}/PascalScanner.cc \
     ${SRC}/pascal.ll 2&> /dev/null && run_check $? "pascal.ll"
 
     if [[ -z "${DLG}" ]]; then
@@ -629,6 +633,20 @@ fi
 if [[ -n "${built_dis}" ]]; then
     cd ${TMP}
     echo "compile disassemler..."
+    
+    # ----------------------------------------
+    # built parser script files ...
+    # ----------------------------------------
+    ${BISON} -d -h${TMP}/AssemblerParser.h  -o${TMP}/AssemblerParser.cc  \
+    ${SRC}/assembler.yy && run_check $? "assembler.yy"
+    
+    ${FLEX}     -h${TMP}/AssemblerScanner.h -o${TMP}/AssemblerScanner.cc \
+    ${SRC}/assembler.ll && run_check $? "assembler.ll"
+
+    # ----------------------------------------
+    # compile C++ source files ...
+    # ----------------------------------------
+    DAT=""
     for i in ${!obj_array2[@]}; do
         DAT="${obj_array2[$i]}"
         
@@ -637,14 +655,29 @@ if [[ -n "${built_dis}" ]]; then
         
         run_check $? "${DAT}.o"
     done
-    DAT=""
-    for i in ${!obj_array2[@]}; do
-        DAT="${DAT} ${TMP}/${obj_array2[$i]}.o"
+    # ----------------------------------------
+    # compile lexe + parser source files ...
+    # ----------------------------------------
+    for i in ${!obj_array3[@]}; do
+        DAT="${obj_array3[$i]}"
+        
+        ${GXX} ${FLAGS} -o ${TMP}/${DAT}.o \
+        -c ${TMP}/${DAT}.cc
+        
+        run_check $? "${DAT}.o"
     done
+    # ----------------------------------------
+    # link all together (.o files) ...
+    # ----------------------------------------
+    DAT=""
+    for i in ${!obj_array2[@]}; do DAT+="${TMP}/${obj_array2[$i]}.o "; done
+    for i in ${!obj_array3[@]}; do DAT+="${TMP}/${obj_array3[$i]}.o "; done
+    
     ${GXX} -o ${TMP}/diss.exe ${DAT} \
         -L${TMP}/asmjit -lasmjit   \
         -lintl -lgmpxx
     run_check $? "diss.exe"
+
     printf "done.\n\n${built_dis}:\n"
     ./diss.exe ${built_dis}
     cd ${SRC}
