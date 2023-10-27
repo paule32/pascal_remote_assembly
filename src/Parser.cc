@@ -6,6 +6,7 @@
 // only for education, and non-profit usage !
 // -----------------------------------------------------------------
 # include <iostream>
+# include <string>
 # include <sstream>
 # include <istream>
 # include <fstream>

@@ -27,8 +27,8 @@ ATXT="| awk '{print \$3}' | cut -d '=' -f 2"
 # prepare compilation tasks ...
 # -----------------------------------------------------------------
 obj_array1=("PascalParser" "PascalScanner" "x86Code" "parser" \
-"start" "win32api")
-obj_array2=("interpreter")
+"start" "win32api" "ErrorHandler")
+obj_array2=("interpreter" "ErrorHandler")
 obj_array3=("AssemblerParser" "AssemblerScanner")
 # -----------------------------------------------------------------
 WMKD=$(which mkdir)
@@ -446,9 +446,9 @@ function run_build_object_files () {
     for i in ${!obj_array1[@]}; do
         DAT="${obj_array1[$i]}"
         
-        ${GXX} ${FLAGS} -o ${TMP}/${DAT}.o \
+        ${GXX} ${FLAGS} -DHAVE_PARSER_PAS -o ${TMP}/${DAT}.o \
         -c ${SRC}/${DAT}.cc
-        
+
         run_check $? "${DAT}.o"
     done
 
@@ -456,6 +456,7 @@ function run_build_object_files () {
     ${SRC}/CommandLineToArgvA.c
 
     run_check $? "CommandLineToArgvA.o"
+
     if [[ -z "${DLG}" ]]; then
         echo "ok. =]"
     fi
@@ -522,11 +523,11 @@ function run_build_nasm_source () {
         tmp_array=()
         tmp_array_func=()
         ")
-    maplist+=$(grep "; T" $1.asm | awk '{ print $4 } ' \
+    maplist+=$(cat $1.asm | grep "; T" $1.asm | awk '{ print $4 } ' \
         | sed -e 's/^/tmp_array_func\+\=\(\"/' \
         | sed -e 's/$/\"\)/')
     maplist+=$(printf "\n ")
-    maplist+=$(grep "; T" $1.asm | awk '{ print $3 } '\
+    maplist+=$(cat $1.asm | grep "; T" $1.asm | awk '{ print $3 } '\
         | cut -f2 -d "x"                  \
         | cut -c 5-                       \
         | sed -e 's/^/tmp_array\+\=\(\"/' \
@@ -579,15 +580,35 @@ function run_build_doc_xml () {
     fi
 }
 # -----------------------------------------------------------------
+# display help informations:
+# -----------------------------------------------------------------
+function help () {
+    HELP="\nasmjit remote assembly test application.\n"
+    HELP+="\nusage: # build.sh options file\n\n"
+    HELP+="Options:\n"
+    HELP+="--------\n"
+    HELP+=" -h display this screen.\n"
+    HELP+=" -a compile application.      file: test.pas\n"
+    HELP+=" -i compile interpreter.      file: test2.pas\n"
+    HELP+=" -r run a x86::Compiler test.\n"
+    HELP+=" -t run converter  test.       file: test2.asm"
+    echo -e $HELP
+    HELP=""
+    exit 1
+}
+# -----------------------------------------------------------------
 # switch back to developer source path ...
 # -----------------------------------------------------------------
-while getopts "a:d:t: " option; do
+while getopts "a:i:r:t:h" option; do
     case "${option}" in
+        h) help ;;
         a) built_app=${OPTARG};;
-        d) built_dis=${OPTARG};;
+        i) built_dis=${OPTARG};;
+        r) built_run=${OPTARG};;
         t) built_tst=${OPTARG};;
-        ?) echo "usage: build.sh [[-a], [-i], [-d]] file.src"
-           echo "Expected -a, -i or -d"
+        \?) echo "usage: build.sh [[-a], [-i], [-d]] file.src"
+           echo "Expected -a, -r, -t or -d"
+           echo "use -h for help"
            exit 1;;
     esac
 done
@@ -616,7 +637,8 @@ if [[ -n "${built_app}" ]]; then
         eval "$dlg"
     fi
 
-    run_build_nasm_source ${built_app}
+     run_build_nasm_source test
+    #run_build_nasm_source ${built_app} # TODO
 
     if [[ -n "${DLG}" ]]; then
         printf '\033[8;%d;%dt' $rows $cols
@@ -698,9 +720,10 @@ fi
 # ----------------------------------------
 # when all is done, then start a test ...
 # ----------------------------------------
-if [[ -n "${built_app}" ]]; then
+if [[ -n "${built_run}" ]]; then
     cd ${TMP}
-    LD_LIBRARY_PATH=./asmjit;./pc.exe ${SRC}/test.pas
+    LD_LIBRARY_PATH=./asmjit;./pc.exe test.pas
+    run_build_nasm_source test
     run_check $? "pc.exe"
     cd ${SRC}
     exit 1
@@ -709,6 +732,5 @@ fi
 # ----------------------------------------
 # we should never reach this, if all done:
 # ----------------------------------------
-echo "usage: build.sh [[-a], [-d], [-t]] file.src"
-echo "no given file."
-exit 1
+help
+

@@ -35,10 +35,33 @@ void Parser::ASM_Code::init_win32api()
         FuncSignatureT<void, HWND, LPCTSTR, LPCTSTR, UINT>(
         CallConvId::kHost));
 
-    invokeNode->setArg(0, HWND    (0)     );
-    invokeNode->setArg(1, LPCTSTR ("huhuhaha"));
-    invokeNode->setArg(2, LPCTSTR ("mumu"));
-    invokeNode->setArg(3, UINT    (0)     );
+    HWND    lpHWin = HWND(0);
+    LPCTSTR lpText = LPCTSTR("huhuhaha");
+    LPCTSTR lpCapt = LPCTSTR("mumu");
+    UINT    lpMsgM = UINT(2);
+    
+    char *  buffer = new char[20480];
+    sprintf(buffer,
+            "; T 0x%p lpText" "\n"
+            "; T 0x%p lpCapt" "\n"
+            "; T 0x%p lpMsgM" "\n"
+            
+            "lpText:" "\n\t" "db \"%s\", 0" "\n"
+            "lpCapt:" "\n\t" "db \"%s\", 0" "\n"
+            "lpMsgM:" "\n\t" "dd 0x%x "     "\n"
+            ,
+            lpText, lpCapt, lpMsgM,
+            lpText, lpCapt, lpMsgM
+            );
+    FuncTableStream << buffer;
+    
+    std::cout << FuncTableStream.str() << std::endl;
+    delete [] buffer;
+    
+    invokeNode->setArg(0, lpHWin );
+    invokeNode->setArg(1, lpText );
+    invokeNode->setArg(2, lpCapt );
+    invokeNode->setArg(3, lpMsgM );
 
     cc->ret();
     cc->endFunc();

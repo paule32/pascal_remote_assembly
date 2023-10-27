@@ -14,8 +14,21 @@ std::istream * lexer_input;
 AsmParser    * asm_parser ;
 char         * locale_utf8;
 
+std::map< std::string, asmjit::Label > app_Labels;
+
 int line   = 1;
 int column = 1;
+
+// -----------------------------------------------------------------
+// extend the namespace STD with "tab" - to produce \t into stream:
+// -----------------------------------------------------------------
+namespace std {
+    template <typename _CharT, typename _Traits>
+    inline basic_ostream<_CharT, _Traits> &
+        tab(basic_ostream<_CharT, _Traits> &__os) {
+        return __os.put(__os.widen('\t'));
+    }
+}
 
 // -----------------------------------------------------------------
 // If the dot is at the beginning of the file name, do not treat
@@ -64,6 +77,7 @@ int main(int argc, char **argv)
         // open file for input/read
         // ----------------------------
         std::fstream fh;
+        std::string  fpath(argv[1]);
         std::string  ext(ExtractFileExtension(argv[1]));
         
         locale_utf8 = new char[4];
@@ -132,6 +146,11 @@ int main(int argc, char **argv)
                 textdomain("en_US_utf8");
             }
         }
+
+        // ----------------------------
+        // create assembler object ...
+        // ----------------------------
+        asm_parser = new AsmParser(argv[1]);
 
         // ----------------------------
         // read-up .o bject file COFF:
@@ -575,6 +594,9 @@ int main(int argc, char **argv)
             fh.read(reinterpret_cast<char*>(&symbol), recordSize);
             symbols.push_back(symbol);
             
+            // ----------------------------
+            // collect symbol names ...
+            // ----------------------------
             for (int i = 0; i < hdr.NumberOfSymbols-2; ++i) {
                 fh.seekg(hdr.PointerToSymbolTable
                 + (sizeof(uint32_t) * (i + 1))
@@ -585,12 +607,18 @@ int main(int argc, char **argv)
                 symbols.push_back(symbol);
             }
             
+            // ----------------------------
+            // print symbol informations:
+            // ----------------------------
             for (const COFFSymbol& symbol : symbols) {
                 std::cout << std::endl;
                 std::cout << "Name    : "   <<             symbol.name    << std::endl;
                 std::cout << "Value   : 0x" << std::hex << symbol.value   << std::endl;
                 std::cout << "Section : "   <<             symbol.section << std::endl;
                 std::cout << "Type    : 0x" << std::hex << symbol.type    << std::endl;
+                
+                //asmjit::Label lbl = asm_parser->asm_code->newLabel();
+                //asm_parser->asm_labels[ symbol.name ] = lbl;
             }
             fh.close();
         }   else
@@ -599,10 +627,10 @@ int main(int argc, char **argv)
         // read .asm text file
         // ----------------------------
         if (ext == ".asm") {
-            fh.open(argv[1], std::fstream::in);
+            fh.open(fpath, std::fstream::in);
             
             if (!fh.is_open()) {
-                std::cout << "error: file '" << argv[1]
+                std::cout << "error: filer '" << argv[1]
                           << "' file is not open."
                           << std::endl;
                 return EXIT_FAILURE;
@@ -617,7 +645,6 @@ int main(int argc, char **argv)
             // ----------------------------
             // parse the assembler text:
             // ----------------------------
-            asm_parser = new AsmParser(argv[1]);
             asm_parser->yyparse();
             
             delete asm_parser;
@@ -663,6 +690,21 @@ AsmParser::AsmParser( char *filename )
         throw EPascalException_FileNotOpen (_("parser file could not be open."));
         throw EPascalException_FileNotFound(_("parser file dont exists."));
     }
+    
+    // ----------------------------
+    // pre-tasks preparations ...
+    // ----------------------------
+    myErrorHandler = new MyErrorHandler();
+    env      = Environment::host();
+    features = CpuInfo::host().features();
+    
+    uint64_t baseAddress = uint64_t(0x1974);
+    
+    code     = new CodeHolder();
+    code->init(env, features, baseAddress);
+    code->setErrorHandler(myErrorHandler);
+    
+    asm_code = new x86::Assembler(code);
 }
 
 // -----------------------------------------------------------------
@@ -683,6 +725,9 @@ AsmParser::~AsmParser()
     if (!strcmp(locale_utf8,"en")) {    // english
         std::remove("locales/en_US/LC_MESSAGES/en_US_utf8.mo");
     }
+    
+    delete asm_code;
+    delete     code;
     
     delete lexer_input;
     delete parser_file;

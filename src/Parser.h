@@ -100,6 +100,12 @@ extern uint32_t  win32_hInstance;
 // -----------------------------------------------------------------
 using namespace asmjit;
 
+class MyErrorHandler : public ErrorHandler {
+public:
+    void handleError(Error err, const char*, BaseEmitter*) override;
+    //MyErrorHandler();
+};
+
 // -----------------------------------------------------------------
 // parser class for our Pascal parser ...
 // -----------------------------------------------------------------
@@ -133,12 +139,6 @@ public:
     // -------------------------------------------------------------
     class ASM_Code {
     public:
-        class MyErrorHandler : public ErrorHandler {
-        public:
-            void handleError(Error err, const char*, BaseEmitter*) override;
-            //MyErrorHandler();
-        };
-
         JitRuntime             rt;  // Runtime specialized for JIT code excution
         Environment           env;
         CpuFeatures      features;
@@ -154,8 +154,7 @@ public:
         x86::Compiler  *       cc;
         Error                 err;
         
-        MyErrorHandler * myErrorHandler;
-
+        MyErrorHandler *   myErrorHandler;
         std::stringstream FuncTableStream;  // experimental
         
         std::map< std::string, FuncNode* > FuncNodeMap;
@@ -198,17 +197,6 @@ extern void parser_cleanup();
 #endif
 
 // -----------------------------------------------------------------
-// extend the namespace STD with "tab" - to produce \t into stream:
-// -----------------------------------------------------------------
-namespace std {
-    template <typename _CharT, typename _Traits>
-    static inline basic_ostream<_CharT, _Traits> &
-        tab(basic_ostream<_CharT, _Traits> &__os) {
-        return __os.put(__os.widen('\t'));
-    }
-}
-
-// -----------------------------------------------------------------
 // parser class for our Assembler parser ...
 // -----------------------------------------------------------------
 #ifdef HAVE_PARSER_ASM
@@ -227,7 +215,19 @@ public:
     AsmParser( char *filename );
     AsmParser();
 
-    std::ifstream * parser_file;
+    JitRuntime             rt;  // Runtime specialized for JIT code excution
+    Environment           env;
+    CpuFeatures      features;
+    
+    CodeHolder     *     code;  // Holds the code and relocation information
+    x86::Assembler * asm_code;
+    std::map<
+        std::string,
+        Label >
+        asm_labels ;
+    
+    std::ifstream  *    parser_file;
+    MyErrorHandler * myErrorHandler;
 
     virtual void yyerror(char * msg);
     virtual int yylex();

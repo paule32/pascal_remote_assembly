@@ -32,13 +32,6 @@ using namespace std;
 
 extern void temptest();
 
-void Parser::ASM_Code::MyErrorHandler::handleError(
-    Error err,
-    const char* message,
-    BaseEmitter* origin) {
-    std::cerr << _("AsmJit error: ") << message << std::endl;
-}
-
 // -----------------------------------------------------------------
 // prepare/init entry point function ...
 // -----------------------------------------------------------------
@@ -130,7 +123,8 @@ void Parser::ASM_Code::code_write()
 // -----------------------------------------------------------------
 void Parser::ASM_Code::code_exec()
 {
-    fprintf(logFile,FuncTableStream.str().data());
+    std::cout << FuncTableStream.str() << std::endl;
+    fprintf(logFile,FuncTableStream.str().c_str());
     fclose (logFile);
     
     // -----------------------------------------
