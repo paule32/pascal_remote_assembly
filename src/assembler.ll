@@ -85,7 +85,7 @@ decdigit    [0..9]*
 ws          [ \t\n| \t\r\n]*
 
 %x NEW_COMMENT
-%x SEQ_SECTION ASM_PUSH ASM_MOV ASM_SUB
+%x SEQ_SECTION ASM_POP ASM_PUSH ASM_MOV ASM_SUB
 
 %%
 
@@ -93,11 +93,32 @@ ws          [ \t\n| \t\r\n]*
 [\n|\r\n]   { column  = 1; line++; }
 [ ]         { column += 1; }
 
-{M}{O}{V}                          { column += strlen(yytext); std::cout << "\t"  << "mov   "; BEGIN(ASM_MOV); }
-<ASM_MOV>{ws}{E}{A}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "ecx, 1" << std::endl; BEGIN(INITIAL);  }
-<ASM_MOV>{ws}{E}{B}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "ecx, 1" << std::endl; BEGIN(INITIAL);  }
-<ASM_MOV>{ws}{E}{C}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "ecx, 1" << std::endl; BEGIN(INITIAL);  }
-<ASM_MOV>{ws}{E}{D}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "ecx, 1" << std::endl; BEGIN(INITIAL);  }
+{C}{A}{L}{L}{ws}({ident})    { column += strlen(yytext); std::cout << "\t"  << "call  " << yytext + 5 << "  ; ok" << std::endl; BEGIN(INITIAL); }
+
+{D}{B}{ws}({hexdigit}|{decdigit}) { column += strlen(yytext); std::cout << "\t"  << yytext << "   ; ok" << std::endl; BEGIN(INITIAL); }
+{D}{W}{ws}({hexdigit}|{decdigit}) { column += strlen(yytext); std::cout << "\t"  << yytext << "   ; ok" << std::endl; BEGIN(INITIAL); }
+{D}{D}{ws}({hexdigit}|{decdigit}) { column += strlen(yytext); std::cout << "\t"  << yytext << "   ; ok" << std::endl; BEGIN(INITIAL); }
+{D}{Q}{ws}({hexdigit}|{decdigit}) { column += strlen(yytext); std::cout << "\t"  << yytext << "   ; ok" << std::endl; BEGIN(INITIAL); }
+
+{M}{O}{V}{ws}                { column += strlen(yytext); std::cout << "\t"  << "mov   "; BEGIN(ASM_MOV); }
+<ASM_MOV>{E}{A}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "ecx, " << yytext + 5 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{E}{B}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "ecx, " << yytext + 5 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{E}{C}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "ecx, " << yytext + 5 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{E}{D}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "ecx, " << yytext + 5 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+
+<ASM_MOV>{R}{D}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "rdx, " << yytext + 5 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+
+<ASM_MOV>{R}1{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r1, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}2{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r2, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}3{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r3, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}4{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r4, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}5{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r5, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}6{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r6, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}7{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r7, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}8{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r8, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}9{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r9, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+
+<ASM_MOV>{R}9{D}{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r9d, " << yytext + 5 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
 
 <ASM_MOV>{E}{D}{X}{ws}\,{ws}{hexdigit}  { column += strlen(yytext); std::cout << "edx, 1" << std::endl; BEGIN(INITIAL);  }
 <ASM_MOV>{E}{D}{X}{ws}\,{ws}{decdigit}  { column += strlen(yytext); std::cout << "edx, 2" << std::endl; BEGIN(INITIAL);  }
@@ -130,29 +151,57 @@ ws          [ \t\n| \t\r\n]*
 <ASM_MOV>{R}{B}{P}{ws}\,{ws}{R}{B}{P}  { column += strlen(yytext); std::cout << "rbp, rbp" << std::endl; BEGIN(INITIAL);  }
 <ASM_MOV>{R}{B}{P}{ws}\,{ws}{R}{C}{P}  { column += strlen(yytext); std::cout << "rbp, rcp" << std::endl; BEGIN(INITIAL);  }
 <ASM_MOV>{R}{B}{P}{ws}\,{ws}{R}{D}{P}  { column += strlen(yytext); std::cout << "rbp, rdp" << std::endl; BEGIN(INITIAL);  }
-<ASM_MOV>{R}{B}{P}{ws}\,{ws}{R}{S}{P}  { column += strlen(yytext); std::cout << "rbp, rsp" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}{B}{P}{ws}\,{ws}{R}{S}{P}  { column += strlen(yytext); std::cout << "rbp, rsp   ; ok" << std::endl; BEGIN(INITIAL);  }
+
+<ASM_MOV>{R}{A}{X}{ws}\,{ws}{Q}{W}{O}{R}{D}{ws}\[{ws}{R}{S}{P}{ws}\+{ws}({hexdigit}|{decdigit}){ws}\]  { column += strlen(yytext); std::cout << "rcx, " << yytext + 5 << "   ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}{B}{X}{ws}\,{ws}{Q}{W}{O}{R}{D}{ws}\[{ws}{R}{S}{P}{ws}\+{ws}({hexdigit}|{decdigit}){ws}\]  { column += strlen(yytext); std::cout << "rcx, " << yytext + 5 << "   ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}{C}{X}{ws}\,{ws}{Q}{W}{O}{R}{D}{ws}\[{ws}{R}{S}{P}{ws}\+{ws}({hexdigit}|{decdigit}){ws}\]  { column += strlen(yytext); std::cout << "rcx, " << yytext + 5 << "   ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}{D}{X}{ws}\,{ws}{Q}{W}{O}{R}{D}{ws}\[{ws}{R}{S}{P}{ws}\+{ws}({hexdigit}|{decdigit}){ws}\]  { column += strlen(yytext); std::cout << "rcx, " << yytext + 5 << "   ; ok" << std::endl; BEGIN(INITIAL);  }
+
+<ASM_MOV>{R}1{ws}\,{ws}{Q}{W}{O}{R}{D}{ws}\[{ws}{R}{S}{P}{ws}\+{ws}({hexdigit}|{decdigit}){ws}\]  { column += strlen(yytext); std::cout << "r1, " << yytext + 5 << "   ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}2{ws}\,{ws}{Q}{W}{O}{R}{D}{ws}\[{ws}{R}{S}{P}{ws}\+{ws}({hexdigit}|{decdigit}){ws}\]  { column += strlen(yytext); std::cout << "r2, " << yytext + 5 << "   ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}3{ws}\,{ws}{Q}{W}{O}{R}{D}{ws}\[{ws}{R}{S}{P}{ws}\+{ws}({hexdigit}|{decdigit}){ws}\]  { column += strlen(yytext); std::cout << "r3, " << yytext + 5 << "   ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}4{ws}\,{ws}{Q}{W}{O}{R}{D}{ws}\[{ws}{R}{S}{P}{ws}\+{ws}({hexdigit}|{decdigit}){ws}\]  { column += strlen(yytext); std::cout << "r4, " << yytext + 5 << "   ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}5{ws}\,{ws}{Q}{W}{O}{R}{D}{ws}\[{ws}{R}{S}{P}{ws}\+{ws}({hexdigit}|{decdigit}){ws}\]  { column += strlen(yytext); std::cout << "r5, " << yytext + 5 << "   ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}6{ws}\,{ws}{Q}{W}{O}{R}{D}{ws}\[{ws}{R}{S}{P}{ws}\+{ws}({hexdigit}|{decdigit}){ws}\]  { column += strlen(yytext); std::cout << "r6, " << yytext + 5 << "   ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}7{ws}\,{ws}{Q}{W}{O}{R}{D}{ws}\[{ws}{R}{S}{P}{ws}\+{ws}({hexdigit}|{decdigit}){ws}\]  { column += strlen(yytext); std::cout << "r7, " << yytext + 5 << "   ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}8{ws}\,{ws}{Q}{W}{O}{R}{D}{ws}\[{ws}{R}{S}{P}{ws}\+{ws}({hexdigit}|{decdigit}){ws}\]  { column += strlen(yytext); std::cout << "r8, " << yytext + 5 << "   ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}9{ws}\,{ws}{Q}{W}{O}{R}{D}{ws}\[{ws}{R}{S}{P}{ws}\+{ws}({hexdigit}|{decdigit}){ws}\]  { column += strlen(yytext); std::cout << "r9, " << yytext + 5 << "   ; ok" << std::endl; BEGIN(INITIAL);  }
+
+<ASM_MOV>{R}{S}{P}{ws}\,{ws}{R}{B}{P}  { column += strlen(yytext); std::cout << "rsp, rbp" << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+
+{P}{O}{P}{ws}                { column += strlen(yytext); std::cout << "\t"  << "pop   "; BEGIN(ASM_POP); }
+<ASM_POP>{E}{A}{X}      { column += strlen(yytext); std::cout << "eax" << "  ; ok" << std::endl; BEGIN(INITIAL); }
+<ASM_POP>{E}{B}{X}      { column += strlen(yytext); std::cout << "ebx" << "  ; ok" << std::endl; BEGIN(INITIAL); }
+<ASM_POP>{E}{C}{X}      { column += strlen(yytext); std::cout << "ecx" << "  ; ok" << std::endl; BEGIN(INITIAL); }
+<ASM_POP>{E}{D}{X}      { column += strlen(yytext); std::cout << "edx" << "  ; ok" << std::endl; BEGIN(INITIAL); }
+
+<ASM_POP>{R}{B}{P}      { column += strlen(yytext); std::cout << "rbp" << "  ; ok" << std::endl; BEGIN(INITIAL); }
+<ASM_POP>{R}{S}{P}      { column += strlen(yytext); std::cout << "rsp" << "  ; ok" << std::endl; BEGIN(INITIAL); }
 
 {P}{U}{S}{H}                 { column += strlen(yytext); std::cout << "\t"  << "push  "; BEGIN(ASM_PUSH); }
-<ASM_PUSH>{ws}{E}{A}{X}      { column += strlen(yytext); std::cout << "eax" << std::endl; BEGIN(INITIAL); }
-<ASM_PUSH>{ws}{E}{B}{X}      { column += strlen(yytext); std::cout << "ebx" << std::endl; BEGIN(INITIAL); }
-<ASM_PUSH>{ws}{E}{C}{X}      { column += strlen(yytext); std::cout << "ecx" << std::endl; BEGIN(INITIAL); }
-<ASM_PUSH>{ws}{E}{D}{X}      { column += strlen(yytext); std::cout << "edx" << std::endl; BEGIN(INITIAL); }
-<ASM_PUSH>{ws}{R}{B}{P}      { column += strlen(yytext); std::cout << "rbp" << std::endl; BEGIN(INITIAL); }
+<ASM_PUSH>{ws}{E}{A}{X}      { column += strlen(yytext); std::cout << "eax" << "  ; ok" << std::endl; BEGIN(INITIAL); }
+<ASM_PUSH>{ws}{E}{B}{X}      { column += strlen(yytext); std::cout << "ebx" << "  ; ok" << std::endl; BEGIN(INITIAL); }
+<ASM_PUSH>{ws}{E}{C}{X}      { column += strlen(yytext); std::cout << "ecx" << "  ; ok" << std::endl; BEGIN(INITIAL); }
+<ASM_PUSH>{ws}{E}{D}{X}      { column += strlen(yytext); std::cout << "edx" << "  ; ok" << std::endl; BEGIN(INITIAL); }
+<ASM_PUSH>{ws}{R}{B}{P}      { column += strlen(yytext); std::cout << "rbp" << "  ; ok" << std::endl; BEGIN(INITIAL); }
+
+{R}{E}{T}{ws}               { column += strlen(yytext); std::cout << "\tret   ; ok" << std::endl; BEGIN(INITIAL); }
 
 {S}{U}{B}      { column += strlen(yytext); std::cout << "\t"  << "sub   "; BEGIN(ASM_SUB); }
-<ASM_SUB>{ws}{E}{A}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { std::cout << "eAX, 1" << std::endl; BEGIN(INITIAL); }
-<ASM_SUB>{ws}{E}{B}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { std::cout << "eAX, 1" << std::endl; BEGIN(INITIAL); }
-<ASM_SUB>{ws}{E}{C}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { std::cout << "ecX, 2" << std::endl; BEGIN(INITIAL); }
-<ASM_SUB>{ws}{E}{D}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { std::cout << "edX, 3" << std::endl; BEGIN(INITIAL); }
-<ASM_SUB>{ws}{R}{S}{P}{ws}\,{ws}({hexdigit}|{decdigit})  { std::cout << "RSP, "  << strdup(yytext) << std::endl; BEGIN(INITIAL); }
+<ASM_SUB>{ws}{E}{A}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { std::cout << "eAX, " << yytext + 6 << "  ; ok" <<std::endl; BEGIN(INITIAL); }
+<ASM_SUB>{ws}{E}{B}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { std::cout << "eAX, " << yytext + 6 << "  ; ok" <<std::endl; BEGIN(INITIAL); }
+<ASM_SUB>{ws}{E}{C}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { std::cout << "ecX, " << yytext + 6 << "  ; ok" <<std::endl; BEGIN(INITIAL); }
+<ASM_SUB>{ws}{E}{D}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { std::cout << "edX, " << yytext + 6 << "  ; ok" <<std::endl; BEGIN(INITIAL); }
+<ASM_SUB>{ws}{R}{S}{P}{ws}\,{ws}({hexdigit}|{decdigit})  { std::cout << "RSP, " << yytext + 6 << "  ; ok" << std::endl; BEGIN(INITIAL); }
 
 {S}{E}{C}{T}{I}{O}{N}       { column += strlen(yytext); std::cout << "section: "; BEGIN(SEQ_SECTION); }
-<SEQ_SECTION>\.{T}{E}{X}{T} { column += strlen(yytext); std::cout << ".text" << std::endl; BEGIN(INITIAL); }
-<SEQ_SECTION>\.{D}{A}{T}{A} { column += strlen(yytext); std::cout << ".data" << std::endl; BEGIN(INITIAL); }
+<SEQ_SECTION>\.{T}{E}{X}{T} { column += strlen(yytext); std::cout << ".text" << yytext << "  ; ok" << std::endl; BEGIN(INITIAL); }
+<SEQ_SECTION>\.{D}{A}{T}{A} { column += strlen(yytext); std::cout << ".data" << yytext << "  ; ok" << std::endl; BEGIN(INITIAL); }
 
 {ident}*[\:|\:\n|\:\r\n]      {
     column += strlen(yytext); 
-    std::cout << "Label:  " << yytext << std::endl;
+    std::cout << yytext << "  ; ok" << std::endl;
     BEGIN(INITIAL);
 }
 
@@ -161,7 +210,7 @@ ws          [ \t\n| \t\r\n]*
 <NEW_COMMENT>\n         { column += strlen(yytext); line++; }
 <NEW_COMMENT>.          { column += strlen(yytext); }
 
-";".*[\n|\r\n]          { }
+";".*{ws}          { }
 
 .   {
     column += 1;
