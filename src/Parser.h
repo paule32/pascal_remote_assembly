@@ -41,12 +41,14 @@
 # include <libintl.h>
 # include <locale.h>
 # include <sys/stat.h>
+# include <strings.h>
 
 // -----------------------------------------------------------------
 // c++ header prototype's/signature's:
 // -----------------------------------------------------------------
 # include <iostream>        // std c++ signatures
 # include <string>
+# include <cstring>
 # include <sstream>
 # include <istream>
 # include <fstream>
@@ -69,8 +71,10 @@
 # include "global.h"
 # include "Exception.h"
 
+#ifdef HAVE_PARSER_PAS
 # include "PascalParser.h"
 # include "PascalScanner.h"
+#endif
 
 # include "x86.h"
 
@@ -99,6 +103,7 @@ using namespace asmjit;
 // -----------------------------------------------------------------
 // parser class for our Pascal parser ...
 // -----------------------------------------------------------------
+#ifdef HAVE_PARSER_PAS
 class Parser: public PascalParser
 {
 private:
@@ -190,6 +195,53 @@ extern Parser * parser;
 extern char   * locale_utf8;
 
 extern void parser_cleanup();
+#endif
+
+// -----------------------------------------------------------------
+// extend the namespace STD with "tab" - to produce \t into stream:
+// -----------------------------------------------------------------
+namespace std {
+    template <typename _CharT, typename _Traits>
+    static inline basic_ostream<_CharT, _Traits> &
+        tab(basic_ostream<_CharT, _Traits> &__os) {
+        return __os.put(__os.widen('\t'));
+    }
+}
+
+// -----------------------------------------------------------------
+// parser class for our Assembler parser ...
+// -----------------------------------------------------------------
+#ifdef HAVE_PARSER_ASM
+
+# include "AssemblerParser.h"
+# include "AssemblerScanner.h"
+
+class AsmParser: public AssemblerParser
+{
+private:
+    AssemblerScanner scanner;
+public:
+    // -------------------------------------------------------------
+    // ctor: initialize, and allocate memory; depend on a file name.
+    // -------------------------------------------------------------
+    AsmParser( char *filename );
+    AsmParser();
+
+    std::ifstream * parser_file;
+
+    virtual void yyerror(char * msg);
+    virtual int yylex();
+    
+    // -------------------------------------------------------------
+    // dtor: try to clean, and free allocated memory.
+    // -------------------------------------------------------------
+    ~AsmParser();
+};
+// -----------------------------------------------------------------
+extern AsmParser * asm_parser;
+extern char      * locale_utf8;
+
+#endif   // HAVA_ASM_PARSER
 
 #endif   // __MINGW32__ || __MINGW64__
 #endif   // PARSER__H_

@@ -13,6 +13,9 @@
 %define CLASS AssemblerScanner
 
 %header{
+# include <windows.h>
+
+# include "Parser.h"
 # include <stdio.h>
 # include <libintl.h>
 # include <locale.h>
@@ -20,6 +23,7 @@
 # include <strings.h>
 
 # include <iostream>
+# include <string>
 # include <sstream>
 # include <cstring>
 
@@ -28,6 +32,9 @@
 
 extern std::istream * lexer_input;
 extern void yyerror(char * err);
+
+extern int line;
+extern int column;
 
 # undef  YY_INPUT
 # define YY_INPUT(buf, result, max_size)  \
@@ -72,146 +79,92 @@ X [Xx]
 Y [Yy]
 Z [Zz]
 
-%x PAS_COMMENT NEW_COMMENT
-%x DEF_BLOCK
-%x DEF_BLOCK_COMMENT
-%x DEF_BLOCK_IFDEF
-%x DEF_BLOCK_ELSE
-%x DEF_BLOCK_CONDITION
-%x DEF_BLOCK_CHECK_COMMENT
-%x DOX DOX_FILE DOX_AUTHOR DOX_BRIEF DOX_BUG
+ident [a-zA-Z_][a-zA-Z0-9_]*
+hexdigit    (0[xX])?[a-fA-F0-9]*
+decdigit    [0..9]*
+ws          [ \t\n| \t\r\n]*
+
+%x NEW_COMMENT
+%x SEQ_SECTION ASM_PUSH ASM_MOV ASM_SUB
 
 %%
 
-\t          { column += 8;             }
-[\n|\r\n]   { column  = 1; line++;     }
-[ ]         { column += strlen(yytext);             }
+\t          { column += 8; }
+[\n|\r\n]   { column  = 1; line++; }
+[ ]         { column += 1; }
 
-{B}{E}{G}{I}{N}             { column += 5; return AssemblerParser::TOK_BEGIN;      }
-{B}{Y}{T}{E}                { column += 4; return AssemblerParser::TOK_BYTE;       }
-{C}{H}{A}{R}                { column += 4; return AssemblerParser::TOK_CHAR;       }
-{C}{O}{N}{S}{T}             { column += 5; return AssemblerParser::TOK_CONST;      }
-{E}{N}{D}                   { column += 3; return AssemblerParser::TOK_END;        }
-{F}{U}{N}{C}{T}{I}{O}{N}    { column += 8; return AssemblerParser::TOK_FUNCTION;   }
-{I}{N}{T}{E}{G}{E}{R}       { column += 7; return AssemblerParser::TOK_INTEGER;    }
-{P}{R}{O}{C}{E}{D}{U}{R}{E} { column += 9; return AssemblerParser::TOK_PROCEDURE;  }
-{P}{R}{O}{G}{R}{A}{M}       { column += 7; return AssemblerParser::TOK_PROGRAM;    }
-{S}{T}{R}{I}{N}{G}          { column += 6; return AssemblerParser::TOK_STRING;     }
-{V}{A}{R}                   { column += 3; return AssemblerParser::TOK_VAR;        }
+{M}{O}{V}                          { column += strlen(yytext); std::cout << "\t"  << "mov   "; BEGIN(ASM_MOV); }
+<ASM_MOV>{ws}{E}{A}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "ecx, 1" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{ws}{E}{B}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "ecx, 1" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{ws}{E}{C}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "ecx, 1" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{ws}{E}{D}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "ecx, 1" << std::endl; BEGIN(INITIAL);  }
 
-[a-zA-Z_][a-zA-Z0-9_]*  { column += strlen(yytext); val->string_val = strdup( yytext ); return AssemblerParser::TOK_IDENTIFIER; }
-[0-9]+                  { column += strlen(yytext); val->int_val    = atoi  ( yytext ); return AssemblerParser::TOK_CONSTANT;   }
+<ASM_MOV>{E}{D}{X}{ws}\,{ws}{hexdigit}  { column += strlen(yytext); std::cout << "edx, 1" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{E}{D}{X}{ws}\,{ws}{decdigit}  { column += strlen(yytext); std::cout << "edx, 2" << std::endl; BEGIN(INITIAL);  }
 
-"//".*                  { column += strlen(yytext); }
+<ASM_MOV>{E}{A}{X}{ws}\,{ws}{E}{B}{X}  { column += strlen(yytext); std::cout << "eax, ebx" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{E}{A}{X}{ws}\,{ws}{E}{C}{X}  { column += strlen(yytext); std::cout << "eax, ecx" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{E}{A}{X}{ws}\,{ws}{E}{D}{X}  { column += strlen(yytext); std::cout << "eax, edx" << std::endl; BEGIN(INITIAL);  }
 
-"{$"                                                { BEGIN(DEF_BLOCK); }
-<DEF_BLOCK>\}                                       { BEGIN(INITIAL);   }
-<DEF_BLOCK>{D}{E}{F}{I}{N}{E}[ ]+[a-zA-Z0-9_]+      {
-    column += strlen(yytext);
-    BEGIN(DEF_BLOCK_COMMENT);
-}
-<DEF_BLOCK>{E}{L}{S}{E}               {
-    column += strlen(yytext);
-    BEGIN(DEF_BLOCK_COMMENT);
-}
-<DEF_BLOCK>{E}{N}{D}{I}{F}            {
-    column += strlen(yytext);
-    BEGIN(DEF_BLOCK_COMMENT);
-}
-<DEF_BLOCK>{I}{F}{D}{E}{F}            {
-    column += strlen(yytext);
-    BEGIN(DEF_BLOCK_IFDEF);
-}
-<DEF_BLOCK>\n           { column = 1; line += 1; }
-<DEF_BLOCK>.            { }
+<ASM_MOV>{E}{A}{X}{ws}\,{ws}{E}{A}{X}  { column += strlen(yytext); std::cout << "eax, eax" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{E}{A}{X}{ws}\,{ws}{E}{B}{X}  { column += strlen(yytext); std::cout << "eax, ebx" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{E}{A}{X}{ws}\,{ws}{E}{C}{X}  { column += strlen(yytext); std::cout << "eax, ecx" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{E}{A}{X}{ws}\,{ws}{E}{D}{X}  { column += strlen(yytext); std::cout << "eax, edx" << std::endl; BEGIN(INITIAL);  }
 
-<DEF_BLOCK_IFDEF>[ ]+[a-zA-Z0-9_]+    {
-    column += strlen(yytext);
-    BEGIN(DEF_BLOCK_CONDITION);
-}
-<DEF_BLOCK_IFDEF>\}     { BEGIN(INITIAL);           }
-<DEF_BLOCK_IFDEF>\n     { column  = 1; line += 1;   }
+<ASM_MOV>{E}{B}{X}{ws}\,{ws}{E}{A}{X}  { column += strlen(yytext); std::cout << "ebx, eax" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{E}{B}{X}{ws}\,{ws}{E}{B}{X}  { column += strlen(yytext); std::cout << "ebx, ebx" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{E}{B}{X}{ws}\,{ws}{E}{C}{X}  { column += strlen(yytext); std::cout << "ebx, ecx" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{E}{B}{X}{ws}\,{ws}{E}{D}{X}  { column += strlen(yytext); std::cout << "ebx, edx" << std::endl; BEGIN(INITIAL);  }
 
-<DEF_BLOCK_CONDITION>[ ]*"=="[ ]*[a-zA-Z0-9_]+ { column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
-<DEF_BLOCK_CONDITION>[ ]*"!="[ ]*[a-zA-Z0-9_]+ { column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
-<DEF_BLOCK_CONDITION>[ ]*"<>"[ ]*[a-zA-Z0-9_]+ { column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
-<DEF_BLOCK_CONDITION>[ ]*"<="[ ]*[a-zA-Z0-9_]+ { column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
-<DEF_BLOCK_CONDITION>[ ]*">="[ ]*[a-zA-Z0-9_]+ { column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
-<DEF_BLOCK_CONDITION>[ ]*"=>"[ ]*[a-zA-Z0-9_]+ { column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
-<DEF_BLOCK_CONDITION>[ ]*"=<"[ ]*[a-zA-Z0-9_]+ { column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
+<ASM_MOV>{E}{C}{X}{ws}\,{ws}{E}{A}{X}  { column += strlen(yytext); std::cout << "ecx, eax" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{E}{C}{X}{ws}\,{ws}{E}{B}{X}  { column += strlen(yytext); std::cout << "ecx, ebx" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{E}{C}{X}{ws}\,{ws}{E}{C}{X}  { column += strlen(yytext); std::cout << "ecx, ecx" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{E}{C}{X}{ws}\,{ws}{E}{D}{X}  { column += strlen(yytext); std::cout << "ecx, edx" << std::endl; BEGIN(INITIAL);  }
 
-<DEF_BLOCK_CONDITION>[ ]*"<"[ ]*[a-zA-Z0-9_]+  { column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
-<DEF_BLOCK_CONDITION>[ ]*">"[ ]*[a-zA-Z0-9_]+  { column += strlen(yytext); BEGIN(DEF_BLOCK_CHECK_COMMENT); }
+<ASM_MOV>{E}{D}{X}{ws}\,{ws}{E}{A}{X}  { column += strlen(yytext); std::cout << "edx, eax" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{E}{D}{X}{ws}\,{ws}{E}{B}{X}  { column += strlen(yytext); std::cout << "edx, ebx" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{E}{D}{X}{ws}\,{ws}{E}{C}{X}  { column += strlen(yytext); std::cout << "edx, ecx" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{E}{D}{X}{ws}\,{ws}{E}{D}{X}  { column += strlen(yytext); std::cout << "edx, edx" << std::endl; BEGIN(INITIAL);  }
 
-<DEF_BLOCK_CONDITION>\}     { BEGIN(INITIAL);           }
-<DEF_BLOCK_CONDITION>\n     { column  = 1; line += 1;   }
-<DEF_BLOCK_CONDITION>.      {
-    std::cout << _("not a valid pre-processor command.") << std::endl;
-    yyterminate();
-}
+<ASM_MOV>{R}{B}{P}{ws}\,{ws}{R}{A}{P}  { column += strlen(yytext); std::cout << "rbp, rdp" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}{B}{P}{ws}\,{ws}{R}{B}{P}  { column += strlen(yytext); std::cout << "rbp, rbp" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}{B}{P}{ws}\,{ws}{R}{C}{P}  { column += strlen(yytext); std::cout << "rbp, rcp" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}{B}{P}{ws}\,{ws}{R}{D}{P}  { column += strlen(yytext); std::cout << "rbp, rdp" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}{B}{P}{ws}\,{ws}{R}{S}{P}  { column += strlen(yytext); std::cout << "rbp, rsp" << std::endl; BEGIN(INITIAL);  }
 
-<DEF_BLOCK_CHECK_COMMENT>\} { BEGIN(INITIAL);  }
-<DEF_BLOCK_CHECK_COMMENT>.  {
-    std::cout << _("not a valid pre-processor command.") << std::endl;
-    yyterminate();
+{P}{U}{S}{H}                 { column += strlen(yytext); std::cout << "\t"  << "push  "; BEGIN(ASM_PUSH); }
+<ASM_PUSH>{ws}{E}{A}{X}      { column += strlen(yytext); std::cout << "eax" << std::endl; BEGIN(INITIAL); }
+<ASM_PUSH>{ws}{E}{B}{X}      { column += strlen(yytext); std::cout << "ebx" << std::endl; BEGIN(INITIAL); }
+<ASM_PUSH>{ws}{E}{C}{X}      { column += strlen(yytext); std::cout << "ecx" << std::endl; BEGIN(INITIAL); }
+<ASM_PUSH>{ws}{E}{D}{X}      { column += strlen(yytext); std::cout << "edx" << std::endl; BEGIN(INITIAL); }
+<ASM_PUSH>{ws}{R}{B}{P}      { column += strlen(yytext); std::cout << "rbp" << std::endl; BEGIN(INITIAL); }
+
+{S}{U}{B}      { column += strlen(yytext); std::cout << "\t"  << "sub   "; BEGIN(ASM_SUB); }
+<ASM_SUB>{ws}{E}{A}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { std::cout << "eAX, 1" << std::endl; BEGIN(INITIAL); }
+<ASM_SUB>{ws}{E}{B}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { std::cout << "eAX, 1" << std::endl; BEGIN(INITIAL); }
+<ASM_SUB>{ws}{E}{C}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { std::cout << "ecX, 2" << std::endl; BEGIN(INITIAL); }
+<ASM_SUB>{ws}{E}{D}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { std::cout << "edX, 3" << std::endl; BEGIN(INITIAL); }
+<ASM_SUB>{ws}{R}{S}{P}{ws}\,{ws}({hexdigit}|{decdigit})  { std::cout << "RSP, "  << strdup(yytext) << std::endl; BEGIN(INITIAL); }
+
+{S}{E}{C}{T}{I}{O}{N}       { column += strlen(yytext); std::cout << "section: "; BEGIN(SEQ_SECTION); }
+<SEQ_SECTION>\.{T}{E}{X}{T} { column += strlen(yytext); std::cout << ".text" << std::endl; BEGIN(INITIAL); }
+<SEQ_SECTION>\.{D}{A}{T}{A} { column += strlen(yytext); std::cout << ".data" << std::endl; BEGIN(INITIAL); }
+
+{ident}*[\:|\:\n|\:\r\n]      {
+    column += strlen(yytext); 
+    std::cout << "Label:  " << yytext << std::endl;
+    BEGIN(INITIAL);
 }
 
-<DEF_BLOCK_COMMENT>\}   { BEGIN(INITIAL);           }
-<DEF_BLOCK_COMMENT>\n   { column  = 1; line += 1;   }
-<DEF_BLOCK_COMMENT>.    { }
+\{                      { column += strlen(yytext); BEGIN(NEW_COMMENT);       }
+<NEW_COMMENT>\}         { column += strlen(yytext); BEGIN(INITIAL);           }
+<NEW_COMMENT>\n         { column += strlen(yytext); line++; }
+<NEW_COMMENT>.          { column += strlen(yytext); }
 
-\{                      { BEGIN(NEW_COMMENT);       }
-<NEW_COMMENT>\}         { BEGIN(INITIAL);           }
-<NEW_COMMENT>\n         { column  = 1; line += 1;   }
-<NEW_COMMENT>.          { }
+";".*[\n|\r\n]          { }
 
-"(**"                   { BEGIN(DOX); }
-
-<DOX>[ \*]*"@file"[ ]+        { BEGIN(DOX_FILE);    }
-<DOX>[ \*]*"@author"[ ]+      { BEGIN(DOX_AUTHOR);  }
-<DOX>[ \*]*"@brief"[ ]+       { BEGIN(DOX_BRIEF);   }
-<DOX>[ \*]*"@bug"[ ]+         { BEGIN(DOX_BUG);     }
-<DOX>\n                 { column  = 1; line += 1;   }
-<DOX>"*)"               { std::cout << "ende" << std::endl; BEGIN(INITIAL);           }
-
-<DOX_FILE>[a-zA-Z0-9_\.\/\:\>\\\$]+     { std::cout << "file  : " << yytext << std::endl; }
-<DOX_FILE>"*)"          { BEGIN(INITIAL);           }
-<DOX_FILE>\n            { column  = 1; line += 1;   }
-
-<DOX_AUTHOR>.*          { std::cout << "author: " << yytext << std::endl; }
-<DOX_AUTHOR>"*)"        { BEGIN(INITIAL);           }
-<DOX_AUTHOR>\n          { column  = 1; line += 1;   }
-
-<DOX_BRIEF>.*           { std::cout << "brief : " << yytext << std::endl; }
-<DOX_BRIEF>"*)"         { BEGIN(INITIAL);           }
-<DOX_BRIEF>\n           { column  = 1; line += 1;   }
-
-<DOX_BUG>.*             { std::cout << "bug   : " << yytext << std::endl; }
-<DOX_BUG>"*)"           { BEGIN(INITIAL);           }
-<DOX_BUG>\n             { column  = 1; line += 1;   }
-
-"(*"                    { BEGIN(PAS_COMMENT);       }
-<PAS_COMMENT>"*)"       { BEGIN(INITIAL);           }
-<PAS_COMMENT>[^*\n]+    { }
-<PAS_COMMENT>\*         { column += 1;              }
-<PAS_COMMENT>\n         { column  = 1; line += 1;   }
-
-"="          { column += 1; return AssemblerParser::SYM_EQUAL;      }
-
-";"          { column += 1;         return AssemblerParser::SYM_SEMICOLON;  }
-";"[\n|\r\n] { column  = 1; line++; return AssemblerParser::SYM_SEMICOLON;  }
-
-":"          { column += 1; return AssemblerParser::SYM_COLON;      }
-","          { column += 1; return AssemblerParser::SYM_COMMA;      }
-\.           { column += 1; return AssemblerParser::SYM_DOT;        }
-
-\'.*\'       {
-    column += strlen(yytext);
-    val->string_val = strdup( yytext );
-    return AssemblerParser::TOK_STRINGEXPR;
-}
-
-.            { column += 1;
+.   {
+    column += 1;
     std::stringstream ss;
     ss << _("Invalide character: ") << yytext[0];
     val->string_val = strdup( ss.str().c_str() );

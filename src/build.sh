@@ -302,6 +302,7 @@ function run_check () {
     if [[ ! $1 -eq 0 ]]; then
         echo "Error: ($2) exec failed. =]"
         echo "aborted."
+        cd ${SRC}
         exit $1
     fi
 }
@@ -650,7 +651,7 @@ if [[ -n "${built_dis}" ]]; then
     for i in ${!obj_array2[@]}; do
         DAT="${obj_array2[$i]}"
         
-        ${GXX} ${FLAGS} -o ${TMP}/${DAT}.o \
+        ${GXX} ${FLAGS} -DHAVE_PARSER_ASM -o ${TMP}/${DAT}.o \
         -c ${SRC}/${DAT}.cc
         
         run_check $? "${DAT}.o"
@@ -661,7 +662,7 @@ if [[ -n "${built_dis}" ]]; then
     for i in ${!obj_array3[@]}; do
         DAT="${obj_array3[$i]}"
         
-        ${GXX} ${FLAGS} -o ${TMP}/${DAT}.o \
+        ${GXX} ${FLAGS} -DHAVE_PARSER_ASM -o ${TMP}/${DAT}.o \
         -c ${TMP}/${DAT}.cc
         
         run_check $? "${DAT}.o"
@@ -683,11 +684,21 @@ if [[ -n "${built_dis}" ]]; then
     cd ${SRC}
     exit 1
 fi
+# ----------------------------------------
+# dont compile, only interpret ...
+# ----------------------------------------
+if [[ -n "${built_tst}" ]]; then
+    cd ${TMP}
+    LD_LIBRARY_PATH=./asmjit;./diss.exe ${built_tst}
+    run_check $? "diss.exe"
+    cd ${SRC}
+    exit 1
+fi
 
 # ----------------------------------------
 # when all is done, then start a test ...
 # ----------------------------------------
-if [[ -n "${built_tst}" ]]; then
+if [[ -n "${built_app}" ]]; then
     cd ${TMP}
     LD_LIBRARY_PATH=./asmjit;./pc.exe ${SRC}/test.pas
     run_check $? "pc.exe"
