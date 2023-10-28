@@ -78,7 +78,8 @@ Parser::ASM_Code::ASM_Code()
     code->setErrorHandler(myErrorHandler);
     code->setLogger(logger);
     
-    cc = new x86::Compiler(code);
+    cc = new x86::Compiler( code );
+    cb = new x86::Builder ( code );
 
     formatFlags =
     FormatFlags::kHexImms    |
@@ -150,10 +151,10 @@ void Parser::ASM_Code::code_exec()
 // -----------------------------------------------------------------
 Parser::ASM_Code::~ASM_Code()
 {
-    if (nullptr != parser->asm_code->cc    ) delete parser->asm_code->cc;
-    if (nullptr != parser->asm_code->code  ) delete parser->asm_code->code;
-    if (nullptr != parser->asm_code->logger) delete parser->asm_code->logger;
+    if (nullptr != cc    ) delete cc;
+    if (nullptr != code  ) delete code;
+    if (nullptr != logger) delete logger;
 
-    if (nullptr != parser->asm_code->myErrorHandler)
-       delete      parser->asm_code->myErrorHandler;
+    if (nullptr != myErrorHandler)
+       delete      myErrorHandler;
 }

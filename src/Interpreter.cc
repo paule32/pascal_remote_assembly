@@ -704,7 +704,8 @@ AsmParser::AsmParser( char *filename )
     code->init(env, features, baseAddress);
     code->setErrorHandler(myErrorHandler);
     
-    asm_code = new x86::Assembler(code);
+    cod_code = new x86::Builder  ( code );
+    asm_code = new x86::Assembler( code );
 }
 
 // -----------------------------------------------------------------
@@ -727,6 +728,7 @@ AsmParser::~AsmParser()
     }
     
     delete asm_code;
+    delete cod_code;
     delete     code;
     
     delete lexer_input;

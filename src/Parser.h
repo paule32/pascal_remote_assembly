@@ -152,6 +152,7 @@ public:
     
         FormatFlags   formatFlags;
         x86::Compiler  *       cc;
+        x86::Builder   *       cb;
         Error                 err;
         
         MyErrorHandler *   myErrorHandler;
@@ -221,6 +222,8 @@ public:
     
     CodeHolder     *     code;  // Holds the code and relocation information
     x86::Assembler * asm_code;
+    x86::Builder   * cod_code;  // attach builder to 'code'
+    
     std::map<
         std::string,
         Label >

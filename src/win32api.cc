@@ -40,16 +40,18 @@ void Parser::ASM_Code::init_win32api()
     LPCTSTR lpCapt = LPCTSTR("mumu");
     UINT    lpMsgM = UINT(2);
     
-    char *  buffer = new char[20480];
+    char * buffer  = new char[20480];
     sprintf(buffer,
-            "; T 0x%p lpText" "\n"
-            "; T 0x%p lpCapt" "\n"
-            "; T 0x%p lpMsgM" "\n"
+            "; T 0x%p MessageBoxA" "\n"
+            "; T 0x%p lpText"      "\n"
+            "; T 0x%p lpCapt"      "\n"
+            "; T 0x%p lpMsgM"      "\n"
             
             "lpText:" "\n\t" "db \"%s\", 0" "\n"
             "lpCapt:" "\n\t" "db \"%s\", 0" "\n"
             "lpMsgM:" "\n\t" "dd 0x%x "     "\n"
             ,
+            ::MessageBoxA ,
             lpText, lpCapt, lpMsgM,
             lpText, lpCapt, lpMsgM
             );

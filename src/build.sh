@@ -589,7 +589,7 @@ function help () {
     HELP+="--------\n"
     HELP+=" -h display this screen.\n"
     HELP+=" -a compile application.      file: test.pas\n"
-    HELP+=" -i compile interpreter.      file: test2.pas\n"
+    HELP+=" -i compile interpreter.      file: test.asm\n"
     HELP+=" -r run a x86::Compiler test.\n"
     HELP+=" -t run converter  test.       file: test2.asm"
     echo -e $HELP
