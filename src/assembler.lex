@@ -49,7 +49,32 @@ decdigit    [0..9]*
 
 %%
 
-"section"   { return TOK_SECTION; }
+"add"       { return TOK_ADD;       }
+"call"      { return TOK_CALL;      }
+"mov"       { return TOK_MOV;       }
+"pop"       { return TOK_POP;       }
+"ptr"       { return TOK_PTR;       }
+"push"      { return TOK_PUSH;      }
+"qword"     { return TOK_QWORD;     }
+"r1"        { return TOK_R1;        }
+"r2"        { return TOK_R2;        }
+"r3"        { return TOK_R3;        }
+"r4"        { return TOK_R4;        }
+"r5"        { return TOK_R5;        }
+"r6"        { return TOK_R6;        }
+"r7"        { return TOK_R7;        }
+"r8"        { return TOK_R8;        }
+"r9"        { return TOK_R9;        }
+"r9d"       { return TOK_R9D;       }
+"rax"       { return TOK_RAX;       }
+"rbp"       { return TOK_RBP;       }
+"rbx"       { return TOK_RBX;       }
+"rcx"       { return TOK_RCX;       }
+"rdx"       { return TOK_RDX;       }
+"ret"       { return TOK_RET;       }
+"rsp"       { return TOK_RSP;       }
+"section"   { return TOK_SECTION;   }
+"sub"       { return TOK_SUB;       }
 "."{ident}  {
     yylval.string_val = strdup(yytext);
     return TOK_SECT_ID;
