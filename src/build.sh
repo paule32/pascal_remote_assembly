@@ -10,7 +10,7 @@ PWD=$(pwd)
 SRC=$(echo "${PWD}")
 TEMP="temp"
 TMP=$(echo "${PWD}/${TEMP}")
-FLAGS=$(echo "-std=c++17 -O2 -fPIC " \
+FLAGS=$(echo "-std=c++20 -O2 -fPIC " \
     "-Wno-pmf-conversions   " \
     "-Wno-register          " \
     "-Wno-write-strings     " \
@@ -45,8 +45,8 @@ GXX=$(echo "${WGXX}")   # g++
 XLT=$(echo "${XLTP}")   # xsltproc
 DLG=$(echo "${TDLG}")   # dialog
 # -----------------------------------------------------------------
-BISON="bison++"
-FLEX="flex++"
+BISON="/usr/bin/bison"
+FLEX="/usr/bin/flex"
 # -----------------------------------------------------------------
 # localization strings for this script ...
 # -----------------------------------------------------------------
@@ -346,7 +346,7 @@ function run_build_asmjit () {
     if [[ -n "${DLG}" ]]; then
         printf '\033[8;%d;%dt' $rows $cols
         dlg="(exit 1) | $dlgs --title \"${!errloc[17]}\" \
-        --gauge \"${!errloc[18]}\" 10 79 15"
+        --gauge \"${!errloc[18]}\" 10 79 $1"
         eval "$dlg"
     else
         printf "[= create asmjit.dll: "
@@ -421,11 +421,11 @@ function run_build_parser () {
         printf "[= create parser: "
     fi
 
-    ${BISON} -d -h${TMP}/PascalParser.h  -o${TMP}/PascalParser.cc  \
-    ${SRC}/pascal.yy 2&> /dev/null && run_check $? "pascal.yy"
+    bison++ -d -h${TMP}/PascalParser.h  -o${TMP}/PascalParser.cc  \
+                ${SRC}/pascal.yy 2&> /dev/null && run_check $? "pascal.yy"
     
-    ${FLEX}     -h${TMP}/PascalScanner.h -o${TMP}/PascalScanner.cc \
-    ${SRC}/pascal.ll 2&> /dev/null && run_check $? "pascal.ll"
+    flex++     -h${TMP}/PascalScanner.h -o${TMP}/PascalScanner.cc \
+                 ${SRC}/pascal.ll 2&> /dev/null && run_check $? "pascal.ll"
 
     if [[ -z "${DLG}" ]]; then
         echo "ok. =]"
@@ -481,7 +481,7 @@ function run_build_exec () {
     ${GXX} -o ${TMP}/pc.exe ${DAT} \
         -L${TMP}/asmjit -lasmjit   \
         -lintl -lgmpxx
-    run_check $? "pc.exe"
+    run_check $? "link pc.exe"
 
     # -----------------------------------------------------------------
     # strip debug informations, and copy file to exec directory: ...
@@ -534,7 +534,7 @@ function run_build_nasm_source () {
         | sed -e 's/$/\"\)/')
     maplist+=$(printf "\n
         arr_cols=0
-        cp $1.asm test2.asm
+        #cp $1.asm $1_nasm.asm
         for el in \${tmp_array[@]}; do
             if [[ \"\$el\" == \"000000000000\" ]]; then
                 ((arr_cols++))
@@ -542,7 +542,7 @@ function run_build_nasm_source () {
             fi
             sedcmd=\"sed -i \'s/0x\${el^^}/\"
             sedcmd+=\"\${tmp_array_func[\$arr_cols]}/g\' \"
-            sedcmd+=\"test2.asm\"
+            sedcmd+=\"$1.asm\"
             eval "\$sedcmd"
             ((arr_cols++))
         done")
@@ -557,8 +557,8 @@ function run_build_nasm_source () {
     #asmdat+="\n$asmtxt\n"
     #echo -e "$asmdat" > test3.asm
     
-    nasm -f win64 -o test2.o test2.asm
-    run_check $? "nasm test2.asm"
+    nasm -f win64 -o ${built_run%.*}.o ${built_run%.*}.asm
+    run_check $? "nasm $1_name.asm"
     
     if [[ -z "${DLG}" ]]; then
         echo "ok. =]"
@@ -599,17 +599,17 @@ function help () {
 # -----------------------------------------------------------------
 # switch back to developer source path ...
 # -----------------------------------------------------------------
-while getopts "a:i:r:t:h" option; do
+while getopts "air:t:h" option; do
     case "${option}" in
-        h) help ;;
-        a) built_app=${OPTARG};;
-        i) built_dis=${OPTARG};;
-        r) built_run=${OPTARG};;
-        t) built_tst=${OPTARG};;
+        h)  help ;;
+        a)  built_app="OPTARG";;
+        i)  built_dis="OPTARG";;
+        r)  built_run=${OPTARG};;
+        t)  built_tst=${OPTARG};;
         \?) echo "usage: build.sh [[-a], [-i], [-d]] file.src"
-           echo "Expected -a, -r, -t or -d"
-           echo "use -h for help"
-           exit 1;;
+            echo "Expected -a, -r, -t or -d"
+            echo "use -h for help"
+            exit 1;;
     esac
 done
 # ----------------------------------------
@@ -621,6 +621,8 @@ if [[ -n "${built_app}" ]]; then
 
     run_build_doc_xml deu  20
     run_build_doc_xml enu  22
+    
+    run_build_asmjit       26
 
     run_build_locales      30
     run_build_parser       32
@@ -636,9 +638,6 @@ if [[ -n "${built_app}" ]]; then
         --gauge \"${!errloc[24]}\" 10 79 94"
         eval "$dlg"
     fi
-
-     run_build_nasm_source test
-    #run_build_nasm_source ${built_app} # TODO
 
     if [[ -n "${DLG}" ]]; then
         printf '\033[8;%d;%dt' $rows $cols
@@ -660,11 +659,21 @@ if [[ -n "${built_dis}" ]]; then
     # ----------------------------------------
     # built parser script files ...
     # ----------------------------------------
-    ${BISON} -d -h${TMP}/AssemblerParser.h  -o${TMP}/AssemblerParser.cc  \
-    ${SRC}/assembler.yy && run_check $? "assembler.yy"
+    ${BISON} -d -o${TMP}/AssemblerParser.cc  ${SRC}/assembler.y
+    ${FLEX}  -i -o${TMP}/AssemblerScanner.cc ${SRC}/assembler.lex
     
-    ${FLEX}     -h${TMP}/AssemblerScanner.h -o${TMP}/AssemblerScanner.cc \
-    ${SRC}/assembler.ll && run_check $? "assembler.ll"
+    ${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/AssemblerParser.o  -c ${TMP}/AssemblerParser.cc
+    ${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/AssemblerScanner.o -c ${TMP}/AssemblerScanner.cc
+
+    ${GXX} ${FLAGS} -DHAVE_PARSER_ASM -o ${TMP}/diss.exe \
+        ${TMP}/AssemblerParser.o \
+        ${TMP}/AssemblerScanner.o -lintl
+
+    strip ${TMP}/diss.exe
+    echo "done"
+    
+    cd ${SRC}
+    exit 1
 
     # ----------------------------------------
     # compile C++ source files ...
@@ -701,8 +710,8 @@ if [[ -n "${built_dis}" ]]; then
         -lintl -lgmpxx
     run_check $? "diss.exe"
 
-    printf "done.\n\n${built_dis}:\n"
-    ./diss.exe ${built_dis}
+    strip diss.exe
+    printf "done.\n"
     cd ${SRC}
     exit 1
 fi
@@ -711,8 +720,19 @@ fi
 # ----------------------------------------
 if [[ -n "${built_tst}" ]]; then
     cd ${TMP}
-    LD_LIBRARY_PATH=./asmjit;./diss.exe ${built_tst}
+    echo "running test..."
+    LD_LIBRARY_PATH=./asmjit;./diss.exe ${built_tst} 2&> ${built_tst%.asm}.cc
     run_check $? "diss.exe"
+    
+    echo "compile new data file..."
+    ${GXX} ${FLAGS} -I.. -o ${TMP}/${built_tst%.asm}.exe \
+        ${TMP}/${built_tst%.asm}.cc \
+    -L  ${TMP}/asmjit -lasmjit -lintl
+    run_check $? "${built_tst%.asm}.exe"
+    
+    strip ${built_tst%.asm}.exe
+    ${TMP}/${built_tst%.asm}.exe ${TMP}/${built_tst%.asm}.out
+    
     cd ${SRC}
     exit 1
 fi
@@ -722,9 +742,21 @@ fi
 # ----------------------------------------
 if [[ -n "${built_run}" ]]; then
     cd ${TMP}
-    LD_LIBRARY_PATH=./asmjit;./pc.exe test.pas
-    run_build_nasm_source test
-    run_check $? "pc.exe"
+
+    echo "create assembly file..."
+    echo "${built_run%.*}.pas"
+    cp ./asmjit/asmjit.dll ./asmjit.dll
+    eval "LD_LIBRARY_PATH=./asmjit;./pc.exe ${built_run%.*}.pas"
+    run_check $? "pc.exe translate ${built_run}"
+    
+    echo "convert assembly file ..."
+    cp ${built_run%.*}.asm ${built_run%.*}_nasm.asm
+    eval "LD_LIBRARY_PATH=./asmjit;./diss.exe ${built_run%.*}_nasm.asm"
+ 
+    echo "compile ${built_run%.*}_nasm.asm ..."
+    run_build_nasm_source ${built_run%.*}_nasm
+    run_check $? "nasm.exe convert ${built_run%.*}_nasm.asm"
+    
     cd ${SRC}
     exit 1
 fi
@@ -733,4 +765,3 @@ fi
 # we should never reach this, if all done:
 # ----------------------------------------
 help
-

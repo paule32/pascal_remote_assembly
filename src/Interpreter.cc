@@ -10,7 +10,6 @@
 // -----------------------------------------------------------------
 // global variable's / constant's ...
 // -----------------------------------------------------------------
-std::istream * lexer_input;
 AsmParser    * asm_parser ;
 char         * locale_utf8;
 
@@ -148,14 +147,14 @@ int main(int argc, char **argv)
         }
 
         // ----------------------------
-        // create assembler object ...
-        // ----------------------------
-        asm_parser = new AsmParser(argv[1]);
-
-        // ----------------------------
         // read-up .o bject file COFF:
         // ----------------------------
         if (ext == ".o") {
+            // ----------------------------
+            // create assembler object ...
+            // ----------------------------
+            asm_parser = new AsmParser(argv[1], true);
+            
             fh.open(argv[1], std::fstream::in | std::fstream::binary);
             
             if (!fh.is_open()) {
@@ -627,6 +626,11 @@ int main(int argc, char **argv)
         // read .asm text file
         // ----------------------------
         if (ext == ".asm") {
+            // ----------------------------
+            // create assembler object ...
+            // ----------------------------
+            asm_parser = new AsmParser(argv[1],true);
+            
             fh.open(fpath, std::fstream::in);
             
             if (!fh.is_open()) {
@@ -645,7 +649,14 @@ int main(int argc, char **argv)
             // ----------------------------
             // parse the assembler text:
             // ----------------------------
+            std::cout << "start...." << std::endl;
+            try  {
             asm_parser->yyparse();
+            }
+            catch(std::exception &e) {
+                std::cout << "wh: " << e.what() << std::endl;
+            }
+            std::cout << "end...." << std::endl;
             
             delete asm_parser;
         }   else {
@@ -673,28 +684,24 @@ int main(int argc, char **argv)
     return EXIT_SUCCESS;
 }
 
-AsmParser::AsmParser( char *filename )
+AsmParser::AsmParser( char *filename, bool mode )
 {
     // --------------------------------------------------------
     // try to open input file.
     // --------------------------------------------------------
-    parser_file = new std::ifstream(filename);
-    if (parser_file->is_open())
-    {
-        std::stringstream buffer;
-        buffer << parser_file->rdbuf();
-        lexer_input = new std::istringstream(buffer.str());
-    }
-    else {
-        if (parser_file->fail())
-        throw EPascalException_FileNotOpen (_("parser file could not be open."));
-        throw EPascalException_FileNotFound(_("parser file dont exists."));
-    }
+    if (mode == false)
+        parser_file = fopen( filename, "rb" ); else
+        parser_file = fopen( filename, "r"  );
+    if(!parser_file)
+    throw EPascalException_FileNotOpen (_("parser file could not be open."));
+        
+    yyin = parser_file;
     
     // ----------------------------
     // pre-tasks preparations ...
     // ----------------------------
     myErrorHandler = new MyErrorHandler();
+    
     env      = Environment::host();
     features = CpuInfo::host().features();
     
@@ -732,7 +739,7 @@ AsmParser::~AsmParser()
     delete     code;
     
     delete lexer_input;
-    delete parser_file;
+    fclose(parser_file);
 }
 
 AsmParser::AsmParser() { }
@@ -768,4 +775,5 @@ int AsmParser::yylex()
     return token;
 }
 
-void yyerror(char *err) { asm_parser->yyerror(err); }
+extern "C" void yyerror(char *err) { asm_parser->yyerror(err); }
+

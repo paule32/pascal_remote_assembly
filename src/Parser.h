@@ -202,8 +202,8 @@ extern void parser_cleanup();
 // -----------------------------------------------------------------
 #ifdef HAVE_PARSER_ASM
 
-# include "AssemblerParser.h"
 # include "AssemblerScanner.h"
+# include "AssemblerParser.h"
 
 class AsmParser: public AssemblerParser
 {
@@ -229,11 +229,11 @@ public:
         Label >
         asm_labels ;
     
-    std::ifstream  *    parser_file;
+    FILE           *    parser_file;
     MyErrorHandler * myErrorHandler;
 
     virtual void yyerror(char * msg);
-    virtual int yylex();
+    virtual int  yylex();
     
     // -------------------------------------------------------------
     // dtor: try to clean, and free allocated memory.

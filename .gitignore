@@ -10,6 +10,7 @@ doc/html/*
 exec
 
 src/1
+src/2
 src/dox
 src/po/1
 src/po/*.mo

@@ -1,100 +1,3 @@
-// -----------------------------------------------------------------
-// File:   Assembler.ll
-// Author: (c) 2023 Jens Kallup - paule32
-// All rights reserved
-//
-// only for education, and non-profit usage !
-// -----------------------------------------------------------------
-%name AssemblerScanner
-
-%define LEX_PARAM YY_AssemblerParser_STYPE *val, YY_AssemblerParser_LTYPE *loc
-%define MEMBERS public: int line, column;
-%define CONSTRUCTOR_INIT : line(1), column(1)
-%define CLASS AssemblerScanner
-
-%header{
-# include <windows.h>
-
-# include "Parser.h"
-# include <stdio.h>
-# include <libintl.h>
-# include <locale.h>
-# include <stdlib.h>
-# include <strings.h>
-
-# include <iostream>
-# include <string>
-# include <sstream>
-# include <cstring>
-
-# include "AssemblerParser.h"
-# include "AssemblerScanner.h"
-
-extern std::istream * lexer_input;
-extern void yyerror(char * err);
-
-extern int line;
-extern int column;
-
-# undef  YY_INPUT
-# define YY_INPUT(buf, result, max_size)  \
-  result = 0; \
-  while (1) { \
-    int c = lexer_input->get(); \
-    if (lexer_input->eof()) { \
-      break; \
-    } \
-    buf[result++] = c; \
-    if (result == max_size || c == '\n') { \
-      break; \
-    } \
-  }
-# define _(String) gettext(String)
-%}
-
-A [Aa]
-B [Bb]
-C [Cc]
-D [Dd]
-E [Ee]
-F [Ff]
-G [Gg]
-H [Hh]
-I [Ii]
-J [Jj]
-K [Kk]
-L [Ll]
-M [Mm]
-N [Nn]
-O [Oo]
-P [Pp]
-Q [Qq]
-R [Rr]
-S [Ss]
-T [Tt]
-U [Uu]
-V [Vv]
-W [Ww]
-X [Xx]
-Y [Yy]
-Z [Zz]
-
-ident [a-zA-Z_][a-zA-Z0-9_]*
-hexdigit    (0[xX])?[a-fA-F0-9]*
-decdigit    [0..9]*
-ws          [ \t\n| \t\r\n]*
-
-%x NEW_COMMENT
-%x SEQ_SECTION ASM_POP ASM_PUSH ASM_MOV ASM_SUB
-
-%%
-
-\t          { column += 8; }
-[\n|\r\n]   { column  = 1; line++; }
-[ ]         { column += 1; }
-
-{C}{A}{L}{L}{ws}({ident})    { column += strlen(yytext); std::cout << "\t"  << "call  " << yytext + 5 << "  ; ok" << std::endl; BEGIN(INITIAL); }
-
 {D}{B}{ws}({hexdigit}|{decdigit}) { column += strlen(yytext); std::cout << "\t"  << yytext << "   ; ok" << std::endl; BEGIN(INITIAL); }
 {D}{W}{ws}({hexdigit}|{decdigit}) { column += strlen(yytext); std::cout << "\t"  << yytext << "   ; ok" << std::endl; BEGIN(INITIAL); }
 {D}{D}{ws}({hexdigit}|{decdigit}) { column += strlen(yytext); std::cout << "\t"  << yytext << "   ; ok" << std::endl; BEGIN(INITIAL); }
@@ -106,17 +9,17 @@ ws          [ \t\n| \t\r\n]*
 <ASM_MOV>{E}{C}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "ecx, " << yytext + 5 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
 <ASM_MOV>{E}{D}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "ecx, " << yytext + 5 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
 
-<ASM_MOV>{R}{D}{X}{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "rdx, " << yytext + 5 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}{D}{X}{ws}\,{ws}({hexdigit}|{decdigit}|{ident})  { column += strlen(yytext); std::cout << "rdx, " << yytext + 5 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
 
-<ASM_MOV>{R}1{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r1, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
-<ASM_MOV>{R}2{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r2, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
-<ASM_MOV>{R}3{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r3, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
-<ASM_MOV>{R}4{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r4, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
-<ASM_MOV>{R}5{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r5, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
-<ASM_MOV>{R}6{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r6, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
-<ASM_MOV>{R}7{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r7, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
-<ASM_MOV>{R}8{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r8, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
-<ASM_MOV>{R}9{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r9, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}1{ws}\,{ws}({hexdigit}|{decdigit}|{ident})  { column += strlen(yytext); std::cout << "r1, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}2{ws}\,{ws}({hexdigit}|{decdigit}|{ident})  { column += strlen(yytext); std::cout << "r2, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}3{ws}\,{ws}({hexdigit}|{decdigit}|{ident})  { column += strlen(yytext); std::cout << "r3, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}4{ws}\,{ws}({hexdigit}|{decdigit}|{ident})  { column += strlen(yytext); std::cout << "r4, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}5{ws}\,{ws}({hexdigit}|{decdigit}|{ident})  { column += strlen(yytext); std::cout << "r5, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}6{ws}\,{ws}({hexdigit}|{decdigit}|{ident})  { column += strlen(yytext); std::cout << "r6, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}7{ws}\,{ws}({hexdigit}|{decdigit}|{ident})  { column += strlen(yytext); std::cout << "r7, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}8{ws}\,{ws}({hexdigit}|{decdigit}|{ident})  { column += strlen(yytext); std::cout << "r8, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
+<ASM_MOV>{R}9{ws}\,{ws}({hexdigit}|{decdigit}|{ident})  { column += strlen(yytext); std::cout << "r9, " << yytext + 4 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
 
 <ASM_MOV>{R}9{D}{ws}\,{ws}({hexdigit}|{decdigit})  { column += strlen(yytext); std::cout << "r9d, " << yytext + 5 << "  ; ok" << std::endl; BEGIN(INITIAL);  }
 
@@ -204,22 +107,3 @@ ws          [ \t\n| \t\r\n]*
     std::cout << yytext << "  ; ok" << std::endl;
     BEGIN(INITIAL);
 }
-
-\{                      { column += strlen(yytext); BEGIN(NEW_COMMENT);       }
-<NEW_COMMENT>\}         { column += strlen(yytext); BEGIN(INITIAL);           }
-<NEW_COMMENT>\n         { column += strlen(yytext); line++; }
-<NEW_COMMENT>.          { column += strlen(yytext); }
-
-";".*{ws}          { }
-
-.   {
-    column += 1;
-    std::stringstream ss;
-    ss << _("Invalide character: ") << yytext[0];
-    val->string_val = strdup( ss.str().c_str() );
-    
-    return AssemblerParser::UNKNOWN;
-}
-
-<<EOF>>      { yyterminate(); }
-%%

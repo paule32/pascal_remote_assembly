@@ -43,13 +43,13 @@ void Parser::ASM_Code::init_win32api()
     char * buffer  = new char[20480];
     sprintf(buffer,
             "; T 0x%p MessageBoxA" "\n"
-            "; T 0x%p lpText"      "\n"
-            "; T 0x%p lpCapt"      "\n"
-            "; T 0x%p lpMsgM"      "\n"
+            "; T 0x%p Lv_Entry__lpText"      "\n"
+            "; T 0x%p Lv_Entry__lpCapt"      "\n"
+            "; T 0x%p Lv_Entry__lpMsgM"      "\n"
             
-            "lpText:" "\n\t" "db \"%s\", 0" "\n"
-            "lpCapt:" "\n\t" "db \"%s\", 0" "\n"
-            "lpMsgM:" "\n\t" "dd 0x%x "     "\n"
+            "Lv_Entry__lpText:" "\n\t" "db \"%s\", 0" "\n"
+            "Lv_Entry__lpCapt:" "\n\t" "db \"%s\", 0" "\n"
+            "Lv_Entry__lpMsgM:" "\n\t" "dd 0x%x "     "\n"
             ,
             ::MessageBoxA ,
             lpText, lpCapt, lpMsgM,
