@@ -53,9 +53,34 @@ decdigit    [0..9]*
 "call"      { return TOK_CALL;      }
 "mov"       { return TOK_MOV;       }
 "pop"       { return TOK_POP;       }
-"ptr"       { return TOK_PTR;       }
 "push"      { return TOK_PUSH;      }
+"ret"       { return TOK_RET;       }
+"sub"       { return TOK_SUB;       }
+
+"ptr"       { return TOK_PTR;       }
+"byte"      { return TOK_BYTE;      }
+"word"      { return TOK_WORD;      }
+"dword"     { return TOK_DWORD;     }
 "qword"     { return TOK_QWORD;     }
+
+"r0b"       { return TOK_R0B;       }
+"r1b"       { return TOK_R1B;       }
+"r2b"       { return TOK_R2B;       }
+"r3b"       { return TOK_R3B;       }
+"r4b"       { return TOK_R4B;       }
+"r5b"       { return TOK_R5B;       }
+"r6b"       { return TOK_R6B;       }
+"r7b"       { return TOK_R7B;       }
+"r8b"       { return TOK_R8B;       }
+"r9b"       { return TOK_R9B;       }
+"r10b"      { return TOK_R10B;      }
+"r11b"      { return TOK_R11B;      }
+"r12b"      { return TOK_R12B;      }
+"r13b"      { return TOK_R13B;      }
+"r14b"      { return TOK_R14B;      }
+"r15b"      { return TOK_R15B;      }
+
+"r0"        { return TOK_R0;        }
 "r1"        { return TOK_R1;        }
 "r2"        { return TOK_R2;        }
 "r3"        { return TOK_R3;        }
@@ -65,22 +90,91 @@ decdigit    [0..9]*
 "r7"        { return TOK_R7;        }
 "r8"        { return TOK_R8;        }
 "r9"        { return TOK_R9;        }
+"r10"       { return TOK_R10;       }
+"r11"       { return TOK_R11;       }
+"r12"       { return TOK_R12;       }
+"r13"       { return TOK_R13;       }
+"r14"       { return TOK_R14;       }
+"r15"       { return TOK_R15;       }
+
+"r0d"       { return TOK_R0D;       }
+"r1d"       { return TOK_R1D;       }
+"r2d"       { return TOK_R2D;       }
+"r3d"       { return TOK_R3D;       }
+"r4d"       { return TOK_R4D;       }
+"r5d"       { return TOK_R5D;       }
+"r6d"       { return TOK_R6D;       }
+"r7d"       { return TOK_R7D;       }
+"r8d"       { return TOK_R8D;       }
 "r9d"       { return TOK_R9D;       }
+"r10d"      { return TOK_R10D;      }
+"r11d"      { return TOK_R11D;      }
+"r12d"      { return TOK_R12D;      }
+"r13d"      { return TOK_R13D;      }
+"r14d"      { return TOK_R14D;      }
+"r15d"      { return TOK_R15D;      }
+
+"r0w"       { return TOK_R0W;       }
+"r1w"       { return TOK_R1W;       }
+"r2w"       { return TOK_R2W;       }
+"r3w"       { return TOK_R3W;       }
+"r4w"       { return TOK_R4W;       }
+"r5w"       { return TOK_R5W;       }
+"r6w"       { return TOK_R6W;       }
+"r7w"       { return TOK_R7W;       }
+"r8w"       { return TOK_R8W;       }
+"r9w"       { return TOK_R9W;       }
+"r10w"      { return TOK_R10W;      }
+"r11w"      { return TOK_R11W;      }
+"r12w"      { return TOK_R12W;      }
+"r13w"      { return TOK_R13W;      }
+"r14w"      { return TOK_R14W;      }
+"r15w"      { return TOK_R15W;      }
+
 "rax"       { return TOK_RAX;       }
-"rbp"       { return TOK_RBP;       }
 "rbx"       { return TOK_RBX;       }
 "rcx"       { return TOK_RCX;       }
 "rdx"       { return TOK_RDX;       }
-"ret"       { return TOK_RET;       }
+"rdi"       { return TOK_RDI;       }
+"rsi"       { return TOK_RSI;       }
 "rsp"       { return TOK_RSP;       }
+"rbp"       { return TOK_RBP;       }
+
+"eax"       { return TOK_EAX;       }
+"ebx"       { return TOK_EBX;       }
+"ecx"       { return TOK_ECX;       }
+"edx"       { return TOK_EDX;       }
+"edi"       { return TOK_EDI;       }
+"esi"       { return TOK_ESI;       }
+"esp"       { return TOK_ESP;       }
+"ebp"       { return TOK_EBP;       }
+
+"ax"        { return TOK_AX;        }
+"bx"        { return TOK_BX;        }
+"cx"        { return TOK_CX;        }
+"dx"        { return TOK_DX;        }
+"di"        { return TOK_DI;        }
+"si"        { return TOK_SI;        }
+"sp"        { return TOK_SP;        }
+"bp"        { return TOK_BP;        }
+
+"ah"        { return TOK_AH;        }
+"bh"        { return TOK_BH;        }
+"ch"        { return TOK_CH;        }
+"dh"        { return TOK_DH;        }
+
+"al"        { return TOK_AL;        }
+"bl"        { return TOK_BL;        }
+"cl"        { return TOK_CL;        }
+"dl"        { return TOK_DL;        }
+
+
 "section"   { return TOK_SECTION;   }
-"sub"       { return TOK_SUB;       }
 "."{ident}  {
     yylval.string_val = strdup(yytext);
     return TOK_SECT_ID;
 }
 
-"call"      { return TOK_CALL;    }
 {ident}":"  {
     yylval.string_val = strdup(yytext);
     return TOK_LABEL;

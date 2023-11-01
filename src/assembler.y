@@ -40,10 +40,11 @@ std::stringstream          output_stream;       // code stream
 }
 
 %token UNKNOWN
+%token TOK_YYEOF 0
+
 %token TOK_ID TOK_CONSTANT
 %token TOK_DOT TOK_SECTION TOK_SECT_ID
-
-%token TOK_YYEOF 0
+%token TOK_HEX TOK_DEC
 
 %token TOK_ADC TOK_ADCX
 %token TOK_ADD TOK_ADDPD TOK_ADDPS TOK_ADDSS TOK_ADDSUBPD TOK_ADDSUBPS 
@@ -60,13 +61,12 @@ std::stringstream          output_stream;       // code stream
 %token TOK_MOV
 %token TOK_NOP
 %token TOK_POP
-%token TOK_PTR
 %token TOK_PUSH
 
-%token TOK_QWORD TOK_DWORD TOK_WORD TOK_BYTE
+%token TOK_QWORD TOK_DWORD TOK_WORD TOK_BYTE TOK_PTR
 
-%token TOK_EAX TOK_EBX TOK_ECX TOK_EDX TOK_EDI TOK_ESI TOK_ESP TOK_EBP
 %token TOK_RAX TOK_RBX TOK_RCX TOK_RDX TOK_RDI TOK_RSI TOK_RSP TOK_RBP
+%token TOK_EAX TOK_EBX TOK_ECX TOK_EDX TOK_EDI TOK_ESI TOK_ESP TOK_EBP
 %token TOK_AX  TOK_BX  TOK_CX  TOK_DX  TOK_DI  TOK_SI  TOK_SP  TOK_BP
 %token TOK_AH  TOK_BH  TOK_CH  TOK_DH
 %token TOK_AL  TOK_BL  TOK_CL  TOK_DL
@@ -143,6 +143,10 @@ program_top
     | TOK_MOV mem ',' reg
     | TOK_MOV reg ',' mem
     | TOK_MOV reg ',' imm32
+    | TOK_MOV reg ',' TOK_BYTE  TOK_PTR '[' TOK_RSP '+' ']'
+    | TOK_MOV reg ',' TOK_WORD  TOK_PTR '[' TOK_RSP '+' ']'
+    | TOK_MOV reg ',' TOK_DWORD TOK_PTR '[' TOK_RSP '+' ']'
+    | TOK_MOV reg ',' TOK_QWORD TOK_PTR '[' TOK_RSP '+' ']'
     | TOK_MOV TOK_BYTE  mem ',' imm32
     | TOK_MOV TOK_WORD  mem ',' imm32
     | TOK_MOV TOK_DWORD mem ',' imm32
@@ -173,10 +177,16 @@ reg8
     | TOK_R0B | TOK_R1B | TOK_R2B | TOK_R3B
     ;
 
-mem:
-imm32:
+mem
+    : TOK_ID
+    ;
+imm32
+    : TOK_ID
+    ;
 
 _tok_id      : TOK_ID      { $$ = yylval.string_val; } ;
 _tok_sect_id : TOK_SECT_ID { $$ = yylval.string_val; } ;
+
+_tok_num     : TOK_HEX | TOK_DEC ;
 
 %%
