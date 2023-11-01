@@ -30,7 +30,7 @@ extern "C" {
 
     int  yywrap  (void     ) { return 1; }
     void yyerror (const char * msg) {
-        std::cerr << "error: " << line << ": " << msg << std::endl;
+        std::cerr << "error: " << (line-1) << ": " << msg << std::endl;
         exit(1);
     }
 };
@@ -74,73 +74,24 @@ decdigit    [0..9]*
 "dword"     { return TOK_DWORD;     }
 "qword"     { return TOK_QWORD;     }
 
-"r0b"       { return TOK_R0B;       }
-"r1b"       { return TOK_R1B;       }
-"r2b"       { return TOK_R2B;       }
-"r3b"       { return TOK_R3B;       }
-"r4b"       { return TOK_R4B;       }
-"r5b"       { return TOK_R5B;       }
-"r6b"       { return TOK_R6B;       }
-"r7b"       { return TOK_R7B;       }
-"r8b"       { return TOK_R8B;       }
-"r9b"       { return TOK_R9B;       }
-"r10b"      { return TOK_R10B;      }
-"r11b"      { return TOK_R11B;      }
-"r12b"      { return TOK_R12B;      }
-"r13b"      { return TOK_R13B;      }
-"r14b"      { return TOK_R14B;      }
-"r15b"      { return TOK_R15B;      }
+("r0"|"r0b"|"r0w"|"r0d"|"r0q")       { return TOK_R0;        }
+("r1"|"r1b"|"r1w"|"r1d"|"r1q")       { return TOK_R1;        }
+("r2"|"r2b"|"r2w"|"r2d"|"r2q")       { return TOK_R2;        }
+("r3"|"r3b"|"r3w"|"r3d"|"r3q")       { return TOK_R3;        }
+("r4"|"r4b"|"r4w"|"r4d"|"r4q")       { return TOK_R4;        }
 
-"r0"        { return TOK_R0;        }
-"r1"        { return TOK_R1;        }
-"r2"        { return TOK_R2;        }
-"r3"        { return TOK_R3;        }
-"r4"        { return TOK_R4;        }
-"r5"        { return TOK_R5;        }
-"r6"        { return TOK_R6;        }
-"r7"        { return TOK_R7;        }
-"r8"        { return TOK_R8;        }
-"r9"        { return TOK_R9;        }
-"r10"       { return TOK_R10;       }
-"r11"       { return TOK_R11;       }
-"r12"       { return TOK_R12;       }
-"r13"       { return TOK_R13;       }
-"r14"       { return TOK_R14;       }
-"r15"       { return TOK_R15;       }
+("r5"|"r5b"|"r5w"|"r5d"|"r5q")       { return TOK_R5;        }
+("r6"|"r6b"|"r6w"|"r6d"|"r6q")       { return TOK_R6;        }
+("r7"|"r7b"|"r7w"|"r7d"|"r7q")       { return TOK_R7;        }
+("r8"|"r8b"|"r8w"|"r8d"|"r8q")       { return TOK_R8;        }
+("r9"|"r9b"|"r9w"|"r9d"|"r9q")       { return TOK_R9;        }
 
-"r0d"       { return TOK_R0D;       }
-"r1d"       { return TOK_R1D;       }
-"r2d"       { return TOK_R2D;       }
-"r3d"       { return TOK_R3D;       }
-"r4d"       { return TOK_R4D;       }
-"r5d"       { return TOK_R5D;       }
-"r6d"       { return TOK_R6D;       }
-"r7d"       { return TOK_R7D;       }
-"r8d"       { return TOK_R8D;       }
-"r9d"       { return TOK_R9D;       }
-"r10d"      { return TOK_R10D;      }
-"r11d"      { return TOK_R11D;      }
-"r12d"      { return TOK_R12D;      }
-"r13d"      { return TOK_R13D;      }
-"r14d"      { return TOK_R14D;      }
-"r15d"      { return TOK_R15D;      }
-
-"r0w"       { return TOK_R0W;       }
-"r1w"       { return TOK_R1W;       }
-"r2w"       { return TOK_R2W;       }
-"r3w"       { return TOK_R3W;       }
-"r4w"       { return TOK_R4W;       }
-"r5w"       { return TOK_R5W;       }
-"r6w"       { return TOK_R6W;       }
-"r7w"       { return TOK_R7W;       }
-"r8w"       { return TOK_R8W;       }
-"r9w"       { return TOK_R9W;       }
-"r10w"      { return TOK_R10W;      }
-"r11w"      { return TOK_R11W;      }
-"r12w"      { return TOK_R12W;      }
-"r13w"      { return TOK_R13W;      }
-"r14w"      { return TOK_R14W;      }
-"r15w"      { return TOK_R15W;      }
+("r10"|"r10b"|"r10w"|"r10d"|"r10q")  { return TOK_R10;       }
+("r11"|"r11b"|"r11w"|"r11d"|"r11q")  { return TOK_R11;       }
+("r12"|"r12b"|"r12w"|"r12d"|"r12q")  { return TOK_R12;       }
+("r13"|"r13b"|"r13w"|"r13d"|"r13q")  { return TOK_R13;       }
+("r14"|"r14b"|"r14w"|"r14d"|"r14q")  { return TOK_R14;       }
+("r15"|"r15b"|"r15w"|"r15d"|"r15q")  { return TOK_R15;       }
 
 "rax"       { return TOK_RAX;       }
 "rbx"       { return TOK_RBX;       }
@@ -179,6 +130,10 @@ decdigit    [0..9]*
 "cl"        { return TOK_CL;        }
 "dl"        { return TOK_DL;        }
 
+"db"        { return TOK_DB;        }
+"dw"        { return TOK_DW;        }
+"dd"        { return TOK_DD;        }
+"dq"        { return TOK_DQ;        }
 
 "section"   { return TOK_SECTION;   }
 ".section"  { return TOK_SECTION;   }
@@ -196,6 +151,11 @@ decdigit    [0..9]*
     return TOK_LABEL;
 }
 {ident}     { return TOK_ID;      }
+
+["'][^"']*["']|[''][^']*['']* {
+    yylval.string_val = strdup(yytext);
+    return TOK_STRING;
+}
 
 \{                      { column += strlen(yytext); BEGIN(NEW_COMMENT);       }
 <NEW_COMMENT>\}         { column += strlen(yytext); BEGIN(INITIAL);           }
@@ -273,6 +233,9 @@ int main(int argc, char **argv)
        << "\texit(1);"                                                                              << std::endl
        << "}"                                                                                       << std::endl
                                                                                                     << std::endl
+       << "// -------------------------------------------------------------------"                  << std::endl
+       << "// this is our \"nain\" entry point of application start."                               << std::endl
+       << "// -------------------------------------------------------------------"                  << std::endl
        << "int main(int argc, char **argv)"                                                         << std::endl
        << "{"                                                                                       << std::endl
        << "\tJitRuntime rt;                     // Runtime specialized for JIT code executin."      << std::endl
