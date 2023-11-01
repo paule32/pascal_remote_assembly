@@ -49,9 +49,20 @@ decdigit    [0..9]*
 
 %%
 
+"adc"       { return TOK_ADC;       }
 "add"       { return TOK_ADD;       }
+"and"       { return TOK_AND;       }
+
 "call"      { return TOK_CALL;      }
+"cmp"       { return TOK_CMP;       }
+
+"je"        { return TOK_JE;        }
+"jmp"       { return TOK_JMP;       }
+"jnz"       { return TOK_JNZ;       }
+"jz"        { return TOK_JZ;        }
+
 "mov"       { return TOK_MOV;       }
+"nop"       { return TOK_NOP;       }
 "pop"       { return TOK_POP;       }
 "push"      { return TOK_PUSH;      }
 "ret"       { return TOK_RET;       }
@@ -170,10 +181,15 @@ decdigit    [0..9]*
 
 
 "section"   { return TOK_SECTION;   }
+".section"  { return TOK_SECTION;   }
+
 "."{ident}  {
     yylval.string_val = strdup(yytext);
     return TOK_SECT_ID;
 }
+
+{decdigit}  { return TOK_DEC;       }
+{hexdigit}  { return TOK_HEX;       }
 
 {ident}":"  {
     yylval.string_val = strdup(yytext);
@@ -187,6 +203,13 @@ decdigit    [0..9]*
 <NEW_COMMENT>.          { column += strlen(yytext); }
 
 ";".*                   { }
+
+\[          { return '['; }
+\]          { return ']'; }
+\+          { return '+'; }
+\-          { return '-'; }
+\*          { return '*'; }
+\,          { return ','; }
 
 [ \t]                   { column += 1; }
 (\n|\r\n)               { column  = 1; line++; }

@@ -659,7 +659,7 @@ if [[ -n "${built_dis}" ]]; then
     # ----------------------------------------
     # built parser script files ...
     # ----------------------------------------
-    ${BISON} -d -o${TMP}/AssemblerParser.cc  ${SRC}/assembler.y
+    ${BISON} -d -Wno-conflicts-rr -o${TMP}/AssemblerParser.cc  ${SRC}/assembler.y
     ${FLEX}  -i -o${TMP}/AssemblerScanner.cc ${SRC}/assembler.lex
     
     ${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/AssemblerParser.o  -c ${TMP}/AssemblerParser.cc
