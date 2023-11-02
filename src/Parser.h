@@ -202,18 +202,13 @@ extern void parser_cleanup();
 // -----------------------------------------------------------------
 #ifdef HAVE_PARSER_ASM
 
-# include "AssemblerScanner.h"
-# include "AssemblerParser.h"
-
-class AsmParser: public AssemblerParser
+class AsmParser
 {
-private:
-    AssemblerScanner scanner;
 public:
     // -------------------------------------------------------------
     // ctor: initialize, and allocate memory; depend on a file name.
     // -------------------------------------------------------------
-    AsmParser( char *filename );
+    AsmParser( char *filename, bool mode);
     AsmParser();
 
     JitRuntime             rt;  // Runtime specialized for JIT code excution
@@ -228,13 +223,7 @@ public:
         std::string,
         Label >
         asm_labels ;
-    
-    FILE           *    parser_file;
-    MyErrorHandler * myErrorHandler;
 
-    virtual void yyerror(char * msg);
-    virtual int  yylex();
-    
     // -------------------------------------------------------------
     // dtor: try to clean, and free allocated memory.
     // -------------------------------------------------------------

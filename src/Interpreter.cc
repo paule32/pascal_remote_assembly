@@ -14,9 +14,9 @@ AsmParser    * asm_parser ;
 char         * locale_utf8;
 
 std::map< std::string, asmjit::Label > app_Labels;
-
-int line   = 1;
-int column = 1;
+extern void asm_parser_main(void);
+extern "C"  int yyparse(void);
+extern "C"  FILE * yyin;
 
 // -----------------------------------------------------------------
 // extend the namespace STD with "tab" - to produce \t into stream:
@@ -72,6 +72,9 @@ int main(int argc, char **argv)
     }
     
     try {
+        // Get the system locale name
+        WCHAR localeName[LOCALE_NAME_MAX_LENGTH];
+        
         // ----------------------------
         // open file for input/read
         // ----------------------------
@@ -631,33 +634,6 @@ int main(int argc, char **argv)
             // ----------------------------
             asm_parser = new AsmParser(argv[1],true);
             
-            fh.open(fpath, std::fstream::in);
-            
-            if (!fh.is_open()) {
-                std::cout << "error: filer '" << argv[1]
-                          << "' file is not open."
-                          << std::endl;
-                return EXIT_FAILURE;
-            }
-            if (fh.fail()) {
-                std::cout << "error: file '" << argv[1]
-                          << "' could not be open."
-                          << std::endl;
-                return EXIT_FAILURE;
-            }
-
-            // ----------------------------
-            // parse the assembler text:
-            // ----------------------------
-            std::cout << "start...." << std::endl;
-            try  {
-            asm_parser->yyparse();
-            }
-            catch(std::exception &e) {
-                std::cout << "wh: " << e.what() << std::endl;
-            }
-            std::cout << "end...." << std::endl;
-            
             delete asm_parser;
         }   else {
             if (asm_parser != nullptr)
@@ -675,7 +651,6 @@ int main(int argc, char **argv)
     // we use try catch for errors:
     // ----------------------------
     catch (std::exception &e) {
-        delete lexer_input;
         std::cerr << "error: " << e.what()
                   << std::endl;
         return EXIT_FAILURE;
@@ -690,18 +665,14 @@ AsmParser::AsmParser( char *filename, bool mode )
     // try to open input file.
     // --------------------------------------------------------
     if (mode == false)
-        parser_file = fopen( filename, "rb" ); else
-        parser_file = fopen( filename, "r"  );
-    if(!parser_file)
+        yyin = fopen( filename, "rb" ); else
+        yyin = fopen( filename, "r"  );
+    if(!yyin)
     throw EPascalException_FileNotOpen (_("parser file could not be open."));
-        
-    yyin = parser_file;
     
     // ----------------------------
     // pre-tasks preparations ...
-    // ----------------------------
-    myErrorHandler = new MyErrorHandler();
-    
+    // ----------------------------    
     env      = Environment::host();
     features = CpuInfo::host().features();
     
@@ -709,10 +680,12 @@ AsmParser::AsmParser( char *filename, bool mode )
     
     code     = new CodeHolder();
     code->init(env, features, baseAddress);
-    code->setErrorHandler(myErrorHandler);
     
     cod_code = new x86::Builder  ( code );
     asm_code = new x86::Assembler( code );
+    
+    yyparse();
+    asm_parser_main();
 }
 
 // -----------------------------------------------------------------
@@ -738,42 +711,7 @@ AsmParser::~AsmParser()
     delete cod_code;
     delete     code;
     
-    delete lexer_input;
-    fclose(parser_file);
+    fclose(yyin);
 }
 
 AsmParser::AsmParser() { }
-
-// -----------------------------------------------------------------
-// handle parser/scanning error's ...
-// -----------------------------------------------------------------
-void AsmParser::yyerror(char * msg)
-{
-    std::cerr
-    << yylloc.last_line
-    << ":"    << yylloc.last_column
-    << ": "   << msg
-    << " : <" << yylloc.text
-    << ">"    << std::endl;
-}
-
-// -----------------------------------------------------------------
-// get token from scanner text:
-// -----------------------------------------------------------------
-int AsmParser::yylex()
-{
-    yylloc.first_line   = scanner.line;
-    yylloc.first_column = scanner.column;
-
-    int token = scanner.yylex(&yylval, &yylloc);
-
-    yylloc.last_line    = scanner.line  ;
-    yylloc.last_column  = scanner.column;
-
-    yylloc.text = (char *)scanner.yytext;
-
-    return token;
-}
-
-extern "C" void yyerror(char *err) { asm_parser->yyerror(err); }
-

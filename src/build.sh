@@ -666,12 +666,15 @@ if [[ -n "${built_dis}" ]]; then
         -o${TMP}/AssemblerParser.cc  ${SRC}/assembler.y
     ${FLEX}  -i -o${TMP}/AssemblerScanner.cc ${SRC}/assembler.lex
     
+    ${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/Interpreter.o      -c ${SRC}/Interpreter.cc
     ${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/AssemblerParser.o  -c ${TMP}/AssemblerParser.cc
     ${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/AssemblerScanner.o -c ${TMP}/AssemblerScanner.cc
 
     ${GXX} ${FLAGS} -DHAVE_PARSER_ASM -o ${TMP}/diss.exe \
-        ${TMP}/AssemblerParser.o \
-        ${TMP}/AssemblerScanner.o -lintl
+        ${TMP}/Interpreter.o      \
+        ${TMP}/AssemblerParser.o  \
+        ${TMP}/AssemblerScanner.o \
+        -L./asmjit -lasmjit -lintl
 
     strip ${TMP}/diss.exe
     echo "done"
