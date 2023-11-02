@@ -72,8 +72,61 @@ int main(int argc, char **argv)
     }
     
     try {
+        // ----------------------------------------------
         // Get the system locale name
+        // ----------------------------------------------
         WCHAR localeName[LOCALE_NAME_MAX_LENGTH];
+        result = GetUserDefaultLocaleName(
+            localeName,
+            LOCALE_NAME_MAX_LENGTH);
+        // ----------------------------------------------
+        // Get the ANSI code page for the current locale
+        // ----------------------------------------------
+        if (result > 0) {
+            int ansiCodePage = GetLocaleInfoEx(
+                localeName,
+                LOCALE_IDEFAULTANSICODEPAGE,
+                NULL,
+                0);
+            if (ansiCodePage > 0) {
+                wchar_t* ansiCodePageBuffer = new wchar_t[ansiCodePage];
+                GetLocaleInfoEx(
+                localeName,
+                LOCALE_IDEFAULTANSICODEPAGE,
+                ansiCodePageBuffer,
+                ansiCodePage);
+                
+                std::wcout
+                << L"ANSI Code Page: "
+                << ansiCodePageBuffer
+                << std::endl;
+                
+                delete [] ansiCodePageBuffer;
+            }
+
+            // ---------------------------------------------
+            // Get the OEM code page for the current locale
+            // ---------------------------------------------
+            int oemCodePage = GetLocaleInfoEx(
+                localeName,
+                LOCALE_IDEFAULTCODEPAGE,
+                NULL,
+                0);
+            if (oemCodePage > 0) {
+                wchar_t* oemCodePageBuffer = new wchar_t[oemCodePage];
+                GetLocaleInfoEx(
+                localeName,
+                LOCALE_IDEFAULTCODEPAGE,
+                oemCodePageBuffer, oemCodePage);
+                
+                std::wcout
+                << L"OEM Code Page: "
+                << oemCodePageBuffer
+                << std::endl;
+                
+                delete [] oemCodePageBuffer;
+            }
+        }
         
         // ----------------------------
         // open file for input/read

@@ -18,6 +18,7 @@
 # include <string>
 # include <algorithm>
 # include <vector>
+# include <map>
 
 // -----------------------------------------------------------------
 // YY parser forwarder to C library ...
@@ -31,7 +32,9 @@ extern "C" {
 // -----------------------------------------------------------------
 // std c++ container:
 // -----------------------------------------------------------------
-std::vector< std::string > section_vector;        // section
+std::vector< std::string      > section_vector;   // section
+std::map   < std::string, int > address_map;      // map string to address
+
 std::stringstream          output_stream;         // code
 std::stringstream          output_stream_labels;  // label's
 
@@ -172,14 +175,38 @@ program_top
            << "\tif (err)"    << std::endl
            << "\tyyerror(gettext(\"failed create label\"));"
            << std::endl;
-
         output_stream_labels << ss.str();
         
-        ss(std::string(""));
-        ss << "\terr = a.bind(lbl_" << str << ");"          << std::endl
-           << "\tif (err)"                                  << std::endl
-           << "\tyyerror(gettext(\"failed bind label\"));"  << std::endl;
-        output_stream << ss.str();
+        // ---------------------------------------
+        // check, if label is data or funcall ...
+        // ---------------------------------------
+        std::stringstream fun;
+        fun << "Fc_" << str;
+        ss  << std::endl;
+        
+        if (address_map.find( fun.str() ) != address_map.end()) {
+            address_map[ fun.str() ] = 0;
+            // -----------------------------------
+            // if found, then bind ...
+            // -----------------------------------
+            ss.str(std::string(""));
+            ss << "\terr = a.bind(lbl_" << str << ");"
+               << std::endl << "\tif (err)"
+               << std::endl << "\tyyerror(gettext(\"failed bind local label\"));"
+               << std::endl;
+        }   else {
+            // -----------------------------------
+            // else, add it ...
+            // -----------------------------------
+            ss.str(std::string(""));
+            std::stringstream s2;
+            
+            s2  << std::endl << "\terr = a.bind(lbl_" << str << ");"
+                << std::endl << "\tif (err) yyerror(gettext(\"failed bind global label\"));"
+                << std::endl ;
+                
+            output_stream << s2.str();
+        }   output_stream << ss.str();
     }
     | _tok_ddata
     | TOK_ADC {
@@ -233,7 +260,6 @@ program_top
     | TOK_MOV   _tok_reg ',' _tok_id {
         std::stringstream ss;
         std::string str = $4;
-        std::string pat = "Lv_";
         
         if (str.empty())
         yyerror(gettext("string is empty"));
@@ -245,11 +271,35 @@ program_top
            << std::endl;
         output_stream << ss.str();
     }
-    | TOK_POP   _tok_reg
+    | TOK_POP   _tok_reg {
+        std::stringstream ss;
+        std::string str = $2;
+        
+        ss << "\tx86::pop("
+           << str
+           << ");"
+           << std::endl;
+        output_stream << ss.str();
+    }
     | TOK_PUSH  _tok_reg
-    | TOK_RET
+    | TOK_RET {
+        std::stringstream ss;
+        ss << "\tx86::ret();" << std::endl;
+        output_stream << ss.str();
+    }
     | TOK_SUB   _tok_reg ',' _tok_num
     | TOK_CALL  _tok_id {
+        std::stringstream ss;
+        std::string str = $2;
+        
+        if (str.empty())
+        yyerror(gettext("string is empty"));
+        
+        ss << "\tx86::call("
+           << str
+           << ");"
+           << std::endl;
+        output_stream << ss.str();
     }
     ;
     
