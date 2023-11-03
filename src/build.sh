@@ -280,13 +280,27 @@ function run_build_prepare () {
     fi
 
     # ---------------------
+    # install boost lib:
+    # ---------------------
+    if [[ -n "${DLG}" ]]; then
+        printf '\033[8;%d;%dt' $rows $cols
+        dlg="(exit 1) | $dlgs --title \"${!errloc[13]}\" "
+        dlg+="--gauge \"${!errloc[14]}\" 10 79 13"
+        eval "$dlg"
+        yes | pacman -S mingw-w64-x86_64-boost 2&> /dev/null
+    else
+        yes | pacman -S mingw-w64-x86_64-boost
+        run_abort $? "boost install"
+    fi
+    
+    # ---------------------
     # create temporary dir:
     # ---------------------
     if [[ -z "${TMP}" ]]; then
         if [[ -n "${DLG}" ]]; then
             printf '\033[8;%d;%dt' $rows $cols
             dlg="(exit 1) | $dlgs --title \"${!errloc[13]}\" \
-            --gauge \"${!errloc[14]}\" 10 79 13"
+            --gauge \"${!errloc[14]}\" 10 79 14"
             eval "$dlg"
         fi
         mkdir -p ${TMP}
@@ -671,10 +685,10 @@ if [[ -n "${built_dis}" ]]; then
     ${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/AssemblerScanner.o -c ${TMP}/AssemblerScanner.cc
 
     ${GXX} ${FLAGS} -DHAVE_PARSER_ASM -o ${TMP}/diss.exe \
-        ${TMP}/Interpreter.o      \
-        ${TMP}/AssemblerParser.o  \
-        ${TMP}/AssemblerScanner.o \
-        -L./asmjit -lasmjit -lintl
+        ${TMP}/Interpreter.o       \
+        ${TMP}/AssemblerParser.o   \
+        ${TMP}/AssemblerScanner.o  \
+        -L./asmjit -lasmjit -lintl -lboost_program_options-mt
 
     strip ${TMP}/diss.exe
     echo "done"

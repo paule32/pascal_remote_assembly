@@ -59,8 +59,10 @@
 # include <unordered_map>
 # include <map>
 # include <any>
+# include <filesystem>
 # include <memory>
 # include <functional>
+# include <codecvt>         // wstr to str
 # include <locale>
 # include <iomanip>
 # include <exception>       // exception handler's
@@ -208,7 +210,7 @@ public:
     // -------------------------------------------------------------
     // ctor: initialize, and allocate memory; depend on a file name.
     // -------------------------------------------------------------
-    AsmParser( char *filename, bool mode);
+    AsmParser( const char *filename, bool mode );
     AsmParser();
 
     JitRuntime             rt;  // Runtime specialized for JIT code excution

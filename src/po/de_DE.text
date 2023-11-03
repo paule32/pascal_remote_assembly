@@ -134,3 +134,21 @@ msgstr ".text Section konnte nicht erstellt werden."
 
 msgid ".asm output file could not be created."
 msgstr ".asm Ausgabe-Datei konnte nicht erstellt werden."
+
+msgid "input assembly file missing."
+msgstr ".asm Eingabe-Datei wurde nicht gefunden."
+
+msgid "input main C++ file must have extension .asm"
+msgstr "Haupt-Eingabe-Datei muss .asm als Datei-Erweiterung haben."
+
+msgid "output main C++ file missing, use default."
+msgstr "Haupt-Ausgabe-Datei nicht angegeben, verwende Standard."
+
+msgid "output main C++ file must have extension .cc"
+msgstr "Haupt-Ausgabe-Datei muss .cc als Datei-Erweitert haben."
+
+msgid "output header C++ file missing, use default."
+msgstr "C++ Header-Datei nicht angegeben, verwende Standard."
+
+msgid "output header C++ file must have extension .h"
+msgstr "Für die C++ Header-Datei wird .h als Datei-Erweiterung erwartet."
