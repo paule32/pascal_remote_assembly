@@ -35,9 +35,10 @@ extern "C" {
 std::vector< std::string      > section_vector;   // section
 std::map   < std::string, int > address_map;      // map string to address
 
-std::stringstream          output_stream;         // code
-std::stringstream          output_stream_labels;  // label's
+std::stringstream  output_stream;         // code
+std::stringstream  output_stream_labels;  // label's
 
+std::stringstream  ts2,ts3;
 %}
 
 %union {
@@ -172,8 +173,7 @@ program_top
         ss << "\tLabel lbl_"  << str << " = a.newNamedLabel("
            << "\""            << str << "\", SIZE_MAX);"
            << std::endl
-           << "\tif (err)"    << std::endl
-           << "\tyyerror(gettext(\"failed create label\"));"
+           << "\tif (err) yyerror(err_lbl.c_str());"
            << std::endl;
         output_stream_labels << ss.str();
         
@@ -191,8 +191,7 @@ program_top
             // -----------------------------------
             ss.str(std::string(""));
             ss << "\terr = a.bind(lbl_" << str << ");"
-               << std::endl << "\tif (err)"
-               << std::endl << "\tyyerror(gettext(\"failed bind local label\"));"
+               << std::endl << "\tif (err) yyerror(err_lbl.c_str());"
                << std::endl;
         }   else {
             // -----------------------------------
@@ -202,7 +201,7 @@ program_top
             std::stringstream s2;
             
             s2  << std::endl << "\terr = a.bind(lbl_" << str << ");"
-                << std::endl << "\tif (err) yyerror(gettext(\"failed bind global label\"));"
+                << std::endl << "\tif (err) yyerror(err_lbl.c_str());"
                 << std::endl ;
                 
             output_stream << s2.str();
@@ -249,7 +248,7 @@ program_top
     | TOK_MOV   _tok_reg ',' _tok_imm32   {
         std::stringstream ss;
         std::string str = $4;
-        std::cout << "imm32: " << str << std::endl;
+        std::cout << "// imm32: " << str << std::endl;
         ss << "\tx86::mov("
            << $2 << ','
            << str
@@ -281,13 +280,23 @@ program_top
            << std::endl;
         output_stream << ss.str();
     }
-    | TOK_PUSH  _tok_reg
+    | TOK_PUSH  _tok_reg {
+        std::stringstream ss;
+        ss << "\tx86::push(" << $2 << ");"
+           << std::endl;
+        output_stream << ss.str();
+    }
     | TOK_RET {
         std::stringstream ss;
         ss << "\tx86::ret();" << std::endl;
         output_stream << ss.str();
     }
-    | TOK_SUB   _tok_reg ',' _tok_num
+    | TOK_SUB   _tok_reg ',' _tok_num {
+        std::stringstream ss;
+        ss << "\tx86::sub(" << $2 << "," << $4 << ");"
+           << std::endl;
+        output_stream << ss.str();
+    }
     | TOK_CALL  _tok_id {
         std::stringstream ss;
         std::string str = $2;
@@ -428,22 +437,54 @@ _reg8l
     
 _tok_mem
     :  _mem_ptr { $$ = $1; }
-    | __mem_ptr { $$ = $1; }
-    ;
-_mem_ptr
-    : _mem_ptr_byte  __mem_ptr
-    | _mem_ptr_word  __mem_ptr
-    | _mem_ptr_dword __mem_ptr
-    | _mem_ptr_qword __mem_ptr
     ;
 
-_mem_ptr_byte  : TOK_BYTE  TOK_PTR { $$ = $1; } | TOK_BYTE  ;
-_mem_ptr_word  : TOK_WORD  TOK_PTR { $$ = $1; } | TOK_WORD  ;
-_mem_ptr_dword : TOK_DWORD TOK_PTR { $$ = $1; } | TOK_DWORD ;
-_mem_ptr_qword : TOK_QWORD TOK_PTR { $$ = $1; } | TOK_QWORD ;
+_mem_ptr
+    : _mem_ptr_byte  { $$ = $1; }
+    | _mem_ptr_word  { $$ = $1; }
+    | _mem_ptr_dword { $$ = $1; }
+    | _mem_ptr_qword { $$ = $1; }
+    ;
+
+_mem_ptr_byte
+    : TOK_BYTE __mem_ptr {
+        std::stringstream ss;
+        ss << "x86::byte_ptr" << $2;
+        $$ = strdup( ss.str().c_str());
+    }
+    ;
+_mem_ptr_word
+    : TOK_WORD __mem_ptr {
+        std::stringstream ss;
+        ss << "x86::word_ptr" << $2;
+        $$ = strdup( ss.str().c_str());
+    }
+    ;
+
+_mem_ptr_dword
+    : TOK_DWORD  __mem_ptr {
+        std::stringstream ss;
+        ss << "x86::dword_ptr" << $2;
+        $$ = strdup( ss.str().c_str());
+    }
+    ;
+    
+_mem_ptr_qword
+    : TOK_QWORD __mem_ptr {
+        std::stringstream ss;
+        ss << "x86::qword_ptr" << $2;
+        $$ = strdup( ss.str().c_str());
+    }
+    ;
 
 __mem_ptr
-    : '[' _tok_reg '+' _tok_num ']'
+    : '[' _tok_reg '+' _tok_num ']' {
+        std::stringstream ss;
+        ss << "("      << $2 << ", "
+           << std::hex << $4
+           << std::dec << ")";
+        $$ = strdup(ss.str().c_str());
+    }
     ;
 
 _tok_imm32

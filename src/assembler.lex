@@ -306,6 +306,7 @@ void asm_parser_main(void)
        << "\t          rt.cpuFeatures());"                                                          << std::endl
                                                                                                     << std::endl
        << "\tx86::Assembler a(&code);           // Create and attach x86::Assembler to code."       << std::endl
+       << "\tstd::string err_lbl(\"failed bind label.\");"                                          << std::endl
                                                                                                     << std::endl
                                                                                                     
        << output_stream_labels.str()  << std::endl

@@ -870,7 +870,7 @@ int main(int argc, char **argv)
         // check, if input, and output file is ok
         // --------------------------------------
         if (file_input_asm.empty()) {
-            std::cerr << gettext("input assembly file missing.") << std::endl;
+            std::cerr << "// " <<  gettext("input assembly file missing.") << std::endl;
             return EXIT_FAILURE;
         }   else {
             std::stringstream ss;
@@ -878,21 +878,21 @@ int main(int argc, char **argv)
             // asm input
             std::string ext(ExtractFileExtension(file_input_asm));
             if (ext != ".asm") {
-                std::cerr << gettext("input main C++ file must have extension .asm")
+                std::cerr << "// " <<  gettext("input main C++ file must have extension .asm")
                           << std::endl;
                 return EXIT_FAILURE;
             }
             
             // c++ output.cc
             if (file_output_cm.empty()) {
-                std::cout << gettext("output main C++ file missing, use default.")
+                std::cout << "// " <<  gettext("output main C++ file missing, use default.")
                           << std::endl;
                 file_output_cm = "aout_main.cc";
             }
             else {
                 std::string ext(ExtractFileExtension(file_output_cm));
                 if ((ext != ".cc") || (ext != ".cc")) {
-                    std::cout << gettext("output main C++ file must have extension .cc")
+                    std::cout << "// " << gettext("output main C++ file must have extension .cc")
                               << std::endl;
                     return EXIT_FAILURE;
                 }
@@ -900,14 +900,14 @@ int main(int argc, char **argv)
             
             // c++ header.h
             if (file_output_ch.empty()) {
-                std::cout << gettext("output header C++ file missing, use default.")
+                std::cout << "// " <<  gettext("output header C++ file missing, use default.")
                           << std::endl;
                 file_output_ch = "aout_header.h";
             }
             else {
                 std::string ext(ExtractFileExtension(file_output_ch));
                 if ((ext != ".h") || (ext != ".H")) {
-                    std::cout << gettext("output header C++ file must have extension .h")
+                    std::cout << "// " <<  gettext("output header C++ file must have extension .h")
                               << std::endl;
                     return EXIT_FAILURE;
                 }
@@ -915,13 +915,13 @@ int main(int argc, char **argv)
             
             // c++ misc.cc
             if (file_output_ct.empty()) {
-                std::cout << "output tool C++ file missing, use default." << std::endl;
+                std::cout << "// " <<  "output tool C++ file missing, use default." << std::endl;
                 file_output_ct = "aout_misc.cc";
             }
             else {
                 std::string ext(ExtractFileExtension(file_output_ct));
                 if ((ext != ".cc") || (ext != ".cc")) {
-                    std::cout << "output misc C++ file must have extension .cc" << std::endl;
+                    std::cout << "// " <<  "output misc C++ file must have extension .cc" << std::endl;
                     return EXIT_FAILURE;
                 }
             }
@@ -987,7 +987,7 @@ AsmParser::AsmParser( const char *filename, bool mode )
 // -----------------------------------------------------------------
 AsmParser::~AsmParser()
 {
-    std::cout << _("please wait...") << std::endl;
+    std::cout << "// " <<  _("please wait...") << std::endl;
 
     // -------------------------------------------------------------
     // at terminating application, delete de-packed .mo file.
