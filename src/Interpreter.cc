@@ -28,6 +28,7 @@ std::string file_output_ct;         // output misc/tools C++ file
 extern void asm_parser_main(void);
 extern "C"  int yyparse(void);
 extern "C"  FILE * yyin;
+extern      int  TurboMain(void);   // console TUI - Turbo Vision
 
 static bool found_args = false;     // program command line arguments
 
@@ -785,7 +786,8 @@ int main(int argc, char **argv)
         options_description general("General Options");
             general.add_options()
             ("help,h"  , "Help screen")
-            ("locale,l", value< std::string >()->default_value("en"  ), "locale");
+            ("locale,l", value< std::string >()->default_value("en"  ), "country locale")
+            ("gui,g"   , "TUI - Text User Interface");
             
         options_description input_long("Input Options (long)");
             input_long.add_options()
@@ -864,6 +866,14 @@ int main(int argc, char **argv)
         if (locale_str.empty()) {
             locale_str = "en";
             found_args = true;
+        }
+        
+        
+        // --------------------------------------
+        // open textual GUI: TurboVision for DOS
+        // --------------------------------------
+        if (vm.count("gui")) {
+            return TurboMain();
         }
         
         // --------------------------------------

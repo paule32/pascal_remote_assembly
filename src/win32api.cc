@@ -42,7 +42,7 @@ void Parser::ASM_Code::init_win32api()
     
     char * buffer  = new char[20480];
     sprintf(buffer,
-            "; T 0x%p MessageBoxA" "\n"
+            "; T 0x%p extern_MessageBoxA" "\n"
             "; T 0x%p Lv_Entry__lpText"      "\n"
             "; T 0x%p Lv_Entry__lpCapt"      "\n"
             "; T 0x%p Lv_Entry__lpMsgM"      "\n"
@@ -123,8 +123,8 @@ bool Parser::ASM_Code::user32_MessageBox()
         // -------------------------------------------
         char  * buffer = new char[1024];
         sprintf(buffer,
-            "; T 0x%p MessageBoxA\n"
-            "MessageBoxA:\n\tdq 0x%p\n",
+            "; T 0x%p extern_MessageBoxA\n"
+            "extern_MessageBoxA:\n\tdq 0x%p\n",
             ::MessageBoxA,
             ::MessageBoxA
         );

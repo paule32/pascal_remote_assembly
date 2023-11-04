@@ -13,11 +13,13 @@ TMP=$(echo "${PWD}/${TEMP}")
 FLAGS=$(echo "-std=c++20 -O2 -fPIC " \
     "-Wno-pmf-conversions   " \
     "-Wno-register          " \
+    "-Wno-volatile          " \
     "-Wno-write-strings     " \
     "-DASMJIT_STATIC        " \
     "-DASMJIT_BUILD_RELEASE " \
     "-DASMJIT_NO_AARCH64    " \
-    "-I/E/msys64/mingw64/usr/include -I${SRC}/asmjit -I${TMP}")
+    "-I/E/msys64/mingw64/usr/include "  \
+    "-I../include -I../include/tvision -I${SRC}/asmjit -I${TMP}")
 # -----------------------------------------------------------------
 ST1="s/\\\"Last\\-Translator\\: .*\\n\\\"/\\\"Last-Translator\\:"
 ST2="Jens Kallup \\<paule32\\.jk\\@gmail\\.com\\>\\n\\\"/g"
@@ -81,6 +83,12 @@ msg_de_DE_0022="Übersetzung abgeschloßen"
 msg_de_DE_0023="\nDas Programm/Package wurde erfolgreich erstellt."
 msg_de_DE_0024="Erfolgreich"
 msg_de_DE_0025="\nAlle Aufgaben wurden erfolgreich ausgeführt."
+msg_de_DE_0026="Löschen der Debug-Informationen"
+msg_de_DE_0027="\nverkleinere Anwendungs-Datei, um die Debug-Informationen-"
+msg_de_DE_0028="Erstelle Script Dateien"
+msg_de_DE_0029="Die Skript-Dateien für Lexer,und Parser werden erstellt..."
+msg_en_US_0030="Fehler aufgetretten"
+msg_en_US_0031="Es wurde ein Fehler vom Compiler zurückgegeben."
 # -----------------------------------------------------------------
 msg_en_US_0000="English"
 msg_en_US_0001="gattering setup data..."
@@ -112,6 +120,12 @@ msg_en_US_0023="\nThe Compiler return successfully.\n"
 msg_en_US_0023+="Application/Package was built."
 msg_en_US_0024="Successfull"
 msg_en_US_0025="\nAll task's was built successfully."
+msg_en_US_0026="Delete Debug-Information"
+msg_en_US_0027="shrink Application, delete Debug-Informations-"
+msg_en_US_0028="Create Lexer/Parser"
+msg_en_US_0029="Create script files for Lexer, and Parser..."
+msg_en_US_0030="Error occured."
+msg_en_US_0031="Error occured while compile file: "
 # -----------------------------------------------------------------
 xlen=$(tput cols)
 ylen=$(tput lines)
@@ -125,10 +139,9 @@ dwidth=$(($xlen - $(($bx * 2))))
 # leave some padding at the bottom
 dheight=$(($ylen - $(($by + $padbottom))))
 lic=$(cat ../LICENSE)
-bgtitle="Pascal Doxy version 0.0.1 (c) 2923 by paule32"
 cols="92"
 rows="$(stty size | cut -d ' ' -f 1)"
-dlgs="${DLG} --backtitle '$bgtitle'"
+dlgs="${DLG} --backtitle \"Pascal Doxy version 0.0.1 (c) 2923 by paule32\""
 # -----------------------------------------------------------------
 # place holder to provide a global common abort function:
 # -----------------------------------------------------------------
@@ -164,7 +177,7 @@ function run_build_prepare () {
     # --------------------------------------
     # fill the localization array with text:
     # --------------------------------------
-    for cnt in {0..27}; do
+    for cnt in {0..31}; do
         number=$(printf "%04d" $cnt)
         eval "Z=msg_${build_locale}_\$number"
         errloc+=("${Z}")
@@ -313,12 +326,25 @@ function run_build_prepare () {
 # check last command return value. if it > 0 then error message ...
 # -----------------------------------------------------------------
 function run_check () {
-    if [[ ! $1 -eq 0 ]]; then
-        echo "Error: ($2) exec failed. =]"
-        echo "aborted."
-        cd ${SRC}
-        exit $1
+    if [[ $1 -eq 0 ]]; then
+        return
     fi
+    if [[ -z "$2" ]]; then
+        printf '\033[8;%d;%dt' $rows $cols
+        /usr/bin/dialog --backtitle "Pascal Doxy version 0.0.1 (c) 2923 by paule32" \
+        --title "Success" --msgbox "no error detected" 14 79
+        cd ${SRC}
+        clear
+        exit 1 
+    fi
+    if [[ -n "${DLG}" ]]; then
+        printf '\033[8;%d;%dt' $rows $cols
+        /usr/bin/dialog --backtitle "Pascal Doxy version 0.0.1 (c) 2923 by paule32" \
+        --title "Error" --msgbox "$2" 14 79
+    fi
+    cd ${SRC}
+    clear
+    exit 1
 }
 # -----------------------------------------------------------------
 # check, if file exists. no? then exit ...
@@ -655,7 +681,7 @@ if [[ -n "${built_app}" ]]; then
 
     if [[ -n "${DLG}" ]]; then
         printf '\033[8;%d;%dt' $rows $cols
-        dlg="(sleep 4 ; exit 1) | $dlgs --title \"${!errloc[25]}\" \
+        dlg="(exit 1) | $dlgs --title \"${!errloc[25]}\" \
         --msgbox \"${!errloc[26]}\" 10 79"
         eval "$dlg"
     fi
@@ -668,10 +694,17 @@ fi
 # ----------------------------------------
 if [[ -n "${built_dis}" ]]; then
     cd ${TMP}
-    echo "compile disassemler..."
-    
+    run_build_prepare
+    if [[ -z "${DLG}" ]]; then
+        echo "compile disassemler..."
+    else
+        printf '\033[8;%d;%dt' $rows $cols
+        dlg="(exit 1) | $dlgs --title \"${!errloc[29]}\" \
+        --gauge \"${!errloc[30]}\" 10 79 70"
+        eval "$dlg"
+    fi
     # ----------------------------------------
-    # built parser script files ...
+    # buils parser script files ...
     # ----------------------------------------
     ${BISON} -d           \
         -Wno-conflicts-rr \
@@ -680,59 +713,69 @@ if [[ -n "${built_dis}" ]]; then
         -o${TMP}/AssemblerParser.cc  ${SRC}/assembler.y
     ${FLEX}  -i -o${TMP}/AssemblerScanner.cc ${SRC}/assembler.lex
     
-    ${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/Interpreter.o      -c ${SRC}/Interpreter.cc
-    ${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/AssemblerParser.o  -c ${TMP}/AssemblerParser.cc
-    ${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/AssemblerScanner.o -c ${TMP}/AssemblerScanner.cc
+    if [[ -z "${DLG}" ]]; then
+        echo "compile parser objects..."
+    else
+        printf '\033[8;%d;%dt' $rows $cols
+        dlg="(exit 1) | $dlgs --title \"${!errloc[19]}\" \
+        --gauge \"${!errloc[20]}\" 10 79 70"
+        eval "$dlg"
+    fi
+    # ----------------------------------------
+    # build parser object files ...
+    # ----------------------------------------
+    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/Interpreter.o      -c ${SRC}/Interpreter.cc      2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/AssemblerParser.o  -c ${TMP}/AssemblerParser.cc  2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/AssemblerScanner.o -c ${TMP}/AssemblerScanner.cc 2>&1 ); run_check $? "${cmd}"
+    
+    # ----------------------------------------
+    # build turbo vision stuff ...
+    # ----------------------------------------
+    cmd=$(${GXX} ${FLAGS} -o${TMP}/Turbo.o    -c ${SRC}/Turbo.cc    2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -o${TMP}/forms.o    -c ${SRC}/forms.cc    2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -o${TMP}/datacoll.o -c ${SRC}/datacoll.cc 2>&1 ); run_check $? "${cmd}"
 
-    ${GXX} ${FLAGS} -DHAVE_PARSER_ASM -o ${TMP}/diss.exe \
+    # ----------------------------------------
+    # link diss.exe application ...
+    # ----------------------------------------
+    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -o ${TMP}/diss.exe \
+        ${TMP}/Turbo.o             \
+        ${TMP}/forms.o             \
         ${TMP}/Interpreter.o       \
         ${TMP}/AssemblerParser.o   \
         ${TMP}/AssemblerScanner.o  \
-        -L./asmjit -lasmjit -lintl -lboost_program_options-mt
+        -L./ -L./asmjit            \
+        -lasmjit                   \
+        -lintl                     \
+        -ltvision                  \
+        -lboost_program_options-mt \
+        -static-libgcc -static-libstdc++ 2>&1 ); run_check $? "${cmd}"
 
-    strip ${TMP}/diss.exe
-    echo "done"
+    if [[ -z "${DLG}" ]]; then
+        echo "compile disassemler..."
+    else
+        printf '\033[8;%d;%dt' $rows $cols
+        dlg="(exit 1) | $dlgs --title \"${!errloc[27]}\" \
+        --gauge \"${!errloc[28]}\" 10 79 78"
+        eval "$dlg"
+    fi
     
-    cd ${SRC}
-    exit 1
+    # ----------------------------------------
+    # strip debug informations, shrink .exe
+    # ----------------------------------------
+    cmd=$(strip ${TMP}/diss.exe 2>&1); run_check $? "${cmd}"
 
     # ----------------------------------------
-    # compile C++ source files ...
+    # display "done" message ...
     # ----------------------------------------
-    DAT=""
-    for i in ${!obj_array2[@]}; do
-        DAT="${obj_array2[$i]}"
-        
-        ${GXX} ${FLAGS} -DHAVE_PARSER_ASM -o ${TMP}/${DAT}.o \
-        -c ${SRC}/${DAT}.cc
-        
-        run_check $? "${DAT}.o"
-    done
-    # ----------------------------------------
-    # compile lexe + parser source files ...
-    # ----------------------------------------
-    for i in ${!obj_array3[@]}; do
-        DAT="${obj_array3[$i]}"
-        
-        ${GXX} ${FLAGS} -DHAVE_PARSER_ASM -o ${TMP}/${DAT}.o \
-        -c ${TMP}/${DAT}.cc
-        
-        run_check $? "${DAT}.o"
-    done
-    # ----------------------------------------
-    # link all together (.o files) ...
-    # ----------------------------------------
-    DAT=""
-    for i in ${!obj_array2[@]}; do DAT+="${TMP}/${obj_array2[$i]}.o "; done
-    for i in ${!obj_array3[@]}; do DAT+="${TMP}/${obj_array3[$i]}.o "; done
+    if [[ -n "${DLG}" ]]; then
+        printf '\033[8;%d;%dt' $rows $cols
+        dlg="(exit 1) | $dlgs --title \"${!errloc[25]}\" \
+        --msgbox \"${!errloc[26]}\" 10 79"
+        eval "$dlg"
+        clear
+    fi
     
-    ${GXX} -o ${TMP}/diss.exe ${DAT} \
-        -L${TMP}/asmjit -lasmjit   \
-        -lintl -lgmpxx
-    run_check $? "diss.exe"
-
-    strip diss.exe
-    printf "done.\n"
     cd ${SRC}
     exit 1
 fi
