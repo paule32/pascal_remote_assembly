@@ -24,8 +24,6 @@ FLAGS=$(echo "-std=c++20 -O2 -fPIC " \
 ST1="s/\\\"Last\\-Translator\\: .*\\n\\\"/\\\"Last-Translator\\:"
 ST2="Jens Kallup \\<paule32\\.jk\\@gmail\\.com\\>\\n\\\"/g"
 # -----------------------------------------------------------------
-ATXT="| awk '{print \$3}' | cut -d '=' -f 2"
-# -----------------------------------------------------------------
 # prepare compilation tasks ...
 # -----------------------------------------------------------------
 obj_array1=("PascalParser" "PascalScanner" "x86Code" "parser" \
@@ -147,8 +145,55 @@ dlgs="${DLG} --backtitle \"Pascal Doxy version 0.0.1 (c) 2923 by paule32\""
 # -----------------------------------------------------------------
 errloc=()
 function run_abort () {
-    echo "${!errloc[8]}"
+    if [[ $1 -eq 0 ]]; then
+        return
+    else
+        if [[ -n "${DLG}" ]]; then
+            printf '\033[8;%d;%dt' $rows $cols
+            eval "${dlgs} --title \"Error\" --msgbox \"$2\" 14 79"
+            cd ${SRC}
+            clear
+            exit 1
+        else
+            echo "Error: $2"
+            cd ${SRC}
+            exit 1
+        fi
+    fi
     exit 1
+}
+# -----------------------------------------------------------------
+# check last command return value. if it > 0 then error message ...
+# -----------------------------------------------------------------
+function run_check () {
+    if [[ $1 -eq 0 ]]; then
+        return
+    fi
+    if [[ -z "$2" ]]; then
+        if [[ -n "${DLG}" ]]; then
+            printf '\033[8;%d;%dt' $rows $cols
+            eval "${dlgs} --title \"Success\" --msgbox \"no error detected\" 14 79"
+            cd ${SRC}
+            clear
+            exit 1
+        else
+            echo "no error detected."
+            cd ${SRC}
+            exit 1
+        fi
+    else
+        if [[ -n "${DLG}" ]]; then
+            printf '\033[8;%d;%dt' $rows $cols
+            eval "${dlgs} --title \"Error\" --msgbox \"$2\" 14 79"
+            cd ${SRC}
+            clear
+            exit 1
+        else
+            echo "Error: $2"
+            cd ${SRC}
+            exit 1
+        fi
+    fi
 }
 # -----------------------------------------------------------------
 # default build locale is: en_US
@@ -204,8 +249,7 @@ function run_build_prepare () {
             eval "$dlg"
             # todo
         else
-            echo "${!errloc[3]} mkdir: ${!errloc[7]} =]"
-            run_abort
+            run_abort 1 "${!errloc[3]} mkdir: ${!errloc[7]} =]"
         fi
     fi
 
@@ -220,8 +264,7 @@ function run_build_prepare () {
             eval "$dlg"
             # todo
         else
-            echo "${!errloc[3]} gcc: ${!errloc[7]} =]"
-            run_abort
+            run_abort 1 "${!errloc[3]} gcc: ${!errloc[7]} =]"
         fi
     fi
     
@@ -237,8 +280,7 @@ function run_build_prepare () {
             exit 1
             # todo
         else
-            echo "${!errloc[3]} g++: ${!errloc[7]} =]"
-            run_abort
+            run_abort 1 "${!errloc[3]} g++: ${!errloc[7]} =]"
         fi
     fi
 
@@ -249,8 +291,7 @@ function run_build_prepare () {
         yes | pacman -Sy dialog 2&> /dev/null
         TDLG=$(which dialog)
         [[ -z "${TDLG}" ]] && {
-            echo "${!errloc[3]} dialog: ${!errloc[7]} =]"
-            run_abort
+            run_abort 1 "${!errloc[3]} dialog: ${!errloc[7]} =]"
         }
     }
     
@@ -267,8 +308,7 @@ function run_build_prepare () {
         else
             XLTP=$(which xsltproc)
             if [[ -z "${XLTP}" ]]; then
-                echo "${!errloc[3]} xsltproc: ${!errloc[7]} =]"
-                run_abort
+                run_abort 1 "${!errloc[3]} xsltproc: ${!errloc[7]} =]"
             fi
         fi
     fi
@@ -286,8 +326,7 @@ function run_build_prepare () {
         else
             XLTP=$(which xsltproc)
             if [[ -z "${XLTP}" ]]; then
-                echo "${!errloc[3]} nasm: ${!errloc[7]} =]"
-                run_abort
+                run_abort 1 "${!errloc[3]} nasm: ${!errloc[7]} =]"
             fi
         fi
     fi
@@ -300,10 +339,11 @@ function run_build_prepare () {
         dlg="(exit 1) | $dlgs --title \"${!errloc[13]}\" "
         dlg+="--gauge \"${!errloc[14]}\" 10 79 13"
         eval "$dlg"
-        yes | pacman -S mingw-w64-x86_64-boost 2&> /dev/null
+        cmd=$(yes | pacman -S mingw-w64-x86_64-boost 2>&1 ); run_abort $? "${cmd}"
+        cmd=$(yes | pacman -S mingw-w64-x86_64-zlib  2>&1 ); run_abort $? "${cmd}"
     else
-        yes | pacman -S mingw-w64-x86_64-boost
-        run_abort $? "boost install"
+        cmd=$(yes | pacman -S mingw-w64-x86_64-boost 2>&1 ); run_abort $? "${cmd}"
+        cmd=$(yes | pacman -S mingw-w64-x86_64-zlib  2>&1 ); run_abort $? "${cmd}"
     fi
     
     # ---------------------
@@ -323,30 +363,6 @@ function run_build_prepare () {
     fi
 }
 # -----------------------------------------------------------------
-# check last command return value. if it > 0 then error message ...
-# -----------------------------------------------------------------
-function run_check () {
-    if [[ $1 -eq 0 ]]; then
-        return
-    fi
-    if [[ -z "$2" ]]; then
-        printf '\033[8;%d;%dt' $rows $cols
-        /usr/bin/dialog --backtitle "Pascal Doxy version 0.0.1 (c) 2923 by paule32" \
-        --title "Success" --msgbox "no error detected" 14 79
-        cd ${SRC}
-        clear
-        exit 1 
-    fi
-    if [[ -n "${DLG}" ]]; then
-        printf '\033[8;%d;%dt' $rows $cols
-        /usr/bin/dialog --backtitle "Pascal Doxy version 0.0.1 (c) 2923 by paule32" \
-        --title "Error" --msgbox "$2" 14 79
-    fi
-    cd ${SRC}
-    clear
-    exit 1
-}
-# -----------------------------------------------------------------
 # check, if file exists. no? then exit ...
 # -----------------------------------------------------------------
 function check_file () {
@@ -363,21 +379,15 @@ function check_file () {
 function runiconv () {
     ret="iconv --from-code=$1 --to-code=UTF-8 $2.text > $2_utf8.pot"
     res=$(eval "$ret")
-    run_check $? "iconv $2"
+    #run_check $? "iconv $2"
 
-    msginit --locale $2       \
+    cmd=$(msginit --locale $2 \
     --output-file $2_utf8.po  \
-    --input       $2_utf8.pot 2> /dev/null
-    run_check $?   "msginit $2"
+    --input       $2_utf8.pot 2>&1 ); run_check $? "${cmd}"
 
-    perl -pi -e "${ST1} ${ST2}" $2_utf8.po
-    run_check $? "perl $2}"
-
-    msgfmt --check --output-file $2_utf8.mo $2_utf8.po
-    run_check $? "msgfmt $2"
-    
-    gzip -9 -c $2_utf8.mo > $3/$2_utf8.mo.gz
-    run_check $? "gzip $2"
+    cmd=$(perl -pi -e "${ST1} ${ST2}"  $2_utf8.po            2>&1 ); run_check $? "${cmd}"
+    cmd=$(msgfmt --check --output-file $2_utf8.mo $2_utf8.po 2>&1 ); run_check $? "${cmd}"
+    cmd=$(gzip -9 -c $2_utf8.mo > $3/$2_utf8.mo.gz           2>&1 ); run_check $? "${cmd}"
 }
 # -----------------------------------------------------------------
 # build asmjit.dll
@@ -432,13 +442,14 @@ function run_build_locales () {
         DAT="${loc_array[$i]}"
         DIR="${TMP}/locales/${DAT}/LC_MESSAGES"
         CHK="${SRC}/po/${DAT}.text"
-        ENC="file -i ${CHK} ${ATXT}"
 
         check_file ${CHK} ".text"
         ${MKD}  -p ${DIR}
-        ret=$(eval "$ENC")
 
-        runiconv ${ret} ${DAT} ${DIR}
+        cmd=$(file -i ${CHK} | awk '{ print $3 }')
+        eco=$(echo ${cmd:8:21})
+        
+        runiconv ${eco} ${DAT} ${DIR}
     done
     
     rm ${SRC}/po/*.po && rm ${SRC}/po/*.pot
@@ -703,6 +714,7 @@ if [[ -n "${built_dis}" ]]; then
         --gauge \"${!errloc[30]}\" 10 79 70"
         eval "$dlg"
     fi
+    run_build_locales 30
     # ----------------------------------------
     # buils parser script files ...
     # ----------------------------------------
@@ -739,15 +751,18 @@ if [[ -n "${built_dis}" ]]; then
     # link diss.exe application ...
     # ----------------------------------------
     cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -o ${TMP}/diss.exe \
+        -L${TMP}/ -L./asmjit       \
+        \
         ${TMP}/Turbo.o             \
         ${TMP}/forms.o             \
         ${TMP}/Interpreter.o       \
         ${TMP}/AssemblerParser.o   \
         ${TMP}/AssemblerScanner.o  \
-        -L./ -L./asmjit            \
+        \
         -lasmjit                   \
-        -lintl                     \
         -ltvision                  \
+        -lz                        \
+        -lintl                     \
         -lboost_program_options-mt \
         -static-libgcc -static-libstdc++ 2>&1 ); run_check $? "${cmd}"
 

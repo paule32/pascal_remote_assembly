@@ -6,13 +6,13 @@
 // only for education, and non-profit usage !
 // -----------------------------------------------------------------
 # include <boost/program_options.hpp>
+# include <zlib.h>
 # include "Parser.h"
 
 // -----------------------------------------------------------------
 // global variable's / constant's ...
 // -----------------------------------------------------------------
 AsmParser    * asm_parser ;
-char         * locale_utf8;
 
 std::map < std::string, asmjit::Label > app_Labels;
 std::string locale_str;             // locales en = English, de = German
@@ -43,6 +43,38 @@ namespace std {
         tab(basic_ostream<_CharT, _Traits> &__os) {
         return __os.put(__os.widen('\t'));
     }
+}
+
+// -----------------------------------------------------------------
+// decompress gzip file...
+// -----------------------------------------------------------------
+int decompressGzipFile(
+    const char* inputFileName,
+    const char* outputFileName) {
+
+    gzFile file = gzopen(inputFileName, "rb");
+    if (file == NULL) {
+        perror("Error at open input file.");
+        return EXIT_FAILURE;
+    }
+    
+    FILE * outputFile = fopen(outputFileName, "wb");
+    if (outputFile == NULL) {
+        perror("Error at open output file.");
+        gzclose(file);
+        return EXIT_FAILURE;
+    }
+    
+    char buffer[1024];
+    int bytesRead;
+    while ((bytesRead = gzread(file, buffer, sizeof(buffer))) > 0) {
+        fwrite(buffer, 1, bytesRead, outputFile);
+    }
+    
+    gzclose(file);
+    fclose(outputFile);
+    
+    return EXIT_SUCCESS;
 }
 
 // -----------------------------------------------------------------
@@ -151,77 +183,78 @@ int handle_codepage()
 }
 
 // ---------------------------------------------------------
+// get gzip'ed locale file, and dezip it ...
+// ---------------------------------------------------------
+int getLocaleSystemUTF8(std::string ls)
+{
+    struct stat buffer;
+    std::stringstream ss1;
+    ss1 << "locales/"
+        << ls  << "/LC_MESSAGES/"
+        << ls  << "_utf8.mo.gz";
+    if (stat(ss1.str().c_str(), &buffer) == 1) {
+        std::cout << "dde" << std::endl;
+        locale_str = strdup("en_US");
+        std::cerr << "localization " << ls << " does not exists." <<
+        std::endl ;
+        return EXIT_FAILURE;
+    }
+    else {
+        std::stringstream ss2;
+        ss2 << "locales/"
+            << ls  << "/LC_MESSAGES/"
+            << ls  << "_utf8.mo";
+        int result = decompressGzipFile(
+            ss1.str().c_str(),
+            ss2.str().c_str());
+        if (result == EXIT_FAILURE) {
+            locale_str = strdup("en_US");
+            return EXIT_FAILURE;
+        }
+        else {
+            locale_str = strdup(ls.c_str());
+            std::stringstream ss;
+            ss << ls << "_utf8";
+            
+            setlocale(LC_ALL,"");
+            bindtextdomain(ss.str().c_str(), "locales");
+            textdomain(ss.str().c_str());
+            std::cout << ls << std::endl;
+        }
+    }
+    return EXIT_SUCCESS;
+}
+
+// ---------------------------------------------------------
 // perform pre-tasks: de-compress the locale file:
 // ---------------------------------------------------------
 int handle_locale()
 {
-    locale_utf8 = new char[4];
-
     LCID lcid = 0;
     if (GetLocaleInfoEx(
         LOCALE_NAME_USER_DEFAULT,
         LOCALE_RETURN_NUMBER | LOCALE_ILANGUAGE,
         (LPWSTR)&lcid,
         sizeof(lcid)) < 2) {
-        std::cerr << _("can not get locale, use default en-en.") <<
+            std::cout << "zuzu" << std::endl;
+        locale_str = strdup("en_US");
+        std::cerr << "can not get locale, use default en-US." <<
         std::endl ;
+        
         return EXIT_FAILURE;
     }
 
     // -----------------------------------------------------
-    // first supported locale is german: de_DE-UTF8 ...
+    // supported locales ...
     // -----------------------------------------------------
-    if (lcid == 0x0407) {
-        struct stat buffer;
-        if (stat("locales/de_DE/LC_MESSAGES/de_DE_utf8.mo.gz",
-            &buffer) == 1) {
-            std::cerr << _("localization de_DE does not exists.") <<
-            std::endl ;
-            return EXIT_FAILURE;
-        }
+    if (lcid == 0x0407)
+    if (getLocaleSystemUTF8("de_DE") == EXIT_SUCCESS)
+        return EXIT_SUCCESS;
+    if (getLocaleSystemUTF8("en_US") == EXIT_SUCCESS)
+        return EXIT_SUCCESS;
 
-        // store name, for delete it later ...
-        locale_utf8 = strdup("de");
-
-        system("gzip -d -c "
-        "locales/de_DE/LC_MESSAGES/de_DE_utf8.mo.gz >"
-        "locales/de_DE/LC_MESSAGES/de_DE_utf8.mo");
-        
-        // -----------------------------------------------------
-        // try to bind de_DE locale as default ...
-        // -----------------------------------------------------
-        setlocale(LC_ALL,"");
-        bindtextdomain("de_DE_utf8", "locales");
-        textdomain("de_DE_utf8");
-    }
-    else {
-        // ---------------------------------------------------------
-        // de_DE_utf8.mo not found, use english locale ...
-        // ---------------------------------------------------------
-        struct stat buffer;
-        if (stat("locales/en_US/LC_MESSAGES/en_US_utf8.mo.gz",
-        &buffer) == 1)
-        {
-            std::cerr << _("localization en_US does not exists.") <<
-            std::endl ;
-        }
-        else {
-            // store name, for delete it later ...
-            locale_utf8 = strdup("en");
-            
-            system("gzip -d -c "
-            "locales/en_US/LC_MESSAGES/en_US_utf8.mo.gz >"
-            "locales/en_US/LC_MESSAGES/en_US_utf8.mo");
-            
-            // ------------------------------------------------
-            // try to bind de_DE locale as default ...
-            // ------------------------------------------------
-            setlocale(LC_ALL,"");
-            bindtextdomain("en_US_utf8", "locales");
-            textdomain("en_US_utf8");
-        }
-    }
-    return EXIT_SUCCESS;
+        locale_str = "en_US";
+        return EXIT_FAILURE;
 }
 
 int handle_object_file( const char *filename)
@@ -727,7 +760,7 @@ int handle_asm_file( const char *filename )
 
         std::stringstream ss;
         ss << "usage: diss.exe [-io file.o] or [-ia file.asm]" << std::endl
-           << "use: --help for more options.";
+           << gettext("use: --help for more options.");
         std::cerr << ss.str() << std::endl;
         return EXIT_FAILURE;
     }
@@ -770,12 +803,12 @@ int main(int argc, char **argv)
     try {
         if (handle_locale() == EXIT_FAILURE)
         return EXIT_FAILURE;
-    
+
         if (handle_codepage() == 0)
         return EXIT_FAILURE;
         
         if (argc == 1) {
-            std::cerr << "use --help for help." << std::endl;
+            std::cerr << _("use --help for help.") << std::endl;
             return EXIT_FAILURE;
         }
         
@@ -993,6 +1026,30 @@ AsmParser::AsmParser( const char *filename, bool mode )
 }
 
 // -----------------------------------------------------------------
+// remove the de-gzip'ed locale file(s) ...
+// -----------------------------------------------------------------
+void removeLocaleFile( std::string ls )
+{
+    namespace fs = std::filesystem;
+    
+    std::stringstream ss;
+    ss  << "locales/"
+        << ls << "/LC_MESSAGES/"
+        << ls << "_utf8.mo";
+    try {
+        if (fs::exists( ss.str() )) {
+            fs::remove( ss.str() );
+        }
+    }
+    catch (std::exception &ex) {
+        std::cerr << "Error: file could not be deleted: "
+                  << ex.what()
+                  <<
+        std::endl ;
+    }
+}
+
+// -----------------------------------------------------------------
 // clean up global storage ...
 // -----------------------------------------------------------------
 AsmParser::~AsmParser()
@@ -1004,12 +1061,8 @@ AsmParser::~AsmParser()
     // this make space for other usage, with other application's ...
     // TODO: check directory, and/or file.
     // -------------------------------------------------------------
-    if (!strcmp(locale_str.c_str(),"de")) {    // german
-        std::remove("locales/de_DE/LC_MESSAGES/de_DE_utf8.mo");
-    }   else
-    if (!strcmp(locale_str.c_str(),"en")) {    // english
-        std::remove("locales/en_US/LC_MESSAGES/en_US_utf8.mo");
-    }
+    removeLocaleFile( std::string("de_DE") );
+    removeLocaleFile( std::string("en_US") );
     
     delete asm_code;
     delete cod_code;
@@ -1019,3 +1072,5 @@ AsmParser::~AsmParser()
 }
 
 AsmParser::AsmParser() { }
+
+// 015158213852

@@ -152,3 +152,6 @@ msgstr "C++ Header-Datei nicht angegeben, verwende Standard."
 
 msgid "output header C++ file must have extension .h"
 msgstr "Für die C++ Header-Datei wird .h als Datei-Erweiterung erwartet."
+
+msgid ""use --help for help."
+msgstr "benutzen Sie --help um die Hilfe anzeigen zu lassen."
