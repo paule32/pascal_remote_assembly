@@ -30,6 +30,7 @@ obj_array1=("PascalParser" "PascalScanner" "x86Code" "parser" \
 "start" "win32api" "ErrorHandler")
 obj_array2=("interpreter" "ErrorHandler")
 obj_array3=("AssemblerParser" "AssemblerScanner")
+loc_array=("de_DE" "en_US")
 # -----------------------------------------------------------------
 WMKD=$(which mkdir)
 NASM=$(which nasm)
@@ -85,8 +86,8 @@ msg_de_DE_0026="Löschen der Debug-Informationen"
 msg_de_DE_0027="\nverkleinere Anwendungs-Datei, um die Debug-Informationen-"
 msg_de_DE_0028="Erstelle Script Dateien"
 msg_de_DE_0029="Die Skript-Dateien für Lexer,und Parser werden erstellt..."
-msg_en_US_0030="Fehler aufgetretten"
-msg_en_US_0031="Es wurde ein Fehler vom Compiler zurückgegeben."
+msg_de_DE_0030="Fehler aufgetretten"
+msg_de_DE_0031="Es wurde ein Fehler vom Compiler zurückgegeben."
 # -----------------------------------------------------------------
 msg_en_US_0000="English"
 msg_en_US_0001="gattering setup data..."
@@ -377,17 +378,24 @@ function check_file () {
 # write the final localization file "*.mo" ...
 # -----------------------------------------------------------------
 function runiconv () {
-    ret="iconv --from-code=$1 --to-code=UTF-8 $2.text > $2_utf8.pot"
+    res=$(iconv --from-code=$1 --to-code=UTF-8 "$4.text" > $3/$2_utf8.pot)
     res=$(eval "$ret")
-    #run_check $? "iconv $2"
+    run_check $? "iconv $1 $2 $3 $4"
+    
+    cmd=$(msginit \
+    --locale=$2   \
+    --input=$3/$2_utf8.pot \
+    --output-file=$3/$2_utf8.po   2>&1 ); run_check $? "${cmd}"
+    cmd=$(rm -rf $3/$2_utf8.mo    2>&1 ); run_check $? "${cmd}"
+    cmd=$(rm -rf $3/$2_utf8.mo.gz 2>&1 ); run_check $? "${cmd}"
 
-    cmd=$(msginit --locale $2 \
-    --output-file $2_utf8.po  \
-    --input       $2_utf8.pot 2>&1 ); run_check $? "${cmd}"
-
-    cmd=$(perl -pi -e "${ST1} ${ST2}"  $2_utf8.po            2>&1 ); run_check $? "${cmd}"
-    cmd=$(msgfmt --check --output-file $2_utf8.mo $2_utf8.po 2>&1 ); run_check $? "${cmd}"
-    cmd=$(gzip -9 -c $2_utf8.mo > $3/$2_utf8.mo.gz           2>&1 ); run_check $? "${cmd}"
+    cmd=$(perl -pi -e "${ST1} ${ST2}"  $$_utf8.po       2>&1 ); run_check $? "${cmd}"
+    cmd=$(msgfmt --check -o $3/$2_utf8.mo $3/$2_utf8.po 2>&1 ); run_check $? "${cmd}"
+    cmd=$(gzip           -9 $3/$2_utf8.mo               2>&1 ); run_check $? "${cmd}"
+    
+    rm -rf $3/$2_utf8.pot 
+    rm -rf $3/$2_utf8.po
+    rm -rf $3/$2_utf8.mo
 }
 # -----------------------------------------------------------------
 # build asmjit.dll
@@ -421,6 +429,25 @@ function run_build_asmjit () {
     fi
 }
 # -----------------------------------------------------------------
+# get encoding from original "*.text" file
+# -----------------------------------------------------------------
+function run_build_locales_helper () {
+    cd ${SRC}/po
+    for i in ${!loc_array[@]}; do
+        DAT="${loc_array[$i]}"
+        DIR="${TMP}/locales/${DAT}/LC_MESSAGES"
+        CHK="${SRC}/po/${DAT}"
+
+        check_file "${CHK}.text" ".text"
+        ${MKD}  -p ${DIR}
+
+        cmd=$(file -i "${CHK}.text" | awk '{ print $3 }')
+        eco=$(echo ${cmd:8:21})
+        
+        runiconv ${eco} ${DAT} ${DIR} ${CHK}
+    done
+}
+# -----------------------------------------------------------------
 # create localization files ...
 # -----------------------------------------------------------------
 function run_build_locales () {
@@ -432,28 +459,10 @@ function run_build_locales () {
     else
         printf "[= create localization files: "
     fi
-    cd ${SRC}/po
-    # -----------------------------------------------------------------
-    # get encoding from original "*.text" file
-    # -----------------------------------------------------------------
-    loc_array=("de_DE" "en_US")
     
-    for i in ${!loc_array[@]}; do
-        DAT="${loc_array[$i]}"
-        DIR="${TMP}/locales/${DAT}/LC_MESSAGES"
-        CHK="${SRC}/po/${DAT}.text"
-
-        check_file ${CHK} ".text"
-        ${MKD}  -p ${DIR}
-
-        cmd=$(file -i ${CHK} | awk '{ print $3 }')
-        eco=$(echo ${cmd:8:21})
-        
-        runiconv ${eco} ${DAT} ${DIR}
-    done
+    run_build_locales_helper ${build_locale}
     
-    rm ${SRC}/po/*.po && rm ${SRC}/po/*.pot
-    rm ${SRC}/po/*.mo
+    #rm ${TMP}/locales/de_DE
     
     if [[ -z "${DLG}" ]]; then
         echo "ok. =]"
@@ -639,6 +648,7 @@ function help () {
     HELP+="Options:\n"
     HELP+="--------\n"
     HELP+=" -h display this screen.\n"
+    HELP+=" -l convert locale files only.\n"
     HELP+=" -a compile application.      file: test.pas\n"
     HELP+=" -i compile interpreter.      file: test.asm\n"
     HELP+=" -r run a x86::Compiler test.\n"
@@ -650,19 +660,36 @@ function help () {
 # -----------------------------------------------------------------
 # switch back to developer source path ...
 # -----------------------------------------------------------------
-while getopts "air:t:h" option; do
+while getopts "lair:t:h" option; do
     case "${option}" in
         h)  help ;;
         a)  built_app="OPTARG";;
         i)  built_dis="OPTARG";;
         r)  built_run=${OPTARG};;
         t)  built_tst=${OPTARG};;
+        l)  built_lng="OPTARG";;
         \?) echo "usage: build.sh [[-a], [-i], [-d]] file.src"
-            echo "Expected -a, -r, -t or -d"
+            echo "Expected -a, -r, -t or -d, or -l"
             echo "use -h for help"
             exit 1;;
     esac
 done
+# ----------------------------------------
+# create locale file only.
+# ----------------------------------------
+if [[ -n "${built_lng}" ]]; then
+    echo "create locale files ..."
+    run_build_locales_helper ${build_locale}
+    
+    rm -rf ${SRC}/po/*.po
+    rm -rf ${SRC}/po/*.pot
+    rm -rf ${SRC}/po/*.mo
+    
+    if [[ -z "${DLG}" ]]; then
+        echo "ok. =]"
+    fi
+    exit 1
+fi
 # ----------------------------------------
 # compile application ...
 # ----------------------------------------

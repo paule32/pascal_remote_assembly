@@ -153,5 +153,50 @@ msgstr "C++ Header-Datei nicht angegeben, verwende Standard."
 msgid "output header C++ file must have extension .h"
 msgstr "Für die C++ Header-Datei wird .h als Datei-Erweiterung erwartet."
 
-msgid ""use --help for help."
+msgid "use --help for help."
 msgstr "benutzen Sie --help um die Hilfe anzeigen zu lassen."
+
+msgid "error: can not register cleanup function."
+msgstr "Fehler: die Aufräum-Funktion kann nicht registriert werden."
+
+msgid "the given file does not exists."
+msgstr "die angegebene Datei existiert nicht."
+
+msgid "error: file could not be deleted: "
+msgstr "Fehler: die Datei konnte nicht gelöscht werden."
+
+msgid "General Options"
+msgstr "Allgemeine Optionen"
+
+msgid "country locale"
+msgstr "Ländersprache"
+
+msgid "Input assembler file"
+msgstr "Assembler Eingabedatei"
+
+msgid "Input object file"
+msgstr "Object Eingabedatei"
+
+msgid "Output C++ tool file"
+msgstr "Ausgabedatei für C++ Tool"
+
+msgid "Output C++ header file"
+msgstr "Ausgabedatei für C++ Header"
+
+msgid "Output C++ main file"
+msgstr "Ausgabedatei für C++ Hauptteil"
+
+msgid "Output Options (short)"
+msgstr "Ausgabeoptionen (kurz)"
+
+msgid "Output Options (long)"
+msgstr "Ausgabeoptionen (lang)"
+
+msgid "Input Options (short)"
+msgstr "Eingabeoptionen (kurz)"
+
+msgid "Input Options (long)"
+msgstr "Eingabeoptionen (lang)"
+
+msgid "Help screen"
+msgstr "Hilfebildschirm"

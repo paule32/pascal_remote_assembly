@@ -789,6 +789,44 @@ void ct_file_output( std::string o_file )
 }
 
 // -----------------------------------------------------------------
+// remove the de-gzip'ed locale file(s) ...
+// -----------------------------------------------------------------
+void removeLocaleFile( std::string ls )
+{
+    namespace fs = std::filesystem;
+    
+    std::stringstream ss;
+    try {
+    ss  << ".\\locales\\"
+        << ls << "\\LC_MESSAGES\\"
+        << ls << "_utf8.mo";
+        fs::path filePath = ss.str();
+        if (fs::exists( filePath )) {
+            fs::remove( filePath );
+        }
+    }
+    catch (std::exception &ex) {
+        std::cerr << _("Error: file could not be deleted: ")
+                  << ex.what()
+                  <<
+        std::endl ;
+    }
+}
+
+// -----------------------------------------------------------------
+// clean-up the workspace ...
+// -----------------------------------------------------------------
+void cleanup() {
+    // -------------------------------------------------------------
+    // at terminating application, delete de-packed .mo file.
+    // this make space for other usage, with other application's ...
+    // TODO: check directory, and/or file.
+    // -------------------------------------------------------------
+    removeLocaleFile( std::string("de_DE") );
+    removeLocaleFile( std::string("en_US") );
+}
+
+// -----------------------------------------------------------------
 // entry point function for our disassembler ...
 // -----------------------------------------------------------------
 int main(int argc, char **argv)
@@ -806,43 +844,56 @@ int main(int argc, char **argv)
 
         if (handle_codepage() == 0)
         return EXIT_FAILURE;
-        
-        if (argc == 1) {
-            std::cerr << _("use --help for help.") << std::endl;
+
+        // ----------------------------------
+        // registering the clean-up function
+        // ----------------------------------
+        if (atexit(cleanup) != 0) {
+            std::cerr << _("error: can not register cleanup function.") <<
+            std::endl ;
             return EXIT_FAILURE;
         }
         
+        // ----------------------------------
+        // if no argument given, display help
+        // ----------------------------------
+        if (argc == 1) {
+            std::cerr << _("use --help for help.") <<
+            std::endl ;
+            return EXIT_FAILURE;
+        }
+
         // -------------------------------------------------------
         // --help:   help screen
         // --locale: use localization (en = english, de = german)
         // -------------------------------------------------------
-        options_description general("General Options");
+        options_description general(_("General Options"));
             general.add_options()
-            ("help,h"  , "Help screen")
-            ("locale,l", value< std::string >()->default_value("en"  ), "country locale")
+            ("help,h"  , _("Help screen"))
+            ("locale,l", value< std::string >()->default_value("en"  ), _("country locale"))
             ("gui,g"   , "TUI - Text User Interface");
             
-        options_description input_long("Input Options (long)");
+        options_description input_long(_("Input Options (long)"));
             input_long.add_options()
-            ("input-asm", value< std::string >()->notifier(asm_file_input), "Input assembler file")
-            ("input-obj", value< std::string >()->notifier(obj_file_input), "Input object file");
+            ("input-asm", value< std::string >()->notifier(asm_file_input), _("Input assembler file"))
+            ("input-obj", value< std::string >()->notifier(obj_file_input), _("Input object file"));
             
-        options_description input_short("Input Options (short)");
+        options_description input_short(_("Input Options (short)"));
             input_short.add_options()
-            ("ia", value< std::string >()->notifier(asm_file_input), "Input assembler file")
-            ("io", value< std::string >()->notifier(obj_file_input), "Input object file");
+            ("ia", value< std::string >()->notifier(asm_file_input), _("Input assembler file"))
+            ("io", value< std::string >()->notifier(obj_file_input), _("Input object file"));
             
-        options_description output_long("Output Options (long)");
+        options_description output_long(_("Output Options (long)"));
             output_long.add_options()
-            ("output-ct" , value< std::string >()->notifier(ct_file_output), "Output C++ tool file")
-            ("output-ch" , value< std::string >()->notifier(ch_file_output), "Output C++ header file")
-            ("output-cm" , value< std::string >()->notifier(cm_file_output), "Output C++ main file");
+            ("output-ct" , value< std::string >()->notifier(ct_file_output), _("Output C++ tool file"))
+            ("output-ch" , value< std::string >()->notifier(ch_file_output), _("Output C++ header file"))
+            ("output-cm" , value< std::string >()->notifier(cm_file_output), _("Output C++ main file"));
             
-        options_description output_short("Output Options (short)");
+        options_description output_short(_("Output Options (short)"));
             output_short.add_options()
-            ("ct", value< std::string >()->notifier(ct_file_output), "Output C++ tool file")
-            ("ch", value< std::string >()->notifier(ch_file_output), "Output C++ header file")
-            ("cm", value< std::string >()->notifier(cm_file_output), "Output C++ main file");
+            ("ct", value< std::string >()->notifier(ct_file_output), _("Output C++ tool file"))
+            ("ch", value< std::string >()->notifier(ch_file_output), _("Output C++ header file"))
+            ("cm", value< std::string >()->notifier(cm_file_output), _("Output C++ main file"));
 
         options_description allOptions("All Options");
         allOptions
@@ -1026,44 +1077,12 @@ AsmParser::AsmParser( const char *filename, bool mode )
 }
 
 // -----------------------------------------------------------------
-// remove the de-gzip'ed locale file(s) ...
-// -----------------------------------------------------------------
-void removeLocaleFile( std::string ls )
-{
-    namespace fs = std::filesystem;
-    
-    std::stringstream ss;
-    ss  << "locales/"
-        << ls << "/LC_MESSAGES/"
-        << ls << "_utf8.mo";
-    try {
-        if (fs::exists( ss.str() )) {
-            fs::remove( ss.str() );
-        }
-    }
-    catch (std::exception &ex) {
-        std::cerr << "Error: file could not be deleted: "
-                  << ex.what()
-                  <<
-        std::endl ;
-    }
-}
-
-// -----------------------------------------------------------------
 // clean up global storage ...
 // -----------------------------------------------------------------
 AsmParser::~AsmParser()
 {
     std::cout << "// " <<  _("please wait...") << std::endl;
 
-    // -------------------------------------------------------------
-    // at terminating application, delete de-packed .mo file.
-    // this make space for other usage, with other application's ...
-    // TODO: check directory, and/or file.
-    // -------------------------------------------------------------
-    removeLocaleFile( std::string("de_DE") );
-    removeLocaleFile( std::string("en_US") );
-    
     delete asm_code;
     delete cod_code;
     delete     code;
