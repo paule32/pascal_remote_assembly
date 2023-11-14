@@ -7,6 +7,7 @@
 // -----------------------------------------------------------------
 # include <boost/program_options.hpp>
 # include <zlib.h>
+# include <functional>      // std::function
 # include "Parser.h"
 
 // -----------------------------------------------------------------
@@ -15,8 +16,6 @@
 AsmParser    * asm_parser ;
 
 std::map < std::string, asmjit::Label > app_Labels;
-std::string locale_str;             // locales en = English, de = German
-std::string locale_codepage;        // ANSI or OEM
 
 std::string file_input_asm;         // input assembly file
 std::string file_input_obj;         // input coff object file
@@ -25,6 +24,9 @@ std::string file_output_cm;         // output main       C++ file
 std::string file_output_ch;         // output header     C++ file
 std::string file_output_ct;         // output misc/tools C++ file
 
+// -----------------------------------------------------------------
+// parser stuff ...
+// -----------------------------------------------------------------
 extern void asm_parser_main(void);
 extern "C"  int yyparse(void);
 extern "C"  FILE * yyin;
@@ -33,6 +35,22 @@ extern      int  TurboMain(void);   // console TUI - Turbo Vision
 static bool found_args = false;     // program command line arguments
 
 using namespace boost::program_options;
+
+// -----------------------------------------------------------------
+// application stuff (name, locale ...
+// -----------------------------------------------------------------
+static std::string ApplicationName( ASMJIT_APPNAME ); // -Define
+
+static std::string de_DE("de_DE");  // german
+static std::string en_US("en_US");  // english us
+
+std::string locale_str;             // locales en = English, de = German
+
+std::string locale_codepage_old;    // ANSI or OEM
+std::string locale_codepage_new;    //
+
+LCID locale_LCID_old;               // for restore the old locale
+LCID locale_LCID_new;               //
 
 // -----------------------------------------------------------------
 // extend the namespace STD with "tab" - to produce \t into stream:
@@ -108,6 +126,39 @@ ExtractFileExtension( std::string const & path )
     return ext;
 }
 
+// -----------------------------------------------------------
+// Retrieve the system error message for the last-error code
+// -----------------------------------------------------------
+void ErrorExit(LPTSTR lpszFunction) 
+{ 
+    LPVOID lpMsgBuf;
+    LPVOID lpDisplayBuf;
+    DWORD dw = GetLastError(); 
+
+    FormatMessage(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+        FORMAT_MESSAGE_FROM_SYSTEM |
+        FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL,
+        dw,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPTSTR) &lpMsgBuf,
+        0, NULL );
+
+    // Display the error message and exit the process
+
+    lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, 
+        (lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR)); 
+    StringCchPrintf((LPTSTR)lpDisplayBuf, 
+        LocalSize(lpDisplayBuf) / sizeof(TCHAR),
+        TEXT("%s failed with error %d: %s"), 
+        lpszFunction, dw, lpMsgBuf); 
+    MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK); 
+
+    LocalFree(lpMsgBuf);
+    LocalFree(lpDisplayBuf);
+}
+
 // ----------------------------------------------
 // Get the system codepage ...
 // ----------------------------------------------
@@ -127,7 +178,7 @@ int handle_codepage()
             LOCALE_IDEFAULTANSICODEPAGE,
             NULL,
             0);
-        if (ansiCodePage > 0) {
+        if (ansiCodePage > 0) {std::cout << "ansi" << std::endl;
             wchar_t* ansiCodePageBuffer = new wchar_t[ansiCodePage];
             GetLocaleInfoEx(
             localeName,
@@ -142,7 +193,7 @@ int handle_codepage()
             std::wstring wideStr = wss.str();
             
             std::wstring_convert< std::codecvt_utf8< wchar_t >> converter;
-            locale_codepage = converter.to_bytes(wideStr);
+            locale_codepage_new = converter.to_bytes(wideStr);
             
             delete [] ansiCodePageBuffer;
             
@@ -157,7 +208,7 @@ int handle_codepage()
             LOCALE_IDEFAULTCODEPAGE,
             NULL,
             0);
-        if (oemCodePage > 0) {
+        if (oemCodePage > 0) {std::cout << "OEM" << std::endl;
             wchar_t* oemCodePageBuffer = new wchar_t[oemCodePage];
             GetLocaleInfoEx(
             localeName,
@@ -172,14 +223,86 @@ int handle_codepage()
             std::wstring wideStr = wss.str();
             
             std::wstring_convert< std::codecvt_utf8< wchar_t >> converter;
-            locale_codepage = converter.to_bytes(wideStr);
+            locale_codepage_new = converter.to_bytes(wideStr);
             
             delete [] oemCodePageBuffer;
             
             return oemCodePage;
         }
     }
+    else {
+        std::cerr << "error: can not get codepage." <<
+        std::endl;
+    }
     return 0;
+}
+
+// ---------------------------------------------------------
+// check file ...
+// ---------------------------------------------------------
+int check_file(
+    std::string filename,
+    std::function<int(void)> stat_func,
+    std::function<int(void)> callback_ok)
+{
+    struct stat attr;
+    
+    // ---------------------------
+    // if file exists ?
+    // ---------------------------
+    if (stat(filename.c_str(), &attr) == -1) {
+        if (stat_func == nullptr) {
+            std::cerr << "invalid: stat_func."
+                      << std::endl;
+            return EXIT_FAILURE;
+        }
+        else {
+            stat_func();
+            return EXIT_FAILURE;
+        }
+    }
+    // ---------------------------
+    // regular file
+    // ---------------------------
+    if (attr.st_mode & S_IFREG) {
+        if (callback_ok == nullptr) {
+            locale_str = en_US;
+            std::cerr << "callback_ok(): failed,"
+                      << std::endl;
+            return EXIT_FAILURE;
+        }
+        else {
+            callback_ok();
+            return EXIT_SUCCESS;
+        }
+    }   else
+    // ---------------------------
+    // device file
+    // ---------------------------
+    if (attr.st_mode & S_IFCHR) {
+        locale_str = en_US;
+        std::cerr << filename << ": file is a devide."
+                  << std::endl ;
+        return EXIT_FAILURE;
+    }   else
+    // ---------------------------
+    // file is a directory
+    // ---------------------------
+    if (attr.st_mode & S_IFDIR) {
+        locale_str = en_US;
+        std::cerr << filename << ": file is a directory."
+                  << std::endl ;
+        return EXIT_FAILURE;
+    }
+    // ---------------------------
+    // unknown file
+    // ---------------------------
+    else {
+        locale_str = en_US;
+        std::cerr << filename << ": file format unknown."
+                  << std::endl ;
+        return EXIT_FAILURE;
+    }   return EXIT_FAILURE;
 }
 
 // ---------------------------------------------------------
@@ -187,42 +310,113 @@ int handle_codepage()
 // ---------------------------------------------------------
 int getLocaleSystemUTF8(std::string ls)
 {
-    struct stat buffer;
-    std::stringstream ss1;
-    ss1 << "locales/"
-        << ls  << "/LC_MESSAGES/"
-        << ls  << "_utf8.mo.gz";
-    if (stat(ss1.str().c_str(), &buffer) == 1) {
-        std::cout << "dde" << std::endl;
-        locale_str = strdup("en_US");
-        std::cerr << "localization " << ls << " does not exists." <<
-        std::endl ;
-        return EXIT_FAILURE;
-    }
-    else {
-        std::stringstream ss2;
-        ss2 << "locales/"
-            << ls  << "/LC_MESSAGES/"
-            << ls  << "_utf8.mo";
-        int result = decompressGzipFile(
-            ss1.str().c_str(),
-            ss2.str().c_str());
-        if (result == EXIT_FAILURE) {
-            locale_str = strdup("en_US");
+    std::string loca("localization error: ");
+    std::stringstream ss1, ss2;
+    
+    ss1 << ".\\locale\\" << ls << ".utf8\\LC_MESSAGES\\" << ApplicationName << ".mo.gz";
+    ss2 << ".\\locale\\" << ls << ".utf8\\LC_MESSAGES\\" << ApplicationName << ".mo";
+        
+    locale_str = ls;
+    
+    return check_file(ss1.str(),
+        [&ls, &ss1]() -> int {
+            std::cerr
+                << "error: " << ss1.str()
+                << ": file does not exists."
+                << std::endl;
+            return EXIT_FAILURE;
+        },
+        [&ls, &ss1, &ss2]() -> int {
+                std::cout << ss1.str() << std::endl;
+            int result = decompressGzipFile(
+                ss1.str().c_str(),
+                ss2.str().c_str());
+            if (result == EXIT_FAILURE) {
+                return EXIT_FAILURE;
+            }
+            else {
+                setlocale( LC_ALL, "de_DE.utf-8" );
+                
+                bind_textdomain_codeset(ApplicationName.c_str(), "UTF-8");
+                bindtextdomain( ApplicationName.c_str(),".\\locale");
+                textdomain    ( ApplicationName.c_str() );
+            
+                std::wcout.imbue(std::locale());
+                std::cout << gettext("File") << std::endl;
+                
+                HWND hwnd       = GetForegroundWindow();
+                int  textLength = GetWindowTextLengthA(hwnd);
+                
+                if (hwnd) {                    
+                    if (textLength < 1) {
+                        std::cout << "error: can not get windows title." <<
+                        std::endl ;
+                        return EXIT_FAILURE;
+                    }
+                    
+                    size_t sizeToAllocate  = 256;
+                    LPVOID allocatedMemory = (PSTR) VirtualAlloc(NULL, sizeToAllocate,
+                    MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE );
+                        
+                    if (!allocatedMemory) {
+                        std::cerr << "error: could not allocate memory to get window title."
+                                  << std::endl;
+                        return EXIT_FAILURE;
+                    }
+                        
+                    // --------------------------------
+                    // GetWindowText needs TCHAR buffer
+                    // --------------------------------
+                    TCHAR windowText[ 256 ];
+                    
+                    textLength = GetWindowText(hwnd, windowText,
+                    sizeof(windowText) / sizeof(windowText[0]));
+                    
+                    if (textLength > 0) {
+                        size_t copyLength = (textLength + 1) * sizeof(TCHAR);
+                        
+                        std::cout << "len: " << textLength << std::endl;
+                        std::cout << "cpy: " << copyLength << std::endl;
+                        if (copyLength <= sizeToAllocate) {
+                            memcpy(allocatedMemory, windowText, copyLength);
+                            std::cout << "window ok: " << windowText <<
+                            std::endl ;
+                            
+                            std::string wintxt = std::string(windowText, copyLength);
+                            if (wintxt.find("MSYS32") != std::string::npos) {
+                                std::cout << "Programm wurde in MSYS 32-bit gestartet." <<
+                                std::endl ;
+                            }   else
+                            if (wintxt.find("MSYS64") != std::string::npos) {
+                                std::cout << "Programm wurde in MSYS 64-bit gestartet." <<
+                                std::endl ;
+                            }   else
+                            if (wintxt.find("MINGW32") != std::string::npos) {
+                                std::cout << "Programm wurde in MINGW 32-bit gestartet." <<
+                                std::endl ;
+                            }   else
+                            if (wintxt.find("MINGW64") != std::string::npos) {
+                                std::cout << "Programm wurde in MINGW 64-bit gestartet." <<
+                                std::endl ;
+                            }
+                        }
+                        return EXIT_SUCCESS;
+                    }
+                    else {
+                        std::cerr << "window title could not be get." <<
+                        std::endl ;
+                    }
+                    
+                    if (VirtualFree(windowText, 0, MEM_RELEASE) == 0) {
+                        std::cerr << "error: could not free memory." <<
+                        std::endl ;
+                        ErrorExit(TEXT("VirtualFree"));
+                    }
+                }
+            }
             return EXIT_FAILURE;
         }
-        else {
-            locale_str = strdup(ls.c_str());
-            std::stringstream ss;
-            ss << ls << "_utf8";
-            
-            setlocale(LC_ALL,"");
-            bindtextdomain(ss.str().c_str(), "locales");
-            textdomain(ss.str().c_str());
-            std::cout << ls << std::endl;
-        }
-    }
-    return EXIT_SUCCESS;
+    );
 }
 
 // ---------------------------------------------------------
@@ -230,31 +424,85 @@ int getLocaleSystemUTF8(std::string ls)
 // ---------------------------------------------------------
 int handle_locale()
 {
-    LCID lcid = 0;
+    // default:
+    locale_str = en_US;
+    LCID lcid  = 0;
+    
     if (GetLocaleInfoEx(
         LOCALE_NAME_USER_DEFAULT,
         LOCALE_RETURN_NUMBER | LOCALE_ILANGUAGE,
         (LPWSTR)&lcid,
         sizeof(lcid)) < 2) {
-            std::cout << "zuzu" << std::endl;
-        locale_str = strdup("en_US");
         std::cerr << "can not get locale, use default en-US." <<
         std::endl ;
         
         return EXIT_FAILURE;
     }
 
+    // -----------------
+    // save old locale
+    // -----------------
+    locale_LCID_old = GetThreadLocale();
+    
     // -----------------------------------------------------
     // supported locales ...
     // -----------------------------------------------------
-    if (lcid == 0x0407)
-    if (getLocaleSystemUTF8("de_DE") == EXIT_SUCCESS)
-        return EXIT_SUCCESS;
-    if (getLocaleSystemUTF8("en_US") == EXIT_SUCCESS)
-        return EXIT_SUCCESS;
+    if (lcid == 0x0407) {
+        SetConsoleOutputCP(65001); // set codepage UTF-8
 
-        locale_str = "en_US";
-        return EXIT_FAILURE;
+        locale_str      = de_DE;
+        locale_LCID_new =
+            MAKELCID(
+            MAKELANGID(
+            LANG_GERMAN,
+            SUBLANG_GERMAN),SORT_DEFAULT);
+
+        // -------------------------
+        // Make change known.
+        // -------------------------
+        SetEnvironmentVariable(
+        LPCTSTR("LC_ALL"),
+        LPCTSTR("de_DE.UTF-8"));
+        
+        SetEnvironmentVariable(
+        LPCTSTR("LANGUAHE"),
+        LPCTSTR("de_DE.UTF-8"));    {
+            extern int  _nl_msg_cat_cntr;
+            ++_nl_msg_cat_cntr;
+        }
+        
+        SetThreadLocale(locale_LCID_new );
+        return getLocaleSystemUTF8(de_DE);
+    }
+    else {
+        std::cout << "4444444444444" << std::endl;
+        SetConsoleOutputCP(65001); // set codepage UTF-8
+        
+        locale_str      = en_US;
+        locale_LCID_new =
+            MAKELCID(
+            MAKELANGID(
+            LANG_ENGLISH,
+            SUBLANG_DEFAULT),SORT_DEFAULT);
+
+        // -------------------------
+        // Make change known.
+        // -------------------------
+        SetEnvironmentVariable(
+        LPCTSTR("LC_ALL"),
+        LPCTSTR("en_US.UTF-8"));
+        
+        SetEnvironmentVariable(
+        LPCTSTR("LANGAGE"),
+        LPCTSTR("en_US.UTF-8"));    {
+            extern int  _nl_msg_cat_cntr;
+            ++_nl_msg_cat_cntr;
+        }
+        
+        SetThreadLocale(locale_LCID_new );
+        return getLocaleSystemUTF8(en_US);
+
+    }   return EXIT_FAILURE;
 }
 
 int handle_object_file( const char *filename)
@@ -797,9 +1045,10 @@ void removeLocaleFile( std::string ls )
     
     std::stringstream ss;
     try {
-    ss  << ".\\locales\\"
-        << ls << "\\LC_MESSAGES\\"
-        << ls << "_utf8.mo";
+    ss  << ".\\locale\\"
+        << ls << ".utf8\\LC_MESSAGES\\"
+        << ApplicationName
+        << ".mo";
         fs::path filePath = ss.str();
         if (fs::exists( filePath )) {
             fs::remove( filePath );
@@ -822,8 +1071,10 @@ void cleanup() {
     // this make space for other usage, with other application's ...
     // TODO: check directory, and/or file.
     // -------------------------------------------------------------
-    removeLocaleFile( std::string("de_DE") );
-    removeLocaleFile( std::string("en_US") );
+    removeLocaleFile( de_DE );
+    removeLocaleFile( en_US );
+    
+    SetThreadLocale(locale_LCID_old);
 }
 
 // -----------------------------------------------------------------
@@ -844,7 +1095,7 @@ int main(int argc, char **argv)
 
         if (handle_codepage() == 0)
         return EXIT_FAILURE;
-
+std::cout << "---> " << locale_str << std::endl;
         // ----------------------------------
         // registering the clean-up function
         // ----------------------------------
@@ -858,7 +1109,7 @@ int main(int argc, char **argv)
         // if no argument given, display help
         // ----------------------------------
         if (argc == 1) {
-            std::cerr << _("use --help for help.") <<
+            std::cerr << gettext("use --help for help.") <<
             std::endl ;
             return EXIT_FAILURE;
         }
@@ -1091,5 +1342,3 @@ AsmParser::~AsmParser()
 }
 
 AsmParser::AsmParser() { }
-
-// 015158213852

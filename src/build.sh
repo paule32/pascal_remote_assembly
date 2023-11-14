@@ -6,11 +6,16 @@
 #
 # only for education, and non-profit usage !
 # -----------------------------------------------------------------
+export ASMJIT_APPNAMEENV="asmjitapp"
+export ASMJIT_APPNAME="\"${ASMJIT_APPNAMEENV}\""
+export ASMJIT_PRODUCTIVE="no"
+
 PWD=$(pwd)
 SRC=$(echo "${PWD}")
 TEMP="temp"
 TMP=$(echo "${PWD}/${TEMP}")
-FLAGS=$(echo "-std=c++20 -O2 -fPIC " \
+FLAGS=$(echo "-std=c++20 -O2 -fPIC "     \
+    "-DASMJIT_APPNAME=${ASMJIT_APPNAME}" \
     "-Wno-pmf-conversions   " \
     "-Wno-register          " \
     "-Wno-volatile          " \
@@ -174,8 +179,9 @@ function run_check () {
         if [[ -n "${DLG}" ]]; then
             printf '\033[8;%d;%dt' $rows $cols
             eval "${dlgs} --title \"Success\" --msgbox \"no error detected\" 14 79"
+            echo "ssss"
             cd ${SRC}
-            clear
+            #clear
             exit 1
         else
             echo "no error detected."
@@ -186,8 +192,9 @@ function run_check () {
         if [[ -n "${DLG}" ]]; then
             printf '\033[8;%d;%dt' $rows $cols
             eval "${dlgs} --title \"Error\" --msgbox \"$2\" 14 79"
+            echo "$2"
             cd ${SRC}
-            clear
+            #clear
             exit 1
         else
             echo "Error: $2"
@@ -196,10 +203,32 @@ function run_check () {
         fi
     fi
 }
+# --------------------------------------
+# fill the localization array with text:
+# --------------------------------------
+function fill_locale () {
+    number=$(printf "%04d" 1)
+    Z=$(echo "msg_${build_locale}_$number")
+    errloc+=("${Z}")
+    printf "[=--- ${!errloc[0]} "
+    for cnt in {0..31}; do
+        number=$(printf "%04d" $cnt)
+        Z=$(echo "msg_${build_locale}_$number")
+        errloc+=("${Z}")
+    done
+    echo " ok. =]"
+}
 # -----------------------------------------------------------------
 # default build locale is: en_US
 # -----------------------------------------------------------------
 function run_build_prepare () {
+    # --- [ dev ] ---
+    if [[ -n "${ASMJIT_PRODUCTIVE}" ]]; then
+        build_locale="en_US"
+        fill_locale
+        return
+    fi
+    # --- [ end ] ---
     loc=$(locale | grep LC_CTYPE | cut -d= -f2 | cut -d. -f1 | sed 's/"//g')
     build_locale="en_US"
     printf "[= Install Language: "
@@ -215,20 +244,7 @@ function run_build_prepare () {
     # --------------------------------------
     # first run, need the followed steps...
     # --------------------------------------
-    number=$(printf "%04d" 1)
-    eval "Z=msg_${build_locale}_\$number"
-    errloc+=("${Z}")
-    printf "[=--- ${!errloc[0]} "
-
-    # --------------------------------------
-    # fill the localization array with text:
-    # --------------------------------------
-    for cnt in {0..31}; do
-        number=$(printf "%04d" $cnt)
-        eval "Z=msg_${build_locale}_\$number"
-        errloc+=("${Z}")
-    done
-    echo " ok. =]"
+    fill_locale
 
     if [[ -z "${DLG}" ]]; then
         printf "[= ${!errloc[3]}"
@@ -393,6 +409,8 @@ function runiconv () {
     cmd=$(msgfmt --check -o $3/$2_utf8.mo $3/$2_utf8.po 2>&1 ); run_check $? "${cmd}"
     cmd=$(gzip           -9 $3/$2_utf8.mo               2>&1 ); run_check $? "${cmd}"
     
+    cmd=$(cp $3/$2_utf8.mo.gz $3/${ASMJIT_APPNAMEENV}.mo.gz 2>&1 ); run_check $? "${cmd}"
+    
     rm -rf $3/$2_utf8.pot 
     rm -rf $3/$2_utf8.po
     rm -rf $3/$2_utf8.mo
@@ -435,7 +453,7 @@ function run_build_locales_helper () {
     cd ${SRC}/po
     for i in ${!loc_array[@]}; do
         DAT="${loc_array[$i]}"
-        DIR="${TMP}/locales/${DAT}/LC_MESSAGES"
+        DIR="${TMP}/locale/${DAT}.utf8/LC_MESSAGES"
         CHK="${SRC}/po/${DAT}"
 
         check_file "${CHK}.text" ".text"
@@ -462,7 +480,7 @@ function run_build_locales () {
     
     run_build_locales_helper ${build_locale}
     
-    #rm ${TMP}/locales/de_DE
+    #rm ${TMP}/locale/de_DE
     
     if [[ -z "${DLG}" ]]; then
         echo "ok. =]"

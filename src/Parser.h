@@ -48,6 +48,7 @@
 // -----------------------------------------------------------------
 # include <iostream>        // std c++ signatures
 # include <string>
+# include <cstdlib>
 # include <cstring>
 # include <sstream>
 # include <istream>
@@ -61,7 +62,7 @@
 # include <any>
 # include <filesystem>
 # include <memory>
-# include <functional>
+# include <functional>      // std::function
 # include <codecvt>         // wstr to str
 # include <locale>
 # include <iomanip>
@@ -86,6 +87,7 @@
 #if defined(_WIN32) || defined(_WIN64)
 extern "C" {
 # include <windows.h>
+# include <strsafe.h>
 extern HINSTANCE win32_hInstance;
 };
 #else
