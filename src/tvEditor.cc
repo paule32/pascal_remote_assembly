@@ -181,7 +181,7 @@ ushort doEditDialog( int dialog, ... )
     return cmCancel;
 }
 
-class TMyTvEditor : public TWindow {
+class TMyTvEditor : public TDialog {
 public:
     class MyEditorChild: public TFileEditor {
     public:
@@ -198,13 +198,19 @@ public:
         {
             TFileEditor::handleEvent( event );
             if (event.what == evKeyDown) {
-                if (event.keyDown.charScan.charCode == 27)     // #27 - Escape
+                if (event.keyDown.charScan.charCode == kbEsc)     // #27 - Escape
                 {
                     owner->close();
                     clearEvent(event);
                     return;
                 }   else
-                if (event.keyDown.keyCode == 0x3c00)  // F2
+                if (event.keyDown.keyCode == kbF1)  // F1
+                {
+                    clearEvent(event);
+                    messageBox("getkey F1",mfInformation|mfOKButton);
+                    return;
+                }   else
+                if (event.keyDown.keyCode == kbF2)  // F2
                 {
                     clearEvent(event);
                     messageBox("getkey F2",mfInformation|mfOKButton);
@@ -215,7 +221,7 @@ public:
                 if (event.message.command == 9)      // F1  - Function key
                 {
                     clearEvent(event);
-                    messageBox("getkey F1",mfInformation|mfOKButton);
+                    messageBox("getkey Help",mfInformation|mfOKButton);
                     return;
                 }
             }
@@ -228,46 +234,34 @@ public:
     }
     TMyTvEditor(const TRect& bounds):
         TWindowInit(&TMyTvEditor::initFrame),
-        TWindow(bounds, "Mein Fenster", wnNoNumber) {
+        TDialog(bounds, "Mein Fenster") {
+        palette = dpBlueDialog;
 
-        // Text-Editor erstellen
-        hScrollBar = new TScrollBar( TRect( 18, size.y - 1, size.x - 19, size.y ) );
-        //hScrollBar->hide();
+        hScrollBar = new TScrollBar( TRect( 18, size.y - 1, size.x - 23, size.y ) );
         insert(hScrollBar);
 
-        vScrollBar = new TScrollBar( TRect( size.x - 19, 1, size.x - 18, size.y - 1 ) );
-        //vScrollBar->hide();
+        vScrollBar = new TScrollBar( TRect( size.x - 23, 1, size.x - 22, size.y - 1 ) );
         insert(vScrollBar);
 
         indicator = new TIndicator( TRect( 2, size.y - 1, 16, size.y) );
         insert(indicator);
         
-        editor = new TFileEditor(TRect(1, 1, size.x - 20, size.y - 1), hScrollBar, vScrollBar, indicator, "www.txt");
+        editor = new MyEditorChild(this, TRect(1, 1, size.x - 24, size.y - 1), hScrollBar, vScrollBar, indicator, "www.txt");
         insert(editor);
 
-        // Schaltflächen erstellen
-        //button1 = new TButton(TRect(2, 24, 18, 26), "Schaltfläche 1", cmButton1, bfNormal);
-        //insert(button1);
+        button1 = new TButton(TRect(size.x - 21, 2, size.x - 3, 4), "Schaltfläche 1", cmButton1, bfNormal);
+        insert(button1);
 
-        //button2 = new TButton(TRect(20, 24, 36, 26), "Schaltfläche 2", cmButton2, bfNormal);
-        //insert(button2);
-
-        // Ereignisse für Schaltflächen hinzufügen
+        button2 = new TButton(TRect(size.x - 21, 5, size.x - 3, 7), "Schaltfläche 2", cmButton2, bfNormal);
+        insert(button2);
+        
         options |= ofSelectable;
+        
+        drawView();
     }
 
     void handleEvent(TEvent & event ){
         TWindow::handleEvent( event );
-        /*
-        if (event.what == evMouseDown) {
-            if (event.mouse.buttons == mbLeftButton) {
-                int mouseX = event.mouse.where.x;
-                int mouseY = event.mouse.where.y;
-                if ((mouseX == 1) && (mouseY == 1)) {
-                    close();
-                }   clearEvent(event);
-            }
-        }   else*/
         if (event.what == evCommand) {
             switch (event.message.command) {
                 case cmClose:
@@ -282,17 +276,10 @@ public:
                     break;
             }
         }
-
-        /*else
-        if (event.what == evKeyDown) {
-            editor->handleEvent(event);  // Weiterleitung des Tastaturereignisses an den Editor
-        }   else {
-            clearEvent(event);
-        }*/
     }
 
 private:
-    TFileEditor * editor;
+    MyEditorChild * editor;
     TIndicator    * indicator;
     
     TScrollBar    * vScrollBar;
@@ -300,4 +287,6 @@ private:
     
     TButton       * button1;
     TButton       * button2;
+    
+    ushort myButtonColor = 0x2F;
 };

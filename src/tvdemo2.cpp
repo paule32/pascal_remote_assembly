@@ -5,80 +5,81 @@
 //
 // only for education, and non-profit usage !
 // -----------------------------------------------------------------
-#define Uses_TDialog
-#define Uses_TRect
-#define Uses_TStaticText
-#define Uses_TButton
-#define Uses_TEvent
-#define Uses_TWindow
-#define Uses_TColorGroup
-#define Uses_TColorItem
-#define Uses_TColorDialog
-#define Uses_TPalette
-#define Uses_TDeskTop
-#define Uses_TApplication
-#define Uses_TChDirDialog
-#define Uses_TScreen
-#define Uses_TView
-#define Uses_TApplication
-#define Uses_TEditWindow
-#define Uses_TDeskTop
-#define Uses_TRect
-#define Uses_TEditor
-#define Uses_TFileEditor
-#define Uses_TFileDialog
-#define Uses_TChDirDialog
-#define Uses_TDialog
-#define Uses_TDeskTop
-#define Uses_TProgram
-#define Uses_TApplication
-#define Uses_TObject
-#define Uses_TInputLine
-#define Uses_TLabel
-#define Uses_THistory
-#define Uses_TRect
-#define Uses_TCheckBoxes
-#define Uses_TButton
-#define Uses_TButton
-#define Uses_MsgBox
-#define Uses_TSItem
-#define Uses_TEditor
-#define Uses_TIndicator
-#define Uses_Desktop
-#define Uses_TDialog
-#define Uses_TDeskTop
-#define Uses_TProgram
-#define Uses_TApplication
-#define Uses_TObject
-#define Uses_TInputLine
-#define Uses_TLabel
-#define Uses_THistory
-#define Uses_TRect
-#define Uses_TCheckBoxes
-#define Uses_TButton
-#define Uses_TButton
-#define Uses_MsgBox
-#define Uses_TSItem
-#define Uses_TEditor
+# define Uses_TDialog
+# define Uses_TRect
+# define Uses_TStaticText
+# define Uses_TButton
+# define Uses_TEvent
+# define Uses_TWindow
+# define Uses_TColorGroup
+# define Uses_TColorItem
+# define Uses_TColorDialog
+# define Uses_TPalette
+# define Uses_TDeskTop
+# define Uses_TApplication
+# define Uses_TChDirDialog
+# define Uses_TScreen
+# define Uses_TView
+# define Uses_TApplication
+# define Uses_TEditWindow
+# define Uses_TDeskTop
+# define Uses_TRect
+# define Uses_TEditor
+# define Uses_TFileEditor
+# define Uses_TFileDialog
+# define Uses_TChDirDialog
+# define Uses_TDialog
+# define Uses_TDeskTop
+# define Uses_TProgram
+# define Uses_TApplication
+# define Uses_TObject
+# define Uses_TInputLine
+# define Uses_TLabel
+# define Uses_THistory
+# define Uses_TRect
+# define Uses_TCheckBoxes
+# define Uses_TButton
+# define Uses_TButton
+# define Uses_MsgBox
+# define Uses_TSItem
+# define Uses_TEditor
+# define Uses_TIndicator
+# define Uses_Desktop
+# define Uses_TDialog
+# define Uses_TDeskTop
+# define Uses_TProgram
+# define Uses_TApplication
+# define Uses_TObject
+# define Uses_TInputLine
+# define Uses_TLabel
+# define Uses_THistory
+# define Uses_TRect
+# define Uses_TCheckBoxes
+# define Uses_TButton
+# define Uses_TButton
+# define Uses_MsgBox
+# define Uses_TSItem
+# define Uses_TEditor
+# define Uses_TKeys
 
-#include <tvision/tv.h>
+# include <tvision/tv.h>
 
-#include "tvdemo.h"
-#include "tvcmds.h"
-#include "demohelp.h"
-#include "ascii.h"
-#include "calendar.h"
-#include "calc.h"
-#include "evntview.h"
-#include "backgrnd.h"
+# include "tvdemo.h"
+# include "tvcmds.h"
+# include "demohelp.h"
+# include "ascii.h"
+# include "calendar.h"
+# include "calc.h"
+# include "evntview.h"
+# include "backgrnd.h"
 
-#include <stdlib.h>
-#include <signal.h>
+# include <stdlib.h>
+# include <signal.h>
 
-#include <strstrea.h>
-#include <iomanip.h>
+# include <strstrea.h>
+# include <iomanip.h>
 
-#include "tvEditor.cc"
+# include "tvEditor.cc"
 
 void TVDemo::handleEvent(TEvent &event)
 {
@@ -394,7 +395,7 @@ void TVDemo::colors()
 
 void TVDemo::tvEditor()
 {
-    TMyTvEditor *editor = (TMyTvEditor *) validView(new TMyTvEditor(TRect(0, 0, 79, 23)));
+    TMyTvEditor *editor = (TMyTvEditor *) validView(new TMyTvEditor(TRect(0, 0, 81, 23)));
 
     if (editor != nullptr) {
         editor->helpCtx = hcCalendar;
