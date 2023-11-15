@@ -1,16 +1,3 @@
-/*----------------------------------------------------------*/
-/*                                                          */
-/*   Turbo Vision TVDEMO source file                        */
-/*                                                          */
-/*----------------------------------------------------------*/
-/*
- *      Turbo Vision - Version 2.0
- *
- *      Copyright (c) 1994 by Borland International
- *      All Rights Reserved.
- *
- */
-
 #define Uses_TView
 #define Uses_TRect
 #define Uses_TStatusLine
@@ -40,11 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef __FLAT__
-#define HELP_FILENAME "demohelp.h32"
-#else
-#define HELP_FILENAME "demohelp.h16"
-#endif
+#define HELP_FILENAME "asmjit.help"
 
 //
 // main: create an application object.  Constructor takes care of all
@@ -57,10 +40,13 @@
 
 extern TPoint shadowSize;
 
+extern ushort doEditDialog( int dialog, ... );
+
 int TurboMain(int argc, char **argv)
 {
     TVDemo *demoProgram = new TVDemo(argc, argv);
 
+    TEditor::editorDialog = doEditDialog;
     demoProgram->run();
 
     TObject::destroy( demoProgram );
@@ -219,11 +205,11 @@ void TVDemo::puzzle()
 
 void TVDemo::retrieveDesktop()
 {
-    if (!ifstream("TVDEMO.DST").good())
+    if (!ifstream("asmjit.desk").good())
         messageBox("Could not find desktop file", mfOKButton | mfError);
     else 
         {
-        fpstream *f = new fpstream("TVDEMO.DST", ios::in|ios::binary);
+        fpstream *f = new fpstream("asmjit.desk", ios::in|ios::binary);
         if( !f )
             messageBox("Could not open desktop file", mfOKButton | mfError);
         else
@@ -242,14 +228,14 @@ void TVDemo::retrieveDesktop()
 
 void TVDemo::saveDesktop()
 {
-    fpstream *f = new fpstream("TVDEMO.DST", ios::out|ios::binary);
+    fpstream *f = new fpstream("asmjit.desk", ios::out|ios::binary);
 
     if( f )
         {
         TVDemo::storeDesktop(*f);
         if( !f )
             {
-            messageBox("Could not create TVDEMO.DST.", mfOKButton | mfError);
+            messageBox("Could not create ASMJIT.DESK.", mfOKButton | mfError);
             delete f;
             ::remove("TVDEMO.DST");
             return;

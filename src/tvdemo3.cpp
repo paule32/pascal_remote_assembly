@@ -1,16 +1,3 @@
-/*----------------------------------------------------------*/
-/*                                                          */
-/*   Turbo Vision TVDEMO source file                        */
-/*                                                          */
-/*----------------------------------------------------------*/
-/*
- *      Turbo Vision - Version 2.0
- *
- *      Copyright (c) 1994 by Borland International
- *      All Rights Reserved.
- *
- */
-
 #define Uses_TRect
 #define Uses_TMenuBar
 #define Uses_TSubMenu
@@ -179,7 +166,7 @@ TMenuBar *TVDemo::initMenuBar(TRect r)
 {
     TSubMenu& sub1 =
       *new TSubMenu( "~\360~", 0, hcSystem ) +
-        *new TMenuItem( "~V~ideo mode", cmVideoMode, kbNoKey, hcNoContext, "" ) +
+        *new TMenuItem( "~T~est Viewer", cmTvEditorCmd, kbNoKey, hcNoContext, "" ) +
          newLine() +
         *new TMenuItem( "~A~bout...", cmAboutCmd, kbNoKey, hcSAbout ) +
          newLine() +

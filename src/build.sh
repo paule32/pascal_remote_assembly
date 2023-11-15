@@ -797,24 +797,25 @@ if [[ -n "${built_dis}" ]]; then
     # ----------------------------------------
     # build turbo vision stuff ...
     # ----------------------------------------
-    cd ${SRC}/tv
-    ${GXX} ${FLAGS} -c *.cpp
-    ar rcx libtvision.a *.o
-    mv libtvision.a ${TMP}
-    cd ${TMP}
+    #cd ${SRC}/tv
+    #${GXX} ${FLAGS} -c *.cpp
+    #ar rcx libtvision.a *.o
+    #mv libtvision.a ${TMP}
+    #cd ${TMP}
     
     cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo1.o  -c ${SRC}/tvdemo1.cpp   2>&1 ); run_check $? "${cmd}"
     cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo2.o  -c ${SRC}/tvdemo2.cpp   2>&1 ); run_check $? "${cmd}"
     cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo3.o  -c ${SRC}/tvdemo3.cpp   2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/puzzle.o   -c ${SRC}/puzzle.cpp    2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/calendar.o -c ${SRC}/calendar.cpp  2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/calc.o     -c ${SRC}/calc.cpp      2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/backgrnd.o -c ${SRC}/backgrnd.cpp  2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/ascii.o    -c ${SRC}/ascii.cpp     2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/evntview.o -c ${SRC}/evntview.cpp  2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/fileview.o -c ${SRC}/fileview.cpp  2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/gadgets.o  -c ${SRC}/gadgets.cpp   2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/mousedlg.o -c ${SRC}/mousedlg.cpp  2>&1 ); run_check $? "${cmd}"
+    
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/puzzle.o   -c ${SRC}/puzzle.cpp    2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/calendar.o -c ${SRC}/calendar.cpp  2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/calc.o     -c ${SRC}/calc.cpp      2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/backgrnd.o -c ${SRC}/backgrnd.cpp  2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/ascii.o    -c ${SRC}/ascii.cpp     2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/evntview.o -c ${SRC}/evntview.cpp  2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/fileview.o -c ${SRC}/fileview.cpp  2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/gadgets.o  -c ${SRC}/gadgets.cpp   2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/mousedlg.o -c ${SRC}/mousedlg.cpp  2>&1 ); run_check $? "${cmd}"
 
     # ----------------------------------------
     # link diss.exe application ...

@@ -1,16 +1,10 @@
-/*----------------------------------------------------------*/
-/*                                                          */
-/*   Turbo Vision TVDEMO source file                        */
-/*                                                          */
-/*----------------------------------------------------------*/
-/*
- *      Turbo Vision - Version 2.0
- *
- *      Copyright (c) 1994 by Borland International
- *      All Rights Reserved.
- *
- */
-
+// -----------------------------------------------------------------
+// File:   tvcmds.h
+// Author: (c) 2023 Jens Kallup - paule32
+// All rights reserved
+//
+// only for education, and non-profit usage !
+// -----------------------------------------------------------------
 #define Uses_TDialog
 #define Uses_TRect
 #define Uses_TStaticText
@@ -25,6 +19,47 @@
 #define Uses_TApplication
 #define Uses_TChDirDialog
 #define Uses_TScreen
+#define Uses_TView
+#define Uses_TApplication
+#define Uses_TEditWindow
+#define Uses_TDeskTop
+#define Uses_TRect
+#define Uses_TEditor
+#define Uses_TFileEditor
+#define Uses_TFileDialog
+#define Uses_TChDirDialog
+#define Uses_TDialog
+#define Uses_TDeskTop
+#define Uses_TProgram
+#define Uses_TApplication
+#define Uses_TObject
+#define Uses_TInputLine
+#define Uses_TLabel
+#define Uses_THistory
+#define Uses_TRect
+#define Uses_TCheckBoxes
+#define Uses_TButton
+#define Uses_TButton
+#define Uses_MsgBox
+#define Uses_TSItem
+#define Uses_TEditor
+#define Uses_TIndicator
+#define Uses_Desktop
+#define Uses_TDialog
+#define Uses_TDeskTop
+#define Uses_TProgram
+#define Uses_TApplication
+#define Uses_TObject
+#define Uses_TInputLine
+#define Uses_TLabel
+#define Uses_THistory
+#define Uses_TRect
+#define Uses_TCheckBoxes
+#define Uses_TButton
+#define Uses_TButton
+#define Uses_MsgBox
+#define Uses_TSItem
+#define Uses_TEditor
 
 #include <tvision/tv.h>
 
@@ -40,10 +75,10 @@
 #include <stdlib.h>
 #include <signal.h>
 
-//
-// DemoApp::handleEvent()
-//  Event loop to distribute the work.
-//
+#include <strstrea.h>
+#include <iomanip.h>
+
+#include "tvEditor.cc"
 
 void TVDemo::handleEvent(TEvent &event)
 {
@@ -97,6 +132,10 @@ void TVDemo::handleEvent(TEvent &event)
                 colors();
                 break;
 
+            case cmTvEditorCmd:
+                tvEditor();
+                break;
+
         case cmSaveCmd:             //  Save current desktop
                 saveDesktop();
                 break;
@@ -124,11 +163,11 @@ void TVDemo::aboutDlgBox()
     TDialog *aboutBox = new TDialog(TRect(0, 0, 39, 13), "About");
 
     aboutBox->insert(
-      new TStaticText(TRect(9, 2, 30, 9),
-        "\003Turbo Vision Demo\n\n"       // These strings will be
+      new TStaticText(TRect(9, 2, 35, 9),
+        "\003Turbo Vision asmjit Demo\n\n"       // These strings will be
         "\003C++ Version\n\n"             // concatenated by the compiler.
-        "\003Copyright (c) 1994\n\n"      // The \003 centers the line.
-        "\003Borland International"
+        "\003Copyright (c) 2023 paule32\n\n"      // The \003 centers the line.
+        "\003non-profit Software"
         )
       );
 
@@ -350,5 +389,15 @@ void TVDemo::colors()
             setScreenMode(TScreen::screenMode);
             }
         destroy( c );
+    }
+}
+
+void TVDemo::tvEditor()
+{
+    TMyTvEditor *editor = (TMyTvEditor *) validView(new TMyTvEditor(TRect(0, 0, 79, 23)));
+
+    if (editor != nullptr) {
+        editor->helpCtx = hcCalendar;
+        deskTop->insert( editor );
     }
 }

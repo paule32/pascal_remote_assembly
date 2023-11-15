@@ -1,26 +1,21 @@
-/*---------------------------------------------------------*/
-/*                                                         */
-/*   TVDemo.h : Header file for TVDemo.cpp                 */
-/*                                                         */
-/*---------------------------------------------------------*/
-/*
- *      Turbo Vision - Version 2.0
- *
- *      Copyright (c) 1994 by Borland International
- *      All Rights Reserved.
- *
- */
+// -----------------------------------------------------------------
+// File:   tvAsmJit.h
+// Author: (c) 2023 Jens Kallup - paule32
+// All rights reserved
+//
+// only for education, and non-profit usage !
+// -----------------------------------------------------------------
+#pragma once
 
-#if !defined( __TVDEMO_H )
-#define __TVDEMO_H
+class  TStatusLine;
+class  TMenuBar;
+class  TPalette;
+class  THeapView;
+class  TClockView;
+class  TMyTvEditor;
+class  fpstream;
 
-class TStatusLine;
-class TMenuBar;
 struct TEvent;
-class TPalette;
-class THeapView;
-class TClockView;
-class fpstream;
 
 class TVDemo : public TApplication 
 {
@@ -58,6 +53,5 @@ private:
     void storeDesktop(fpstream& s);   // Store the current desktop
     void saveDesktop();               //  in a resource file
 
+    void tvEditor();
 };
-
-#endif // __TVDEMO_H

@@ -8,7 +8,6 @@
 #pragma once
 
 // Misc UI commands
-
 const ushort
    cmAboutBox    = 2000,
    cmChgDir      = 2001,
