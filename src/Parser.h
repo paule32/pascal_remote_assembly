@@ -87,6 +87,7 @@
 #if defined(_WIN32) || defined(_WIN64)
 extern "C" {
 # include <windows.h>
+# include <tchar.h>
 # include <strsafe.h>
 extern HINSTANCE win32_hInstance;
 };

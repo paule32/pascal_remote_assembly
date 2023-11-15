@@ -13,11 +13,25 @@
 # define Uses_MsgBox
 
 #include <tvision/tv.h>
+__link( RDialog )
+__link( RView )
 
+#if !defined( __FORMS_H )
 #include "forms.h"
-#include "formcmds.h"
+#endif  // __FORMS_H
 
+#if !defined( __LISTDLG_H )
+#include "listdlg.h"
+#endif  // __LISTDLG_H
+
+#if !defined( __FORMCMDS_H )
+#include "formcmds.h"
+#endif  // __FORMCMDS_H
+
+#if !defined( __STRING_H )
 #include <string.h>
+#endif  // __STRING_H
+
 
 // Compares two buffers and returns True if contents are equal
 
@@ -115,13 +129,11 @@ void TForm::handleEvent( TEvent& event)
         clearEvent(event);
         if (changed() == True)
             {
-/*
             if (((TListDialog *)listDialog)->saveForm(this))
                 {
                 destroy(this);
                 return;
                 }
-*/
             }
         else
             {
@@ -141,7 +153,7 @@ void TForm::handleEvent( TEvent& event)
             if ( (prevData != NULL) && (event.message.infoPtr == prevData) )
                 clearEvent(event);
             }
-/*        else
+        else
             // Belong to sending ListDialog?
 
             if (listDialog == event.message.infoPtr)
@@ -156,7 +168,6 @@ void TForm::handleEvent( TEvent& event)
                 else if (event.message.command == cmCloseForm)
                     destroy(this);
            }
-*/
         }
 }
 
@@ -176,8 +187,8 @@ Boolean TForm::valid(ushort command)
                 {
                 case cmYes:
                 // Try to save changes. Cancel if save fails
-//                    if (!((TListDialog *)listDialog)->saveForm(this))
-//                        action = cmCancel;
+                    if (!((TListDialog *)listDialog)->saveForm(this))
+                        action = cmCancel;
                     break;
                 case cmNo:
                     break;                // abandon changes

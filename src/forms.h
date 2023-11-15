@@ -26,7 +26,7 @@ public:
     virtual void handleEvent( TEvent& );
     virtual Boolean valid( ushort );
 
-//    TView  *listDialog;
+    TView  *listDialog;
     void   *prevData;
     ushort keyWidth;
 

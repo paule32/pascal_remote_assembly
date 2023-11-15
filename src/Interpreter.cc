@@ -30,7 +30,7 @@ std::string file_output_ct;         // output misc/tools C++ file
 extern void asm_parser_main(void);
 extern "C"  int yyparse(void);
 extern "C"  FILE * yyin;
-extern      int  TurboMain(void);   // console TUI - Turbo Vision
+extern      int  TurboMain(int,char**);
 
 static bool found_args = false;     // program command line arguments
 
@@ -52,6 +52,18 @@ std::string locale_codepage_new;    //
 LCID locale_LCID_old;               // for restore the old locale
 LCID locale_LCID_new;               //
 
+HANDLE g_hChildStd_IN_Rd  = NULL;
+HANDLE g_hChildStd_IN_Wr  = NULL;
+HANDLE g_hChildStd_OUT_Rd = NULL;
+HANDLE g_hChildStd_OUT_Wr = NULL;
+
+// -----------------------------------------------------------------
+// function member forwarder's ...
+// -----------------------------------------------------------------
+std::string ExtractFileExtension( std::string const&);
+void        ErrorExit(LPTSTR);
+void        CreateChildProcess();
+
 // -----------------------------------------------------------------
 // extend the namespace STD with "tab" - to produce \t into stream:
 // -----------------------------------------------------------------
@@ -60,6 +72,74 @@ namespace std {
     inline basic_ostream<_CharT, _Traits> &
         tab(basic_ostream<_CharT, _Traits> &__os) {
         return __os.put(__os.widen('\t'));
+    }
+}
+
+// -----------------------------------------------------------------
+// Create a child process that uses the previously created pipes for
+// STDIN and STDOUT.
+// -----------------------------------------------------------------
+void CreateChildProcess() {
+    PROCESS_INFORMATION piProcInfo;
+    STARTUPINFO         siStartInfo;
+    BOOL                bSuccess = FALSE;
+    TCHAR szCmdline[]   = TEXT("child");
+    
+    // ----------------------------------------------------
+    // Set up members of the PROCESS_INFORMATION structure. 
+    // ----------------------------------------------------
+    ZeroMemory( &piProcInfo, sizeof(PROCESS_INFORMATION) );
+    
+    // ----------------------------------------------------
+    // Set up members of the STARTUPINFO structure.
+    // This structure specifies the STDIN and STDOUT
+    // handles for redirection.
+    // ----------------------------------------------------
+    ZeroMemory( &siStartInfo, sizeof(STARTUPINFO) );
+    
+    siStartInfo.cb         = sizeof(STARTUPINFO) ;
+    siStartInfo.hStdError  = g_hChildStd_OUT_Wr  ;
+    siStartInfo.hStdOutput = g_hChildStd_OUT_Wr  ;
+    siStartInfo.hStdInput  = g_hChildStd_IN_Rd   ;
+    siStartInfo.dwFlags   |= STARTF_USESTDHANDLES;
+    
+    // ----------------------------------------------------
+    // Create the child process.
+    // ----------------------------------------------------
+    bSuccess = CreateProcess(NULL, 
+        szCmdline,     // command line
+        NULL,          // process security attributes
+        NULL,          // primary thread security attributes
+        TRUE,          // handles are inherited
+        0,             // creation flags
+        NULL,          // use parent's environment
+        NULL,          // use parent's current directory
+        &siStartInfo,  // STARTUPINFO pointer
+        &piProcInfo);  // receives PROCESS_INFORMATION
+        
+    // ----------------------------------------------------
+    // If an error occurs, exit the application. 
+    // ----------------------------------------------------
+    if (!bSuccess) {
+        ErrorExit(TEXT("CreateProcess"));
+    }
+    else {
+        // ------------------------------------------------------------
+        // Close handles to the child process and its primary thread.
+        // Some applications might keep these handles to monitor the
+        // status of the child process, for example.
+        // ------------------------------------------------------------
+        CloseHandle ( piProcInfo.hProcess );
+        CloseHandle ( piProcInfo.hThread  );
+        
+        // ------------------------------------------------------------
+        // Close handles to the stdin and stdout pipes no longer needed
+        // by the child process.
+        // If they are not explicitly closed,there is no way to
+        // recognize that the child process has ended.
+        // ------------------------------------------------------------
+        CloseHandle ( g_hChildStd_OUT_Wr );
+        CloseHandle ( g_hChildStd_IN_Rd  );
     }
 }
 
@@ -129,14 +209,14 @@ ExtractFileExtension( std::string const & path )
 // -----------------------------------------------------------
 // Retrieve the system error message for the last-error code
 // -----------------------------------------------------------
-void ErrorExit(LPTSTR lpszFunction) 
-{ 
+void ErrorExit(LPTSTR lpszFunction)
+{
     LPVOID lpMsgBuf;
     LPVOID lpDisplayBuf;
-    DWORD dw = GetLastError(); 
+    DWORD dw = GetLastError();
 
     FormatMessage(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+        FORMAT_MESSAGE_ALLOCATE_BUFFER |
         FORMAT_MESSAGE_FROM_SYSTEM |
         FORMAT_MESSAGE_IGNORE_INSERTS,
         NULL,
@@ -145,18 +225,21 @@ void ErrorExit(LPTSTR lpszFunction)
         (LPTSTR) &lpMsgBuf,
         0, NULL );
 
+    // -----------------------------------------------
     // Display the error message and exit the process
-
+    // -----------------------------------------------
     lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, 
-        (lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR)); 
+    (lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR));
+        
     StringCchPrintf((LPTSTR)lpDisplayBuf, 
         LocalSize(lpDisplayBuf) / sizeof(TCHAR),
         TEXT("%s failed with error %d: %s"), 
-        lpszFunction, dw, lpMsgBuf); 
-    MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK); 
+        lpszFunction, dw, lpMsgBuf);
 
-    LocalFree(lpMsgBuf);
-    LocalFree(lpDisplayBuf);
+    MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK);
+
+    LocalFree ( lpMsgBuf );
+    LocalFree ( lpDisplayBuf );
 }
 
 // ----------------------------------------------
@@ -237,6 +320,13 @@ int handle_codepage()
     return 0;
 }
 
+static bool FileExists(const char* filePath)
+{
+    DWORD fileAttributes = GetFileAttributesA(filePath);
+    
+    return (fileAttributes != INVALID_FILE_ATTRIBUTES)
+    && !(fileAttributes & FILE_ATTRIBUTE_DIRECTORY);
+}
 // ---------------------------------------------------------
 // check file ...
 // ---------------------------------------------------------
@@ -313,10 +403,21 @@ int getLocaleSystemUTF8(std::string ls)
     std::string loca("localization error: ");
     std::stringstream ss1, ss2;
     
-    ss1 << ".\\locale\\" << ls << ".utf8\\LC_MESSAGES\\" << ApplicationName << ".mo.gz";
-    ss2 << ".\\locale\\" << ls << ".utf8\\LC_MESSAGES\\" << ApplicationName << ".mo";
-        
     locale_str = ls;
+    
+    // ---------------------------------------------------
+    // msys2, and *nix use: '/', else Windows: '\' ...
+    // ---------------------------------------------------
+    if (std::filesystem::path::preferred_separator == '/') {
+        ss2 << "./locale/"   << ls << ".utf8/LC_MESSAGES/"
+            << ApplicationName
+            << ".mo";
+    }   else {
+        ss2 << ".\\locale\\" << ls << ".utf8\\LC_MESSAGES\\"
+            << ApplicationName
+            << ".mo";
+    }   ss1 << ss2.str()
+            << ".gz";
     
     return check_file(ss1.str(),
         [&ls, &ss1]() -> int {
@@ -335,15 +436,52 @@ int getLocaleSystemUTF8(std::string ls)
                 return EXIT_FAILURE;
             }
             else {
-                setlocale( LC_ALL, "de_DE.utf-8" );
+                std::string loca(ls );
+                loca.append(".UTF-8");
+                setlocale( LC_ALL, loca.c_str() );
+                std::wcout.imbue(std::locale () );
+
+                char* libvar;
+                size_t requireSize;
+                
+                errno_t err1 = getenv_s(&requireSize, NULL, 0, "LANGUAGE");
+                if (err1 == EINVAL) {
+                    std::cerr << "error: LANGUAGE environment variable could not be get." <<
+                    std::endl ;
+                    return EXIT_FAILURE;
+                }
+                else {
+                    if (!requireSize) {
+                        libvar = (char *) malloc( strlen(loca.c_str()) * sizeof(char));
+                        if (!libvar) {
+                            std::cerr << "error: failed to allocate memory." <<
+                            std::endl ;
+                            return EXIT_FAILURE;
+                        }
+                        requireSize = strlen(loca.c_str());
+                    }   else {
+                        libvar = (char *) malloc( requireSize * sizeof(char));
+                        if (!libvar) {
+                            std::cerr << "error: failed to allocate memory." <<
+                            std::endl ;
+                            return EXIT_FAILURE;
+                        }
+                    }
+
+                    // --------------------
+                    // set final locale ...
+                    // --------------------
+                    getenv_s(&requireSize, libvar, requireSize, "LANGUAGE");
+                    _putenv_s("LANGUAGE" , loca.c_str());
+                    free(libvar);
+                }
                 
                 bind_textdomain_codeset(ApplicationName.c_str(), "UTF-8");
-                bindtextdomain( ApplicationName.c_str(),".\\locale");
+                bindtextdomain( ApplicationName.c_str(),"locale");
                 textdomain    ( ApplicationName.c_str() );
-            
-                std::wcout.imbue(std::locale());
-                std::cout << gettext("File") << std::endl;
                 
+                std::cout << gettext("File") << std::endl;
+            
                 HWND hwnd       = GetForegroundWindow();
                 int  textLength = GetWindowTextLengthA(hwnd);
                 
@@ -420,6 +558,36 @@ int getLocaleSystemUTF8(std::string ls)
 }
 
 // ---------------------------------------------------------
+// locale helper function member as place-holder ...
+// ---------------------------------------------------------
+int SetApplicationLocale( std::string loca, LCID lcid ) {
+    std::stringstream ss;
+    ss << loca << ".UTF-8";
+
+    SetEnvironmentVariable(
+    LPCTSTR("LC_ALL"),
+    LPCTSTR(ss.str().c_str()));
+
+    SetEnvironmentVariable(
+    LPCTSTR("LANG"),
+    LPCTSTR(ss.str().c_str()));
+
+    SetEnvironmentVariable(
+    LPCTSTR("LANGUAHE"),
+    LPCTSTR(ss.str().c_str()));
+
+    // -------------------------
+    // mark locale as "changed"
+    // -------------------------
+    extern int  _nl_msg_cat_cntr;
+    ++_nl_msg_cat_cntr;
+    SetThreadLocale(lcid);
+
+    if (SetThreadUILanguage(lcid) != 0) {
+        return getLocaleSystemUTF8(de_DE);
+    }   return EXIT_FAILURE;
+}
+// ---------------------------------------------------------
 // perform pre-tasks: de-compress the locale file:
 // ---------------------------------------------------------
 int handle_locale()
@@ -451,57 +619,18 @@ int handle_locale()
         SetConsoleOutputCP(65001); // set codepage UTF-8
 
         locale_str      = de_DE;
-        locale_LCID_new =
-            MAKELCID(
-            MAKELANGID(
-            LANG_GERMAN,
-            SUBLANG_GERMAN),SORT_DEFAULT);
-
-        // -------------------------
-        // Make change known.
-        // -------------------------
-        SetEnvironmentVariable(
-        LPCTSTR("LC_ALL"),
-        LPCTSTR("de_DE.UTF-8"));
-        
-        SetEnvironmentVariable(
-        LPCTSTR("LANGUAHE"),
-        LPCTSTR("de_DE.UTF-8"));    {
-            extern int  _nl_msg_cat_cntr;
-            ++_nl_msg_cat_cntr;
-        }
-        
-        SetThreadLocale(locale_LCID_new );
-        return getLocaleSystemUTF8(de_DE);
+        locale_LCID_new = MAKELCID(
+        MAKELANGID(LANG_GERMAN,SUBLANG_GERMAN),SORT_DEFAULT);
+        return SetApplicationLocale(locale_str,locale_LCID_new);
     }
     else {
         std::cout << "4444444444444" << std::endl;
         SetConsoleOutputCP(65001); // set codepage UTF-8
         
         locale_str      = en_US;
-        locale_LCID_new =
-            MAKELCID(
-            MAKELANGID(
-            LANG_ENGLISH,
-            SUBLANG_DEFAULT),SORT_DEFAULT);
-
-        // -------------------------
-        // Make change known.
-        // -------------------------
-        SetEnvironmentVariable(
-        LPCTSTR("LC_ALL"),
-        LPCTSTR("en_US.UTF-8"));
-        
-        SetEnvironmentVariable(
-        LPCTSTR("LANGAGE"),
-        LPCTSTR("en_US.UTF-8"));    {
-            extern int  _nl_msg_cat_cntr;
-            ++_nl_msg_cat_cntr;
-        }
-        
-        SetThreadLocale(locale_LCID_new );
-        return getLocaleSystemUTF8(en_US);
-
+        locale_LCID_new = MAKELCID(
+        MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT),SORT_DEFAULT);
+        return SetApplicationLocale(locale_str,locale_LCID_new);
     }   return EXIT_FAILURE;
 }
 
@@ -1045,10 +1174,20 @@ void removeLocaleFile( std::string ls )
     
     std::stringstream ss;
     try {
-    ss  << ".\\locale\\"
-        << ls << ".utf8\\LC_MESSAGES\\"
-        << ApplicationName
-        << ".mo";
+        // ---------------------------------------------------
+        // msys2, and *nix use: '/', else Windows: '\' ...
+        // ---------------------------------------------------
+        if (std::filesystem::path::preferred_separator == '/') {
+            ss  << "./locale/"
+                << ls << ".utf8/LC_MESSAGES/"
+                << ApplicationName
+                << ".mo";
+        }   else {
+            ss  << ".\\locale\\"
+                << ls << ".utf8\\LC_MESSAGES\\"
+                << ApplicationName
+                << ".mo";
+        }
         fs::path filePath = ss.str();
         if (fs::exists( filePath )) {
             fs::remove( filePath );
@@ -1090,12 +1229,9 @@ int main(int argc, char **argv)
     // parse command line args:
     // ----------------------------
     try {
-        if (handle_locale() == EXIT_FAILURE)
-        return EXIT_FAILURE;
+        if (handle_locale  () == EXIT_FAILURE) return EXIT_FAILURE;
+        if (handle_codepage() ==            0) return EXIT_FAILURE;
 
-        if (handle_codepage() == 0)
-        return EXIT_FAILURE;
-std::cout << "---> " << locale_str << std::endl;
         // ----------------------------------
         // registering the clean-up function
         // ----------------------------------
@@ -1104,11 +1240,12 @@ std::cout << "---> " << locale_str << std::endl;
             std::endl ;
             return EXIT_FAILURE;
         }
-        
+        std::cerr << gettext("File") <<
+            std::endl ;
         // ----------------------------------
         // if no argument given, display help
         // ----------------------------------
-        if (argc == 1) {
+        if (argc < 2) {
             std::cerr << gettext("use --help for help.") <<
             std::endl ;
             return EXIT_FAILURE;
@@ -1208,7 +1345,7 @@ std::cout << "---> " << locale_str << std::endl;
         // open textual GUI: TurboVision for DOS
         // --------------------------------------
         if (vm.count("gui")) {
-            return TurboMain();
+            return TurboMain(argc,argv);
         }
         
         // --------------------------------------

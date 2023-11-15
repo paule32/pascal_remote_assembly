@@ -1,27 +1,5 @@
-/* ------------------------------------------------------------------------*/
-/*                                                                         */
-/*   VIEWS.H                                                               */
-/*                                                                         */
-/*   defines the classes TView, TFrame, TScrollBar, TScroller,             */
-/*   TListViewer, TGroup, and TWindow                                      */
-/*                                                                         */
-/* ------------------------------------------------------------------------*/
-/*
- *      Turbo Vision - Version 2.0
- *
- *      Copyright (c) 1994 by Borland International
- *      All Rights Reserved.
- *
- */
+#pragma once
 
-#if defined( __BORLANDC__ )
-#pragma option -Vo-
-#endif
-#if defined( __BCOPT__ ) && !defined (__FLAT__)
-#pragma option -po-
-#endif
-
-#if !defined( __COMMAND_CODES )
 #define __COMMAND_CODES
 
 const ushort
@@ -199,9 +177,6 @@ const ushort
     positionalEvents    = evMouse & ~evMouseWheel,
     focusedEvents       = evKeyboard | evCommand;
 
-#endif  // __COMMAND_CODES
-
-#if defined( Uses_TCommandSet ) && !defined( __TCommandSet )
 #define __TCommandSet
 
 class TCommandSet
@@ -281,9 +256,6 @@ inline int TCommandSet::mask( int cmd ) noexcept
     return masks[ cmd & 0x07 ];
 }
 
-#endif  // Uses_TCommandSet
-
-#if defined( Uses_TPalette ) && !defined( __TPalette )
 #define __TPalette
 
 class TPalette
@@ -292,14 +264,14 @@ class TPalette
 public:
 
     TPalette( const char *, ushort ) noexcept;
-#ifndef __BORLANDC__
+
     TPalette( const TColorAttr *, ushort ) noexcept;
     template <size_t N>
     TPalette( const TColorAttr (&array) [N] ) noexcept :
         TPalette(array, (ushort) N)
     {
     }
-#endif
+
     TPalette( const TPalette& ) noexcept;
     ~TPalette();
 
@@ -316,9 +288,6 @@ inline TColorAttr& TPalette::operator[]( int index ) const noexcept
     return data[index];
 }
 
-#endif  // Uses_TPalette
-
-#if defined( Uses_TView ) && !defined( __TView )
 #define __TView
 
 struct write_args
@@ -442,10 +411,9 @@ public:
     void writeLine( short x, short y, short w, short h, const TDrawBuffer& b ) noexcept;
     void writeLine( short x, short y, short w, short h, const void _FAR *b ) noexcept;
     void writeStr( short x, short y, const char *str, uchar color ) noexcept;
-#ifndef __BORLANDC__
+
     void writeBuf(  short x, short y, short w, short h, const TScreenCell *b ) noexcept;
     void writeLine( short x, short y, short w, short h, const TScreenCell *b ) noexcept;
-#endif
 
     TPoint size;
     ushort options;
@@ -479,9 +447,8 @@ private:
     void change( uchar, TPoint delta, TPoint& p, TPoint& s, ushort ctrlState ) noexcept;
     static void writeView( write_args );
     void writeView( short x, short y, short count, const void _FAR* b ) noexcept;
-#ifndef __BORLANDC__
+
     void writeView( short x, short y, short count, const TScreenCell* b ) noexcept;
-#endif
 
     TPoint resizeBalance;
 
@@ -526,8 +493,6 @@ inline void TView::writeLine( short x, short y, short w, short h,
     writeLine( x, y, min(w, short(b.length() - x)), h, &b.data[0] );
 }
 
-#endif  // Uses_TView
-
 /* ---------------------------------------------------------------------- */
 /*      class TFrame                                                      */
 /*                                                                        */
@@ -539,7 +504,6 @@ inline void TView::writeLine( short x, short y, short w, short h,
 /*        5 = Icons                                                       */
 /* ---------------------------------------------------------------------- */
 
-#if defined( Uses_TFrame ) && !defined( __TFrame )
 #define __TFrame
 
 class _FAR TRect;
@@ -596,8 +560,6 @@ inline opstream& operator << ( opstream& os, TFrame& cl )
 inline opstream& operator << ( opstream& os, TFrame* cl )
     { return os << (TStreamable *)cl; }
 
-#endif  // Uses_TFrame
-
 /* ---------------------------------------------------------------------- */
 /*      class TScrollBar                                                  */
 /*                                                                        */
@@ -607,7 +569,6 @@ inline opstream& operator << ( opstream& os, TFrame* cl )
 /*        3 = Indicator                                                   */
 /* ---------------------------------------------------------------------- */
 
-#if defined( Uses_TScrollBar ) && !defined( __TScrollBar )
 #define __TScrollBar
 
 class _FAR TRect;
@@ -678,8 +639,6 @@ inline opstream& operator << ( opstream& os, TScrollBar& cl )
 inline opstream& operator << ( opstream& os, TScrollBar* cl )
     { return os << (TStreamable *)cl; }
 
-#endif  // Uses_TScrollBar
-
 /* ---------------------------------------------------------------------- */
 /*      class TScroller                                                   */
 /*                                                                        */
@@ -688,7 +647,6 @@ inline opstream& operator << ( opstream& os, TScrollBar* cl )
 /*      2 = Selected text                                                 */
 /* ---------------------------------------------------------------------- */
 
-#if defined( Uses_TScroller ) && !defined( __TScroller )
 #define __TScroller
 
 class _FAR TRect;
@@ -754,9 +712,6 @@ inline opstream& operator << ( opstream& os, TScroller& cl )
 inline opstream& operator << ( opstream& os, TScroller* cl )
     { return os << (TStreamable *)cl; }
 
-#endif  // Uses_TScroller
-
-#if defined( Uses_TListViewer ) && !defined( __TListViewer )
 #define __TListViewer
 
 class _FAR TRect;
@@ -825,9 +780,6 @@ inline opstream& operator << ( opstream& os, TListViewer& cl )
 inline opstream& operator << ( opstream& os, TListViewer* cl )
     { return os << (TStreamable *)cl; }
 
-#endif  // Uses_TListViewer
-
-#if defined( Uses_TGroup ) && !defined( __TGroup )
 #define __TGroup
 
 class _FAR TView;
@@ -935,9 +887,6 @@ inline opstream& operator << ( opstream& os, TGroup& cl )
 inline opstream& operator << ( opstream& os, TGroup* cl )
     { return os << (TStreamable *)cl; }
 
-#endif  // Uses_TGroup
-
-#if defined( Uses_TWindow ) && !defined( __TWindow )
 #define __TWindow
 
 #define cpBlueWindow "\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
@@ -1035,11 +984,3 @@ inline opstream& operator << ( opstream& os, TWindow& cl )
 inline opstream& operator << ( opstream& os, TWindow* cl )
     { return os << (TStreamable *)cl; }
 
-#endif  // Uses_TWindow
-
-#if defined( __BORLANDC__ )
-#pragma option -Vo.
-#endif
-#if defined( __BCOPT__ ) && !defined (__FLAT__)
-#pragma option -po.
-#endif

@@ -1,36 +1,7 @@
-/* ------------------------------------------------------------------------*/
-/*                                                                         */
-/*   TVOBJS.H                                                              */
-/*                                                                         */
-/*   defines the classes TObject, TNSCollection, and TNSSortedCollection.  */
-/*                                                                         */
-/*   The NS variants of collections are Not Streamable.  These are         */
-/*   needed for internal use in the stream manager.  There are             */
-/*   streamable variants of each of these classes for use by the           */
-/*   rest of the library.                                                  */
-/*                                                                         */
-/* ------------------------------------------------------------------------*/
-/*
- *      Turbo Vision - Version 2.0
- *
- *      Copyright (c) 1994 by Borland International
- *      All Rights Reserved.
- *
- */
 
-#if defined( __BORLANDC__ )
-#pragma option -Vo-
-#endif
-#if defined( __BCOPT__ ) && !defined (__FLAT__)
-#pragma option -po-
-#endif
-
-#if defined( Uses_TObject ) && !defined( __TObject )
+#pragma once
 #define __TObject
-
-#if !defined( __STDDEF_H )
 #include <stddef.h>
-#endif  // __STDDEF_H
 
 class TObject
 {
@@ -53,9 +24,6 @@ inline void TObject::destroy( TObject *o )
     delete o;
 }
 
-#endif  // Uses_TObject
-
-#if defined( Uses_TNSCollection ) && !defined( __TNSCollection )
 #define __TNSCollection
 
 class TNSCollection : public TObject
@@ -110,11 +78,6 @@ private:
 
 };
 
-#endif  // Uses_TNSCollection
-
-#if defined( Uses_TNSSortedCollection ) && !defined( __TNSSortedCollection )
-#define __TNSSortedCollection
-
 class TNSSortedCollection: public virtual TNSCollection
 {
 
@@ -142,11 +105,3 @@ private:
 
 };
 
-#endif  // Uses_TNSSortedCollection
-
-#if defined( __BORLANDC__ )
-#pragma option -Vo.
-#endif
-#if defined( __BCOPT__ ) && !defined (__FLAT__)
-#pragma option -po.
-#endif

@@ -17,14 +17,23 @@ TMP=$(echo "${PWD}/${TEMP}")
 FLAGS=$(echo "-std=c++20 -O2 -fPIC "     \
     "-DASMJIT_APPNAME=${ASMJIT_APPNAME}" \
     "-Wno-pmf-conversions   " \
+    "-Wno-deprecated        " \
     "-Wno-register          " \
     "-Wno-volatile          " \
     "-Wno-write-strings     " \
+    "-Wno-invalid-offsetof  " \
     "-DASMJIT_STATIC        " \
     "-DASMJIT_BUILD_RELEASE " \
     "-DASMJIT_NO_AARCH64    " \
-    "-I/E/msys64/mingw64/usr/include "  \
-    "-I../include -I../include/tvision -I${SRC}/asmjit -I${TMP}")
+    "-D__FLAT__     " \
+    "-U__BORLANDC__ " \
+    "-I/E/msys64/mingw64/usr/include   " \
+    "-I${SRC}/include                  " \
+    "-I${SRC}/include/tvision          " \
+    "-I${SRC}/include/tvision/compat   " \
+    "-I${SRC}/include/tvision/compat/borland " \
+    "-I${SRC}/include/tvision/internal " \
+    "-I${SRC}/asmjit -I${TMP}")
 # -----------------------------------------------------------------
 ST1="s/\\\"Last\\-Translator\\: .*\\n\\\"/\\\"Last-Translator\\:"
 ST2="Jens Kallup \\<paule32\\.jk\\@gmail\\.com\\>\\n\\\"/g"
@@ -788,27 +797,52 @@ if [[ -n "${built_dis}" ]]; then
     # ----------------------------------------
     # build turbo vision stuff ...
     # ----------------------------------------
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/Turbo.o    -c ${SRC}/Turbo.cc    2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/forms.o    -c ${SRC}/forms.cc    2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/datacoll.o -c ${SRC}/datacoll.cc 2>&1 ); run_check $? "${cmd}"
+    cd ${SRC}/tv
+    ${GXX} ${FLAGS} -c *.cpp
+    ar rcx libtvision.a *.o
+    mv libtvision.a ${TMP}
+    cd ${TMP}
+    
+    cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo1.o  -c ${SRC}/tvdemo1.cpp   2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo2.o  -c ${SRC}/tvdemo2.cpp   2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo3.o  -c ${SRC}/tvdemo3.cpp   2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -o${TMP}/puzzle.o   -c ${SRC}/puzzle.cpp    2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -o${TMP}/calendar.o -c ${SRC}/calendar.cpp  2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -o${TMP}/calc.o     -c ${SRC}/calc.cpp      2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -o${TMP}/backgrnd.o -c ${SRC}/backgrnd.cpp  2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -o${TMP}/ascii.o    -c ${SRC}/ascii.cpp     2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -o${TMP}/evntview.o -c ${SRC}/evntview.cpp  2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -o${TMP}/fileview.o -c ${SRC}/fileview.cpp  2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -o${TMP}/gadgets.o  -c ${SRC}/gadgets.cpp   2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -o${TMP}/mousedlg.o -c ${SRC}/mousedlg.cpp  2>&1 ); run_check $? "${cmd}"
 
     # ----------------------------------------
     # link diss.exe application ...
     # ----------------------------------------
     cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -o ${TMP}/diss.exe \
-        -L${TMP}/ -L./asmjit       \
+        -L${TMP}/ -L./asmjit        \
         \
-        ${TMP}/Turbo.o             \
-        ${TMP}/forms.o             \
-        ${TMP}/Interpreter.o       \
-        ${TMP}/AssemblerParser.o   \
-        ${TMP}/AssemblerScanner.o  \
+        ${TMP}/ascii.o              \
+        ${TMP}/calc.o               \
+        ${TMP}/evntview.o           \
+        ${TMP}/gadgets.o            \
+        ${TMP}/puzzle.o             \
+        ${TMP}/tvdemo2.o            \
+        ${TMP}/backgrnd.o           \
+        ${TMP}/calendar.o           \
+        ${TMP}/fileview.o           \
+        ${TMP}/mousedlg.o           \
+        ${TMP}/tvdemo1.o            \
+        ${TMP}/tvdemo3.o            \
+        ${TMP}/Interpreter.o        \
+        ${TMP}/AssemblerParser.o    \
+        ${TMP}/AssemblerScanner.o   \
         \
-        -lasmjit                   \
-        -ltvision                  \
-        -lz                        \
-        -lintl                     \
-        -lboost_program_options-mt \
+        -lasmjit                    \
+        -ltvision                   \
+        -lz                         \
+        -lintl                      \
+        -lboost_program_options-mt  \
         -static-libgcc -static-libstdc++ 2>&1 ); run_check $? "${cmd}"
 
     if [[ -z "${DLG}" ]]; then

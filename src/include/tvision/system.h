@@ -1,27 +1,5 @@
-/* ------------------------------------------------------------------------*/
-/*                                                                         */
-/*   SYSTEM.H                                                              */
-/*                                                                         */
-/*   defines the classes THWMouse, TMouse, TEventQueue, TDisplay,          */
-/*   TScreen, and TSystemError                                             */
-/*                                                                         */
-/* ------------------------------------------------------------------------*/
-/*
- *      Turbo Vision - Version 2.0
- *
- *      Copyright (c) 1994 by Borland International
- *      All Rights Reserved.
- *
- */
 
-#if defined( __BORLANDC__ )
-#pragma option -Vo-
-#endif
-#if defined( __BCOPT__ ) && !defined (__FLAT__)
-#pragma option -po-
-#endif
-
-#if !defined( __EVENT_CODES )
+#pragma once
 #define __EVENT_CODES
 
 /* Event codes */
@@ -57,22 +35,15 @@ const int mwRight   = 0x08;
 
 /* Mouse event flags */
 
-#if !defined( __FLAT__ )
-const int meMouseMoved = 0x01;
-const int meDoubleClick = 0x02;
-#else
 #if !defined( __WINDOWS_H )
 #include <tvision/compat/windows/windows.h>
 #endif
 const int meMouseMoved = MOUSE_MOVED;       // NT values from WINDOWS.H
 const int meDoubleClick = DOUBLE_CLICK;
-#endif
+
 // 0x04 and 0x08 are reserved by NT (MOUSE_WHEELED, MOUSE_HWHEELED).
 const int meTripleClick = 0x10;
 
-#endif  // __EVENT_CODES
-
-#if defined( Uses_TEvent ) && !defined( __TEvent )
 #define __TEvent
 
 struct MouseEventType
@@ -99,10 +70,6 @@ protected:
     static void setRange( ushort, ushort ) noexcept;
     static void getEvent( MouseEventType& ) noexcept;
     static Boolean present() noexcept;
-
-#if !defined( __FLAT__ )
-    static void registerHandler( unsigned, void (_FAR *)() );
-#endif
 
     static void suspend() noexcept;
     static void resume() noexcept;
@@ -144,10 +111,6 @@ public:
     static void getEvent( MouseEventType& ) noexcept;
     static Boolean present() noexcept;
 
-#if !defined( __FLAT__ )
-    static void registerHandler( unsigned, void (_FAR *)() );
-#endif
-
     static void suspend() noexcept { THWMouse::suspend(); }
     static void resume() noexcept { THWMouse::resume(); }
 
@@ -177,13 +140,6 @@ inline Boolean TMouse::present() noexcept
 {
     return THWMouse::present();
 }
-
-#if !defined( __FLAT__ )
-inline void TMouse::registerHandler( unsigned mask, void (_FAR *func)() )
-{
-    THWMouse::registerHandler( mask, func );
-}
-#endif
 
 struct CharScanType
 {
@@ -246,9 +202,6 @@ struct TEvent
     static void putNothing() noexcept;
 };
 
-#endif  // Uses_TEvent
-
-#if defined( Uses_TEventQueue ) && !defined( __TEventQueue )
 #define __TEventQueue
 
 class TEventQueue
@@ -280,14 +233,9 @@ private:
     static void getKeyOrPasteEvent( TEvent& ) noexcept;
     static Boolean readKeyPress( TEvent& ) noexcept;
 
-#if !defined( __FLAT__ )
-#if !defined( __DPMI16__ )
-#define __MOUSEHUGE huge
-#else
 #define __MOUSEHUGE
-#endif
+
     static void __MOUSEHUGE mouseInt();
-#endif
 
     static MouseEventType _NEAR lastMouse;
 public:
@@ -295,16 +243,6 @@ public:
 private:
     static MouseEventType _NEAR downMouse;
     static ushort _NEAR downTicks;
-
-#if !defined( __FLAT__ )
-    static TEvent _NEAR eventQueue[ eventQSize ];
-    static TEvent * _NEAR eventQHead;
-    static TEvent * _NEAR eventQTail;
-public:
-    static Boolean _NEAR mouseIntFlag;
-private:
-    static ushort _NEAR eventCount;
-#endif
 
     static Boolean _NEAR mouseEvents;
     static Boolean _NEAR pendingMouseUp;
@@ -328,16 +266,9 @@ inline void TEvent::getMouseEvent() noexcept
     TEventQueue::getMouseEvent( *this );
 }
 
-#endif  // Uses_TEventQueue
-
-#if defined( Uses_TTimerQueue ) && !defined( __TTimerQueue )
 #define __TTimerQueue
 
-#ifdef __BORLANDC__
-typedef uint32_t TTimePoint;
-#else
 typedef uint64_t TTimePoint;
-#endif
 
 struct _FAR TTimer;
 
@@ -360,9 +291,6 @@ private:
     TTimer *first;
 };
 
-#endif // Uses_TTimerQueue
-
-#if defined( Uses_TClipboard ) && !defined( __TClipboard )
 #define __TClipboard
 
 class TClipboard
@@ -383,9 +311,6 @@ private:
     static size_t localTextLength;
 };
 
-#endif
-
-#if defined( Uses_TScreen ) && !defined( __TScreen )
 #define __TScreen
 
 
@@ -418,10 +343,6 @@ public:
     static void setCrtMode( ushort ) noexcept;
     static ushort getCrtMode() noexcept;
 
-#if !defined( __FLAT__ )
-    static int isEGAorVGA();
-#endif
-
 protected:
 
     TDisplay() noexcept { updateIntlChars(); };
@@ -429,10 +350,6 @@ protected:
     ~TDisplay() {};
 
 private:
-
-#if !defined( __FLAT__ )
-    static void videoInt();
-#endif
 
     static void updateIntlChars() noexcept;
 
@@ -469,9 +386,7 @@ public:
 
 };
 
-#endif  // Uses_TScreen
 
-#if defined( Uses_TSystemError ) && !defined( __TSystemError )
 #define __TSystemError
 
 class _FAR TDrawBuffer;
@@ -495,64 +410,9 @@ public:
     static void suspend() noexcept;
     static void resume() noexcept;
 
-#if !defined( __FLAT__ )
-    static short ( _FAR *sysErrorFunc )( short, uchar );
-#endif
-
 private:
 
     static Boolean _NEAR saveCtrlBreak;
 
-#if !defined( __FLAT__ )
-    static ushort _NEAR sysColorAttr;
-    static ushort _NEAR sysMonoAttr;
-    static Boolean _NEAR sysErrActive;
-
-    static void swapStatusLine( TDrawBuffer _FAR & );
-    static ushort selectKey();
-    static short sysErr( short, uchar );
-
-    static const char * const _NEAR errorString[22];
-    static const char * _NEAR sRetryOrCancel;
-
-    static Boolean _NEAR inIDE;
-
-    static void interrupt Int24PMThunk();
-    static void setupDPMI();
-    static void shutdownDPMI();
-
-    static TPMRegs Int24Regs;
-    static void (interrupt far *Int24RMThunk)();
-    static void (interrupt far *Int24RMCallback)();
-    static unsigned Int24RMThunkSel;
-
-    friend class Int11trap;
-#endif
-
 };
 
-#if !defined( __FLAT__ )
-class Int11trap
-{
-
-public:
-
-    Int11trap();
-    ~Int11trap();
-
-private:
-
-    static void interrupt handler(...);
-    static void interrupt (_FAR * _NEAR oldHandler)(...);
-
-};
-#endif
-
-#endif  // Uses_TSystemError
-
-#if defined( __BORLANDC__ )
-#pragma option -Vo.
-#endif
-#if defined( __BCOPT__ ) && !defined (__FLAT__)
-#pragma option -po.
-#endif

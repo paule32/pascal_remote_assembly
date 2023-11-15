@@ -13,14 +13,8 @@
  *
  */
 
-#if defined( __BORLANDC__ )
-#pragma option -Vo-
-#endif
-#if defined( __BCOPT__ ) && !defined (__FLAT__)
-#pragma option -po-
-#endif
+#pragma once
 
-#if defined( Uses_TBackground ) && !defined( __TBackground )
 #define __TBackground
 
 class _FAR TRect;
@@ -64,10 +58,7 @@ inline opstream& operator << ( opstream& os, TBackground& cl )
 inline opstream& operator << ( opstream& os, TBackground* cl )
     { return os << (TStreamable *)cl; }
 
-#endif  // Uses_TBackground
 
-
-#if defined( Uses_TDeskTop )  && !defined( __TDeskTop )
 #define __TDeskTop
 
 class _FAR TBackground;
@@ -135,7 +126,6 @@ inline opstream& operator << ( opstream& os, TDeskTop& cl )
 inline opstream& operator << ( opstream& os, TDeskTop* cl )
     { return os << (TStreamable *)(TGroup *)cl; }
 
-#endif
 
 // Turbo Vision 2.0 Color Palettes
 
@@ -172,7 +162,6 @@ inline opstream& operator << ( opstream& os, TDeskTop* cl )
     "\x0F\x0F\x07\x70\x07\x07\x70\x07\x07\x07\x70\x0F\x07\x07\x01\x00" \
     "\x07\x0F\x07\x70\x70\x07\x0F\x70"    // help colors
 
-#if defined( Uses_TProgram ) && !defined( __TProgram )
 #define __TProgram
 
 // Standard application help contexts
@@ -305,9 +294,6 @@ private:
 
 };
 
-#endif
-
-#if defined( Uses_TApplication ) && !defined( __TApplication )
 #define __TApplication
 
 class TStaticInit
@@ -340,11 +326,3 @@ public:
 
 };
 
-#endif
-
-#if defined( __BORLANDC__ )
-#pragma option -Vo.
-#endif
-#if defined( __BCOPT__ ) && !defined (__FLAT__)
-#pragma option -po.
-#endif
