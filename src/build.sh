@@ -6,16 +6,35 @@
 #
 # only for education, and non-profit usage !
 # -----------------------------------------------------------------
-export ASMJIT_APPNAMEENV="asmjitapp"
-export ASMJIT_APPNAME="\"${ASMJIT_APPNAMEENV}\""
-export ASMJIT_PRODUCTIVE="no"
-
 PWD=$(pwd)
+
+# -----------------------------------------------------------------
+# custom stuff ...
+# -----------------------------------------------------------------
+export ASMJIT_PRODUCTIVE="no"
+export ASMJIT_APPNAMEENV="asmjit"
+
+export ASMJIT_APPNAME_EXEPATH="\"${PWD}\""
+export ASMJIT_APPNAME_EXEFILE="\"${ASMJIT_APPNAMEENV}.exe\""
+
+export ASMJIT_APPNAME_HLPFILE="\"${ASMJIT_APPNAMEENV}.hlp\""
+
+export ASMJIT_APPNAME_INIFILE="\"${ASMJIT_APPNAMEENV}.ini\""
+export ASMJIT_APPNAME_LOGFILE="\"${ASMJIT_APPNAMEENV}.log\""
+
+# -----------------------------------------------------------------
+# internal stuff ...
+# -----------------------------------------------------------------
 SRC=$(echo "${PWD}")
 TEMP="temp"
 TMP=$(echo "${PWD}/${TEMP}")
-FLAGS=$(echo "-std=c++20 -O2 -fPIC "     \
-    "-DASMJIT_APPNAME=${ASMJIT_APPNAME}" \
+FLAGS=$(echo "-std=c++20 -O2 -fPIC "        \
+    "-DASMJIT_APPNAME=\"asmjit\"" \
+    "-DASMJIT_APPNAME_EXEFILE=${ASMJIT_APPNAME_EXEFILE}" \
+    "-DASMJIT_APPNAME_EXEPATH=${ASMJIT_APPNAME_EXEPATH}" \
+    "-DASMJIT_APPNAME_HLPFILE=${ASMJIT_APPNAME_HLPFILE}" \
+    "-DASMJIT_APPNAME_INIFILE=${ASMJIT_APPNAME_INIFILE}" \
+    "-DASMJIT_APPNAME_LOGFILE=${ASMJIT_APPNAME_LOGFILE}" \
     "-Wno-pmf-conversions   " \
     "-Wno-deprecated        " \
     "-Wno-register          " \
@@ -418,11 +437,12 @@ function runiconv () {
     cmd=$(msgfmt --check -o $3/$2_utf8.mo $3/$2_utf8.po 2>&1 ); run_check $? "${cmd}"
     cmd=$(gzip           -9 $3/$2_utf8.mo               2>&1 ); run_check $? "${cmd}"
     
-    cmd=$(cp $3/$2_utf8.mo.gz $3/${ASMJIT_APPNAMEENV}.mo.gz 2>&1 ); run_check $? "${cmd}"
+    cmd=$(cp $3/$2_utf8.mo.gz $3/${ASMJIT_APPNAMEENV}app.mo.gz 2>&1 ); run_check $? "${cmd}"
     
     rm -rf $3/$2_utf8.pot 
     rm -rf $3/$2_utf8.po
     rm -rf $3/$2_utf8.mo
+    rm -rf $3/$2_utf8.mo.gz
 }
 # -----------------------------------------------------------------
 # build asmjit.dll
@@ -839,8 +859,11 @@ if [[ -n "${built_dis}" ]]; then
         ${TMP}/AssemblerParser.o    \
         ${TMP}/AssemblerScanner.o   \
         \
+        ${TMP}/dwarf.o              \
+        \
         -lasmjit                    \
         -ltvision                   \
+        -ldwarf64                   \
         -lz                         \
         -lintl                      \
         -lboost_program_options-mt  \

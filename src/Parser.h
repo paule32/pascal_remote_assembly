@@ -44,6 +44,11 @@
 # include <strings.h>
 
 // -----------------------------------------------------------------
+// GNU dwarf debug header stuff ...
+// -----------------------------------------------------------------
+# include <dwarf/dwarf.h>
+
+// -----------------------------------------------------------------
 // c++ header prototype's/signature's:
 // -----------------------------------------------------------------
 # include <iostream>        // std c++ signatures
@@ -73,6 +78,13 @@
 // -----------------------------------------------------------------
 # include "global.h"
 # include "Exception.h"
+
+// -----------------------------------------------------------------
+// loggin specified header files ...
+// -----------------------------------------------------------------
+# include <plog/Log.h>
+# include <plog/Initializers/RollingFileInitializer.h>
+
 
 #ifdef HAVE_PARSER_PAS
 # include "PascalParser.h"

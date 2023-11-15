@@ -5,10 +5,17 @@
 //
 // only for education, and non-profit usage !
 // -----------------------------------------------------------------
+# include <boost/exception/get_error_info.hpp> 
 # include <boost/program_options.hpp>
+
 # include <zlib.h>
-# include <functional>      // std::function
 # include "Parser.h"
+
+// -----------------------------------------------------------------
+// TODO: change in build.sh script ...
+// -----------------------------------------------------------------
+# undef  ASMJIT_APPNAME
+# define ASMJIT_APPNAME "asmjitapp"
 
 // -----------------------------------------------------------------
 // global variable's / constant's ...
@@ -35,12 +42,24 @@ extern      int  TurboMain(int,char**);
 static bool found_args = false;     // program command line arguments
 
 using namespace boost::program_options;
+using namespace plog;
+using namespace std;
 
 // -----------------------------------------------------------------
 // application stuff (name, locale ...
 // -----------------------------------------------------------------
-static std::string ApplicationName( ASMJIT_APPNAME ); // -Define
+std::string ApplicationName;
 
+std::string ApplicationExePath;
+std::string ApplicationExeFile;
+std::string ApplicationHlpFile;
+
+std::string ApplicationIniFile;
+std::string ApplicationLogFile;
+
+// -----------------------------------------------------------------
+// hard coded supported standard locales:
+// -----------------------------------------------------------------
 static std::string de_DE("de_DE");  // german
 static std::string en_US("en_US");  // english us
 
@@ -64,6 +83,7 @@ std::string ExtractFileExtension( std::string const&);
 void        ErrorExit(LPTSTR);
 void        CreateChildProcess();
 
+void        test_dwarf1(void);
 // -----------------------------------------------------------------
 // extend the namespace STD with "tab" - to produce \t into stream:
 // -----------------------------------------------------------------
@@ -152,13 +172,16 @@ int decompressGzipFile(
 
     gzFile file = gzopen(inputFileName, "rb");
     if (file == NULL) {
-        perror("Error at open input file.");
+        std::cerr << gettext("Error at open input file.") <<
+        std::endl ;
+        test_dwarf1();
         return EXIT_FAILURE;
     }
     
     FILE * outputFile = fopen(outputFileName, "wb");
     if (outputFile == NULL) {
-        perror("Error at open output file.");
+        std::cerr << gettext("Error at open output file.") <<
+        std::endl ;
         gzclose(file);
         return EXIT_FAILURE;
     }
@@ -204,6 +227,13 @@ ExtractFileExtension( std::string const & path )
     }
 
     return ext;
+}
+std::string
+ExtractFilePath( const std::string& filePath )
+{
+    namespace fs = std::filesystem;
+    fs::path fullPath(filePath);
+    return fullPath.parent_path().string();
 }
 
 // -----------------------------------------------------------
@@ -1224,24 +1254,44 @@ int main(int argc, char **argv)
     options_description desc{"Options"};
     variables_map       vm;
     int                 result = 1;
-    
-    // ----------------------------
-    // parse command line args:
-    // ----------------------------
+
+    // --------------------------------------
+    // ASMJIT coming from build.sh script ...
+    // --------------------------------------
     try {
+        namespace fs = std::filesystem;
+        
+        ApplicationName     = ASMJIT_APPNAME;
+        
+        ApplicationExeFile  = ASMJIT_APPNAME_EXEFILE;
+        ApplicationHlpFile  = ASMJIT_APPNAME_HLPFILE;
+        
+        ApplicationIniFile  = ASMJIT_APPNAME_INIFILE;
+        ApplicationLogFile  = ASMJIT_APPNAME_LOGFILE;
+        
+        ApplicationExePath  = ExtractFilePath(argv[0]);
+        
+        // ----------------------------------
+        // try to get user locale translation
+        // ----------------------------------
         if (handle_locale  () == EXIT_FAILURE) return EXIT_FAILURE;
         if (handle_codepage() ==            0) return EXIT_FAILURE;
+
+        // ----------------------------------
+        // initialize logging stuff ...
+        // ----------------------------------
+        plog::init(plog::debug  ,    ApplicationLogFile.c_str());
+        PLOGI << "current path: " << ApplicationExePath;
 
         // ----------------------------------
         // registering the clean-up function
         // ----------------------------------
         if (atexit(cleanup) != 0) {
-            std::cerr << _("error: can not register cleanup function.") <<
+            std::cerr << gettext("error: can not register cleanup function.") <<
             std::endl ;
             return EXIT_FAILURE;
         }
-        std::cerr << gettext("File") <<
-            std::endl ;
+
         // ----------------------------------
         // if no argument given, display help
         // ----------------------------------
@@ -1255,35 +1305,37 @@ int main(int argc, char **argv)
         // --help:   help screen
         // --locale: use localization (en = english, de = german)
         // -------------------------------------------------------
-        options_description general(_("General Options"));
+        // parse command line args:
+        // ----------------------------
+        options_description general(gettext("General Options"));
             general.add_options()
-            ("help,h"  , _("Help screen"))
-            ("locale,l", value< std::string >()->default_value("en"  ), _("country locale"))
+            ("help,h"  , gettext("Help screen"))
+            ("locale,l", value< std::string >()->default_value("en"  ), gettext("country locale"))
             ("gui,g"   , "TUI - Text User Interface");
             
-        options_description input_long(_("Input Options (long)"));
+        options_description input_long(gettext("Input Options (long)"));
             input_long.add_options()
-            ("input-asm", value< std::string >()->notifier(asm_file_input), _("Input assembler file"))
-            ("input-obj", value< std::string >()->notifier(obj_file_input), _("Input object file"));
+            ("input-asm", value< std::string >()->notifier(asm_file_input), gettext("Input assembler file"))
+            ("input-obj", value< std::string >()->notifier(obj_file_input), gettext("Input object file"));
             
-        options_description input_short(_("Input Options (short)"));
+        options_description input_short(gettext("Input Options (short)"));
             input_short.add_options()
-            ("ia", value< std::string >()->notifier(asm_file_input), _("Input assembler file"))
-            ("io", value< std::string >()->notifier(obj_file_input), _("Input object file"));
+            ("ia", value< std::string >()->notifier(asm_file_input), gettext("Input assembler file"))
+            ("io", value< std::string >()->notifier(obj_file_input), gettext("Input object file"));
             
-        options_description output_long(_("Output Options (long)"));
+        options_description output_long(gettext("Output Options (long)"));
             output_long.add_options()
-            ("output-ct" , value< std::string >()->notifier(ct_file_output), _("Output C++ tool file"))
-            ("output-ch" , value< std::string >()->notifier(ch_file_output), _("Output C++ header file"))
-            ("output-cm" , value< std::string >()->notifier(cm_file_output), _("Output C++ main file"));
+            ("output-ct" , value< std::string >()->notifier(ct_file_output), gettext("Output C++ tool file"))
+            ("output-ch" , value< std::string >()->notifier(ch_file_output), gettext("Output C++ header file"))
+            ("output-cm" , value< std::string >()->notifier(cm_file_output), gettext("Output C++ main file"));
             
         options_description output_short(_("Output Options (short)"));
             output_short.add_options()
-            ("ct", value< std::string >()->notifier(ct_file_output), _("Output C++ tool file"))
-            ("ch", value< std::string >()->notifier(ch_file_output), _("Output C++ header file"))
-            ("cm", value< std::string >()->notifier(cm_file_output), _("Output C++ main file"));
+            ("ct", value< std::string >()->notifier(ct_file_output), gettext("Output C++ tool file"))
+            ("ch", value< std::string >()->notifier(ch_file_output), gettext("Output C++ header file"))
+            ("cm", value< std::string >()->notifier(cm_file_output), gettext("Output C++ main file"));
 
-        options_description allOptions("All Options");
+        options_description allOptions(gettext("All Options"));
         allOptions
             .add(general)
             .add(input_long)
@@ -1309,7 +1361,7 @@ int main(int argc, char **argv)
             locale_str = vm["locale"].as< std::string >();
             
             if (locale_str.length() <  2) {
-                std::cerr << "invalid locale parameter length." << std::endl;
+                std::cerr << gettext("invalid locale parameter length.") << std::endl;
                 return EXIT_FAILURE;
             }
             // ----------------------------
@@ -1323,11 +1375,11 @@ int main(int argc, char **argv)
                 found_en  = locale_str.find( std::string("en") );
                 found_de  = locale_str.find( std::string("de") );
                 
-                if (found_en != std::string::npos) { found = 1; locale_str = "en"; } else
-                if (found_de != std::string::npos) { found = 1; locale_str = "de"; } else
+                if (found_en != std::string::npos) { found = 1; locale_str = "en_US"; } else
+                if (found_de != std::string::npos) { found = 1; locale_str = "de_DE"; } else
                 
-                locale_str = "en"; } else {
-                locale_str = "en";
+                locale_str = "en_US"; } else {
+                locale_str = "en_US";
             }
             found_args = true;
         }
@@ -1397,13 +1449,15 @@ int main(int argc, char **argv)
             
             // c++ misc.cc
             if (file_output_ct.empty()) {
-                std::cout << "// " <<  "output tool C++ file missing, use default." << std::endl;
+                std::cout << "// " <<  gettext("output tool C++ file missing, use default.") <<
+                std::endl ;
                 file_output_ct = "aout_misc.cc";
             }
             else {
                 std::string ext(ExtractFileExtension(file_output_ct));
                 if ((ext != ".cc") || (ext != ".cc")) {
-                    std::cout << "// " <<  "output misc C++ file must have extension .cc" << std::endl;
+                    std::cout << "// " <<  gettext("output misc C++ file must have extension .cc") <<
+                    std::endl ;
                     return EXIT_FAILURE;
                 }
             }
@@ -1412,7 +1466,8 @@ int main(int argc, char **argv)
         }
         
         if (file_input_obj.empty()) {
-            std::cerr << "input object file missing." << std::endl;
+            std::cerr << gettext("input object file missing.") <<
+            std::endl ;
             return EXIT_FAILURE;
         }   else {
             return handle_object_file( file_input_obj.c_str() );
@@ -1421,16 +1476,22 @@ int main(int argc, char **argv)
     // ----------------------------
     // we use try catch for errors:
     // ----------------------------
-    catch (error const &e) {
-        std::cerr << "boost exception: " << e.what() << std::endl;
+    catch (const boost::exception &e) {
+        std::cerr << "Fehler in Funktion: " << *boost::get_error_info<boost::throw_function>(e) << std::endl;
+        std::cerr << "Datei: "              << *boost::get_error_info<boost::throw_file>    (e) << std::endl;
+        std::cerr << "Zeile: "              << *boost::get_error_info<boost::throw_line>    (e) << std::endl;
         return EXIT_FAILURE;
     }
     catch (std::exception &e) {
-        std::cerr << "exception: " << e.what() << std::endl;
+        std::cerr << gettext("exception: ")
+                  << e.what()
+                  << std::endl;
         return EXIT_FAILURE;
     }
     catch (...) {
-        std::cerr << "exception: common" << std::endl;
+        std::cerr << gettext("exception: common")
+                  << std::endl;
+                  
         return EXIT_FAILURE;
     }   return EXIT_SUCCESS;
 }
@@ -1469,7 +1530,7 @@ AsmParser::AsmParser( const char *filename, bool mode )
 // -----------------------------------------------------------------
 AsmParser::~AsmParser()
 {
-    std::cout << "// " <<  _("please wait...") << std::endl;
+    std::cout << "// " <<  gettext("please wait...") << std::endl;
 
     delete asm_code;
     delete cod_code;
@@ -1479,3 +1540,53 @@ AsmParser::~AsmParser()
 }
 
 AsmParser::AsmParser() { }
+
+extern "C" int test_dwarf(void);
+extern "C" int test_dwarf2(void);
+
+static ::std::stringstream error_buffer;
+
+void test_dwarf1(void)
+{
+	unsigned            ftype = 0;
+    unsigned           endian = 0;
+    unsigned       offsetsize = 0;
+    int               errcode = 0;
+    int                   res = 0;
+    Dwarf_Unsigned   filesize = 0;
+    unsigned char path_source = DW_PATHSOURCE_unspecified;
+
+    res = test_dwarf();
+
+    if (res == DW_DLV_NO_ENTRY) throw std::string("FAIL Cannot dwarf_object_init_b() NO ENTRY."); else
+    if (res == DW_DLV_ERROR)    throw std::string("FAIL CannoNTRY.");
+
+    res = test_dwarf2();
+    
+    if (res == DW_DLV_NO_ENTRY) throw std::string("FAIL Cannot dwarf_object_init_b() NO ENTRY."); else
+    if (res == DW_DLV_ERROR)    throw std::string("FAIL CannoNTRY.");
+
+    res = dwarf_object_detector_path_b(
+        "file_name.c_str()",
+        0,0,
+        0,0,
+        &ftype,&endian,&offsetsize,&filesize,
+        &path_source,&errcode);
+
+    if (res != DW_DLV_OK) {
+        error_buffer.str("");
+        if (res == DW_DLV_ERROR) {
+            error_buffer
+            << ::std::string( "Can not open: " )
+            << ::std::string("file_name")
+            << ::std::endl
+            << ::std::string( "Error: " )
+            << dwarf_errmsg_by_number(errcode);
+        }	else {
+            error_buffer
+            << ::std::string("There is no file: ")
+            << ::std::string("file_name");
+        }
+        throw std::string( error_buffer.str() );
+    }
+}

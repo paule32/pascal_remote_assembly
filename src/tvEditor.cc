@@ -8,7 +8,8 @@
 
 void outOfMemory()
 {
-    messageBox("Not enough memory for this operation.", mfError | mfOKButton );
+    messageBox(gettext("Not enough memory for this operation."),
+    mfError | mfOKButton );
 }
 
 typedef char *_charPtr;
@@ -40,18 +41,18 @@ TDialog *createFindDialog()
     TInputLine *control = new TInputLine( TRect( 3, 3, 32, 4 ), 80 );
     d->insert( control );
     d->insert(
-        new TLabel( TRect( 2, 2, 15, 3 ), "~T~ext to find", control ) );
+        new TLabel( TRect( 2, 2, 15, 3 ), gettext("~T~ext to find"), control ) );
     d->insert(
         new THistory( TRect( 32, 3, 35, 4 ), control, 10 ) );
 
     d->insert( new TCheckBoxes( TRect( 3, 5, 35, 7 ),
-        new TSItem( "~C~ase sensitive",
+        new TSItem( gettext("~C~ase sensitive"),
         new TSItem( "~W~hole words only", 0 ))));
 
     d->insert(
         new TButton( TRect( 14, 9, 24, 11 ), "O~K~", cmOK, bfDefault ) );
     d->insert(
-        new TButton( TRect( 26, 9, 36, 11 ), "Cancel", cmCancel, bfNormal ) );
+        new TButton( TRect( 26, 9, 36, 11 ), gettext("Cancel"), cmCancel, bfNormal ) );
 
     d->selectNext( False );
     return d;
@@ -59,31 +60,31 @@ TDialog *createFindDialog()
 
 TDialog *createReplaceDialog()
 {
-    TDialog *d = new TDialog( TRect( 0, 0, 40, 16 ), "Replace" );
+    TDialog *d = new TDialog( TRect( 0, 0, 40, 16 ), gettext("Replace") );
 
     d->options |= ofCentered;
 
     TInputLine *control = new TInputLine( TRect( 3, 3, 34, 4 ), 80 );
     d->insert( control );
     d->insert(
-        new TLabel( TRect( 2, 2, 15, 3 ), "~T~ext to find", control ) );
+        new TLabel( TRect( 2, 2, 15, 3 ), gettext("~T~ext to find"), control ) );
     d->insert( new THistory( TRect( 34, 3, 37, 4 ), control, 10 ) );
 
     control = new TInputLine( TRect( 3, 6, 34, 7 ), 80 );
     d->insert( control );
-    d->insert( new TLabel( TRect( 2, 5, 12, 6 ), "~N~ew text", control ) );
+    d->insert( new TLabel( TRect( 2, 5, 12, 6 ), gettext("~N~ew text"), control ) );
     d->insert( new THistory( TRect( 34, 6, 37, 7 ), control, 11 ) );
 
     d->insert( new TCheckBoxes( TRect( 3, 8, 37, 12 ),
-        new TSItem("~C~ase sensitive",
+        new TSItem(gettext("~C~ase sensitive"),
         new TSItem("~W~hole words only",
-        new TSItem("~P~rompt on replace",
-        new TSItem("~R~eplace all", 0 ))))));
+        new TSItem(gettext("~P~rompt on replace"),
+        new TSItem(gettext("~R~eplace all"), 0 ))))));
 
     d->insert(
         new TButton( TRect( 17, 13, 27, 15 ), "O~K~", cmOK, bfDefault ) );
     d->insert( new TButton( TRect( 28, 13, 38, 15 ),
-                            "Cancel", cmCancel, bfNormal ) );
+                            gettext("Cancel"), cmCancel, bfNormal ) );
 
     d->selectNext( False );
 
@@ -100,12 +101,12 @@ ushort doEditDialog( int dialog, ... )
     switch( dialog )
         {
         case edOutOfMemory:
-            return messageBox( "Not enough memory for this operation",
+            return messageBox( gettext("Not enough memory for this operation"),
                                mfError | mfOKButton );
         case edReadError:
             {
             va_start( arg, dialog );
-            os << "Error reading file " << va_arg( arg, _charPtr )
+            os << gettext("Error reading file ") << va_arg( arg, _charPtr )
                << "." << ends;
             va_end( arg );
             return messageBox( buf, mfError | mfOKButton );
@@ -113,7 +114,7 @@ ushort doEditDialog( int dialog, ... )
         case edWriteError:
             {
             va_start( arg, dialog );
-            os << "Error writing file " << va_arg( arg,_charPtr )
+            os << gettext("Error writing file ") << va_arg( arg,_charPtr )
                << "." << ends;
             va_end( arg );
             return messageBox( buf, mfError | mfOKButton );
@@ -121,7 +122,7 @@ ushort doEditDialog( int dialog, ... )
         case edCreateError:
             {
             va_start( arg, dialog );
-            os << "Error creating file " << va_arg( arg, _charPtr )
+            os << gettext("Error creating file ") << va_arg( arg, _charPtr )
                << "." << ends;
             va_end( arg );
             return messageBox( buf, mfError | mfOKButton );
@@ -130,18 +131,18 @@ ushort doEditDialog( int dialog, ... )
             {
             va_start( arg, dialog );
             os << va_arg( arg, _charPtr )
-               << " has been modified. Save?" << ends;
+               << gettext(" has been modified. Save?") << ends;
             va_end( arg );
             return messageBox( buf, mfInformation | mfYesNoCancel );
             }
         case edSaveUntitled:
-            return messageBox( "Save untitled file?",
+            return messageBox( gettext("Save untitled file?"),
                                mfInformation | mfYesNoCancel );
         case edSaveAs:
             {
             va_start( arg, dialog );
             return execDialog( new TFileDialog( "*.*",
-                                                "Save file as",
+                                                gettext("Save file as"),
                                                 "~N~ame",
                                                 fdOKButton,
                                                 101 ), va_arg( arg, _charPtr ) );
@@ -154,7 +155,7 @@ ushort doEditDialog( int dialog, ... )
             }
 
         case edSearchFailed:
-            return messageBox( "Search string not found.",
+            return messageBox( gettext("Search string not found."),
                                mfError | mfOKButton );
         case edReplace:
             {
@@ -173,7 +174,7 @@ ushort doEditDialog( int dialog, ... )
             if( pt->y <= t.y )
                 r.move( 0, TProgram::deskTop->size.y - r.b.y - 2 );
             va_end( arg );
-            return messageBoxRect( r, "Replace this occurence?",
+            return messageBoxRect( r, gettext("Replace this occurence?"),
                                    mfYesNoCancel | mfInformation );
 
         }
@@ -249,10 +250,10 @@ public:
         editor = new MyEditorChild(this, TRect(1, 1, size.x - 24, size.y - 1), hScrollBar, vScrollBar, indicator, "www.txt");
         insert(editor);
 
-        button1 = new TButton(TRect(size.x - 21, 2, size.x - 3, 4), "Schaltfläche 1", cmButton1, bfNormal);
+        button1 = new TButton(TRect(size.x - 21, 2, size.x - 3, 4), "Start", cmButton1, bfNormal);
         insert(button1);
 
-        button2 = new TButton(TRect(size.x - 21, 5, size.x - 3, 7), "Schaltfläche 2", cmButton2, bfNormal);
+        button2 = new TButton(TRect(size.x - 21, 5, size.x - 3, 7), "Compile", cmButton2, bfNormal);
         insert(button2);
         
         options |= ofSelectable;

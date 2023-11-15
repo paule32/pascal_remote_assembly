@@ -63,6 +63,7 @@ msgstr "Fenster"
 
 msgid "Help"
 msgstr "Hilfe"
+
 msgid "About"
 msgstr "Über..."
 
@@ -126,8 +127,210 @@ msgstr "Runtime-Add Function fehlgeschlagen."
 msgid "Runtime add: "
 msgstr "Laufzeit hinzufügen: "
 
+msgid "failed to create .data section"
+msgstr ".data Section konnte nicht erstellt werden."
+
+msgid "failed to create .text section"
+msgstr ".text Section konnte nicht erstellt werden."
+
+msgid ".asm output file could not be created."
+msgstr ".asm Ausgabe-Datei konnte nicht erstellt werden."
+
+msgid "input main C++ file must have extension .asm"
+msgstr "Haupt-Eingabe-Datei muss .asm als Datei-Erweiterung haben."
+
+msgid "output main C++ file missing, use default."
+msgstr "Haupt-Ausgabe-Datei nicht angegeben, verwende Standard."
+
+msgid "output main C++ file must have extension .cc"
+msgstr "Haupt-Ausgabe-Datei muss .cc als Datei-Erweitert haben."
+
+msgid "output header C++ file missing, use default."
+msgstr "C++ Header-Datei nicht angegeben, verwende Standard."
+
+msgid "output header C++ file must have extension .h"
+msgstr "Für die C++ Header-Datei wird .h als Datei-Erweiterung erwartet."
+
+msgid "use --help for help."
+msgstr "benutzen Sie --help um die Hilfe anzeigen zu lassen."
+
+msgid "error: can not register cleanup function."
+msgstr "Fehler: die Aufräum-Funktion kann nicht registriert werden."
+
+msgid "the given file does not exists."
+msgstr "die angegebene Datei existiert nicht."
+
+msgid "error: file could not be deleted: "
+msgstr "Fehler: die Datei konnte nicht gelöscht werden."
+
+msgid "General Options"
+msgstr "Allgemeine Optionen"
+
+msgid "country locale"
+msgstr "Ländersprache"
+
+msgid "Input assembler file"
+msgstr "Assembler Eingabedatei"
+
+msgid "Input object file"
+msgstr "Object Eingabedatei"
+
+msgid "Output C++ tool file"
+msgstr "Ausgabedatei für C++ Tool"
+
+msgid "Output C++ header file"
+msgstr "Ausgabedatei für C++ Header"
+
+msgid "Output C++ main file"
+msgstr "Ausgabedatei für C++ Hauptteil"
+
+msgid "Output Options (short)"
+msgstr "Ausgabeoptionen (kurz)"
+
+msgid "Output Options (long)"
+msgstr "Ausgabeoptionen (lang)"
+
+msgid "Input Options (short)"
+msgstr "Eingabeoptionen (kurz)"
+
+msgid "Input Options (long)"
+msgstr "Eingabeoptionen (lang)"
+
+msgid "Help screen"
+msgstr "Hilfebildschirm"
+
+msgid "Options"
+msgstr "Optionen"
+
+msgid "All Options"
+msgstr "Alle Optionen"
+
+msgid "invalid locale parameter length."
+msgstr "Sprachparameter entsprechen nicht den Anforderungen."
+
+msgid "input assembly file missing."
+msgstr "Assembler-Eingabedatei wurde nicht gefunden."
+
+msgid "input main assembly file must have extension .asm"
+msgstr "Haupt-Eingabe-Assembler-Datei muss die Dateierweiterung .asm haben."
+
+msgid "option for output main C++ file missing, use default."
+msgstr "Option für C++ Haupt-Ausgabe-Datei nicht verfügbar, verwende standard."
+
+msgid "option for output header C++ file missing, use default."
+msgstr "Option für C++ Header-Ausgabe-Datei fehlt, verwende standard."
+
+msgid "output tool C++ file missing, use default."
+msgstr "Ausgabe-Datei für C++ Tools nicht angegeben, verwende standard."
+
+msgid "option for C++ output tool file must have extension .cc"
+msgstr "Ausgabe-Datei für C++ Tool Datei muss die Erweiterung .cc haben."
+
+msgid "input object file missing."
+msgstr "Object-Eingabe-Datei fehlt."
+
+msgid "boost exception: "
+msgstr "boost Ausnahme-Fehler: "
+
+msgid "exception: common"
+msgstr "Allgemeiner Ausnahme-Fehler"
+
+msgid "use: --help for more options."
+msgstr "benutzen Sie --help, um mehr Hilfeoptionen anzuzeigen."
+
+msgid "  contain executable code"
+msgstr "  enthält ausführbaren Code"
+
+msgid "can not get code section."
+msgstr "die Code-Sektion kann nicht ermittelt werden."
+
+msgid "invalid size."
+msgstr "falsche größe."
+
+msgid "no symbols found."
+msgstr "keine Symbole gefunden."
+
+msgid "no symbol table found."
+msgstr "keine Symbol-Tabelle gefunden."
+
+msgid "machine: could not determine."
+msgstr "Computer-Typ konnte nicht ermittelt werden."
+
+msgid "file is execute able."
+msgstr "Datei ist ausführbar."
+
+msgid "has invalid size."
+msgstr "hat die falsche größe."
+
+msgid "could not be open."
+msgstr "konnte nicht geöffnet werden."
+
+msgid "error: file"
+msgstr "Fehler: Datei"
+
+msgid "file is not open."
+msgstr "Datei ist nicht geöffnet."
+
+msgid " does not exists."
+msgstr " existiert nicht."
+
+msgid "error at open output file."
+msgstr "Fehler beim öffnen der Ausgabe-Datei."
+
+msgid "error at open input file."
+msgstr "Fehler beim öffnen der Eingabe-Datei."
+
 msgid "error"
 msgstr "Fehler"
 
-msgid "use --help for help."
-msgstr "benutzen Sie --help, um die Hilfe anzuzeigen."
+msgid "codepage could not be found."
+msgstr "Sprach-Seite konnte nicht gefunden werden."
+
+msgid "Replace"
+msgstr "Ersetzen"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "~T~ext to find"
+msgstr "~T~ext suche"
+
+msgid "~C~ase sensitive"
+msgstr "~G~roß/KlSchr. beachten"
+
+msgid "~N~ew text"
+msgstr "~N~euer Text"
+
+msgid "~R~eplace all"
+msgstr "Alles ~E~rsetzen"
+
+msgid "~P~rompt on replace"
+msgstr "~A~nhalten an Position"
+
+msgid "Not enough memory for this operation"
+msgstr "Nich genügend Speicher vorhanden."
+
+msgid "Error reading file "
+msgstr "Fehler beim lesen der Datei: "
+
+msgid "Error writing file "
+msgstr "Fehler beim schreiben der Datei: "
+
+msgid "Error creating file "
+msgstr "Fehler beim erstellen der Datei: "
+
+msgid " has been modified. Save?"
+msgstr " wurde geändert. Speichern?"
+
+msgid "Save untitled file?"
+msgstr "Datei speichern?"
+
+msgid "Save file as"
+msgstr "Speichern unter"
+
+msgid "Search string not found."
+msgstr "Such-Text nicht gefunden."
+
+msgid "Replace this occurence?"
+msgstr "markierte Stelle ersetzen?"
+

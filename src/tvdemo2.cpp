@@ -79,6 +79,8 @@
 # include <strstrea.h>
 # include <iomanip.h>
 
+# include "Parser.h"
+
 # include "tvEditor.cc"
 
 void TVDemo::handleEvent(TEvent &event)
@@ -161,13 +163,13 @@ void TVDemo::handleEvent(TEvent &event)
 
 void TVDemo::aboutDlgBox()
 {
-    TDialog *aboutBox = new TDialog(TRect(0, 0, 39, 13), "About");
+    TDialog *aboutBox = new TDialog(TRect(0, 0, 39, 13), gettext("About"));
 
     aboutBox->insert(
-      new TStaticText(TRect(9, 2, 35, 9),
-        "\003Turbo Vision asmjit Demo\n\n"       // These strings will be
-        "\003C++ Version\n\n"             // concatenated by the compiler.
-        "\003Copyright (c) 2023 paule32\n\n"      // The \003 centers the line.
+      new TStaticText(TRect(9, 2, 42, 9),
+        "\003Turbo Vision asmjit Demo\n\n"
+        "\003C++ Version\n\n"
+        "\003Copyright (c) 2023 paule32\n\n"
         "\003non-profit Software"
         )
       );
@@ -182,59 +184,33 @@ void TVDemo::aboutDlgBox()
 
 }
 
-
-//
-// Ascii Chart function
-//
-
-void TVDemo::asciiTable()
-{
+void TVDemo::asciiTable() {
     TAsciiChart *chart = (TAsciiChart *) validView(new TAsciiChart);
-
-    if(chart != 0)
-    {
+    if(chart != 0) {
         chart->helpCtx = hcAsciiTable;
         deskTop->insert(chart);
     }
 }
 
-void TVDemo::chBackground()
-{
+void TVDemo::chBackground() {
     TChBackground *b = (TChBackground *) validView(new TChBackground(deskTop->background));
-    if (b != 0)
-    {
+    if (b != 0) {
         deskTop->execView(b);
         destroy(b);
     }
 }
 
-
-//
-// Calendar function()
-//
-
-void TVDemo::calendar()
-{
+void TVDemo::calendar() {
     TCalendarWindow *cal = (TCalendarWindow *) validView(new TCalendarWindow);
-
-    if(cal != 0)
-    {
+    if(cal != 0) {
         cal->helpCtx = hcCalendar;
         deskTop->insert( cal );
     }
 }
 
-
-//
-// Calculator function
-//
-
-void TVDemo::calculator()
-{
+void TVDemo::calculator() {
     TCalculator *calc = (TCalculator *) validView(new TCalculator);
-
-    if(calc != 0)
-    {
+    if(calc != 0) {
         calc->helpCtx = hcCalculator;
         deskTop->insert(calc);
     }
@@ -256,16 +232,9 @@ void TVDemo::printEvent(const TEvent &event)
         viewer->print(event);
 }
 
-//
-// Change Directory function
-//
-
-void TVDemo::changeDir()
-{
+void TVDemo::changeDir() {
     TView *d = validView( new TChDirDialog( 0, cmChangeDir ) );
-
-    if( d != 0 )
-        {
+    if( d != 0 ) {
         d->helpCtx = hcFCChDirDBox;
         deskTop->execView( d );
         destroy( d );
