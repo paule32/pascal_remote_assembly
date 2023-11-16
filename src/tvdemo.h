@@ -54,4 +54,5 @@ private:
     void saveDesktop();               //  in a resource file
 
     void tvEditor();
+    void create_info_window();
 };

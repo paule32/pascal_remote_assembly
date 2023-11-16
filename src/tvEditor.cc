@@ -194,7 +194,10 @@ public:
             TIndicator * indicator,
             TStringView  filename):
             TFileEditor( bounds,hScrollBar,vScrollBar,indicator,filename),
-            owner(parent) { }
+            owner(parent) {
+                EditorTextColor    = 0x1e;
+                EditorCommentColor = 0x31;
+            }
         void handleEvent( TEvent &event )
         {
             TFileEditor::handleEvent( event );
@@ -288,6 +291,124 @@ private:
     
     TButton       * button1;
     TButton       * button2;
-    
-    ushort myButtonColor = 0x2F;
 };
+
+#define cpGreenDialog \
+        "\x11\x75\x62\x63\x64\x65\x66\x67\x68\x69\x6a\x6b\x6c\x6d\x6e\x6f"\
+        "\x70\x71\x72\x73\x74\x75\x76\x77\x78\x79\x7a\x7b\x7c\x7d\x7e\x7f"
+
+class TMyTvInfoWindow : public TDialog {
+public:
+    class MyEditorChild: public TEditor {
+    public:
+        MyEditorChild(
+            TMyTvInfoWindow* parent,
+            const TRect& bounds,
+            TScrollBar * hScrollBar,
+            TScrollBar * vScrollBar,
+            TIndicator * indicator,
+            TStringView  filename):
+            TEditor( bounds,hScrollBar,vScrollBar,indicator,999999999),
+            owner(parent) {
+                EditorTextColor = 0x30;
+            }
+        void handleEvent( TEvent &event )
+        {
+            TEditor::handleEvent( event );
+            if (event.what == evKeyDown) {
+                if (event.keyDown.charScan.charCode == kbEsc)     // #27 - Escape
+                {
+                    owner->close();
+                    clearEvent(event);
+                    return;
+                }   else
+                if (event.keyDown.keyCode == kbF1)  // F1
+                {
+                    clearEvent(event);
+                    messageBox("getkey F1",mfInformation|mfOKButton);
+                    return;
+                }   else
+                if (event.keyDown.keyCode == kbF2)  // F2
+                {
+                    clearEvent(event);
+                    messageBox("getkey F2",mfInformation|mfOKButton);
+                    return;
+                }
+            }   else
+            if (event.what == evCommand) {
+                if (event.message.command == 9)      // F1  - Function key
+                {
+                    clearEvent(event);
+                    messageBox("getkey Help",mfInformation|mfOKButton);
+                    return;
+                }
+            }
+        }
+    private:
+        TMyTvInfoWindow * owner;
+    };
+    
+    ~TMyTvInfoWindow() {
+    }
+    TMyTvInfoWindow(const TRect& bounds):
+        TWindowInit(&TMyTvInfoWindow::initFrame),
+        TDialog(bounds, "Info window") {
+        
+        hScrollBar = new TScrollBar( TRect( 18, size.y - 1, size.x - 23, size.y ) );
+        insert(hScrollBar);
+
+        vScrollBar = new TScrollBar( TRect( size.x - 23, 1, size.x - 22, size.y - 1 ) );
+        insert(vScrollBar);
+
+        indicator = new TIndicator( TRect( 2, size.y - 1, 16, size.y) );
+        insert(indicator);
+        
+        editor = new MyEditorChild(this, TRect(1, 1, size.x - 24, size.y - 1), hScrollBar, vScrollBar, indicator, "www.txt");
+        insert(editor);
+
+    }
+    void handleEvent(TEvent & event ){
+        TWindow::handleEvent( event );
+        if (event.what == evCommand) {
+            switch (event.message.command) {
+                case cmClose:
+                    close();
+                    clearEvent(event);
+                    break;
+            }
+        }
+    }
+    virtual TPalette& getPalette() const {
+        static TPalette palette( cpGreenDialog, sizeof(cpGreenDialog)-1 );
+        return palette;
+    }
+
+private:
+    MyEditorChild * editor;
+    TIndicator    * indicator;
+
+    TScrollBar    * vScrollBar;
+    TScrollBar    * hScrollBar;
+};
+
+void TVDemo::tvEditor()
+{
+    TMyTvEditor *editor = (TMyTvEditor *) validView(
+    new TMyTvEditor(TRect(0, 0, 81, 23)));
+
+    if (editor != nullptr) {
+        editor->helpCtx = hcCalendar;
+        deskTop->insert( editor );
+    }
+}
+
+void TVDemo::create_info_window()
+{
+    TMyTvInfoWindow *p = (TMyTvInfoWindow*) validView(
+    new TMyTvInfoWindow(TRect(2,size.y-10,size.x-4,size.y-3)));
+
+    if (p != nullptr) {
+        p->helpCtx = hcCalendar;
+        deskTop->insert( p );
+    }
+}

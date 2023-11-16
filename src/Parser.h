@@ -72,6 +72,7 @@
 # include <locale>
 # include <iomanip>
 # include <exception>       // exception handler's
+# include <stdexcept>
 
 // -----------------------------------------------------------------
 // global per file used variables/declarations:
@@ -80,11 +81,19 @@
 # include "Exception.h"
 
 // -----------------------------------------------------------------
+// boost library header files ...
+// -----------------------------------------------------------------
+# include <boost/program_options.hpp>
+# include <boost/exception/all.hpp>
+
+// -----------------------------------------------------------------
 // loggin specified header files ...
 // -----------------------------------------------------------------
 # include <plog/Log.h>
 # include <plog/Initializers/RollingFileInitializer.h>
 
+# include <inicpp.h>        // .ini files
+# include <zlib.h>          // decompress locale
 
 #ifdef HAVE_PARSER_PAS
 # include "PascalParser.h"

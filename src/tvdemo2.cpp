@@ -241,11 +241,6 @@ void TVDemo::changeDir() {
     }
 }
 
-
-//
-// Color Control Dialog Box function
-//
-
 void TVDemo::colors()
 {
     TColorGroup &group1 =
@@ -359,15 +354,5 @@ void TVDemo::colors()
             setScreenMode(TScreen::screenMode);
             }
         destroy( c );
-    }
-}
-
-void TVDemo::tvEditor()
-{
-    TMyTvEditor *editor = (TMyTvEditor *) validView(new TMyTvEditor(TRect(0, 0, 81, 23)));
-
-    if (editor != nullptr) {
-        editor->helpCtx = hcCalendar;
-        deskTop->insert( editor );
     }
 }

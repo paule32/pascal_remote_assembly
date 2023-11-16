@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define HELP_FILENAME "asmjit.help"
+#define HELP_FILENAME "asmjit.hlp"
 
 //
 // main: create an application object.  Constructor takes care of all
@@ -81,6 +81,8 @@ TVDemo::TVDemo( int argc, char **argv ) :
     heap->growMode = gfGrowLoX | gfGrowHiX;
     insert(heap);
 
+    create_info_window();
+/*
     while (--argc > 0)                              // Display files specified
         {                                           //  on command line.
         strcpy( fileSpec, *++argv );
@@ -96,6 +98,7 @@ TVDemo::TVDemo( int argc, char **argv ) :
                 deskTop->insert(w);
             }
         }
+*/
 
 }
 
@@ -209,7 +212,7 @@ void TVDemo::retrieveDesktop()
         messageBox("Could not find desktop file", mfOKButton | mfError);
     else 
         {
-        fpstream *f = new fpstream("asmjit.desk", ios::in|ios::binary);
+        fpstream *f = new fpstream("asmjit.dst", ios::in|ios::binary);
         if( !f )
             messageBox("Could not open desktop file", mfOKButton | mfError);
         else
@@ -228,16 +231,16 @@ void TVDemo::retrieveDesktop()
 
 void TVDemo::saveDesktop()
 {
-    fpstream *f = new fpstream("asmjit.desk", ios::out|ios::binary);
+    fpstream *f = new fpstream("asmjit.dst", ios::out|ios::binary);
 
     if( f )
         {
         TVDemo::storeDesktop(*f);
         if( !f )
             {
-            messageBox("Could not create ASMJIT.DESK.", mfOKButton | mfError);
+            messageBox("Could not create ASMJIT.DST.", mfOKButton | mfError);
             delete f;
-            ::remove("TVDEMO.DST");
+            ::remove("asmjit.dst");
             return;
             }
         }

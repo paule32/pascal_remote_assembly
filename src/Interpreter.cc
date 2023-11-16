@@ -5,10 +5,6 @@
 //
 // only for education, and non-profit usage !
 // -----------------------------------------------------------------
-# include <boost/exception/get_error_info.hpp> 
-# include <boost/program_options.hpp>
-
-# include <zlib.h>
 # include "Parser.h"
 
 // -----------------------------------------------------------------
@@ -41,9 +37,13 @@ extern      int  TurboMain(int,char**);
 
 static bool found_args = false;     // program command line arguments
 
+// -----------------------------------------------------------------
+// used namespace ...
+// -----------------------------------------------------------------
 using namespace boost::program_options;
-using namespace plog;
-using namespace std;
+using namespace plog;               // logging
+using namespace ini;                // .ini
+using namespace std;                // c++ std container
 
 // -----------------------------------------------------------------
 // application stuff (name, locale ...
@@ -1270,7 +1270,10 @@ int main(int argc, char **argv)
         ApplicationLogFile  = ASMJIT_APPNAME_LOGFILE;
         
         ApplicationExePath  = ExtractFilePath(argv[0]);
-        
+/*throw boost::enable_error_info(std::runtime_error("Beispiel mit errinfo_at_line"))
+      << boost::throw_function(__FUNCTION__)
+      << boost::throw_file(__FILE__)
+      << boost::throw_line(__LINE__);*/
         // ----------------------------------
         // try to get user locale translation
         // ----------------------------------
@@ -1278,15 +1281,28 @@ int main(int argc, char **argv)
         if (handle_codepage() ==            0) return EXIT_FAILURE;
 
         // ----------------------------------
+        // read .ini file for custom set's:
+        // ----------------------------------
+        ini::IniFile myini;
+        
+        myini.setMultiLineValues(true);
+        myini.load(ApplicationIniFile);
+        
+        std::string exePath = myini["common"]["path"].as<std::string>();
+        std::cout << "elen: " << exePath.length() <<
+        std::endl ;
+        
+        // ----------------------------------
         // initialize logging stuff ...
         // ----------------------------------
         plog::init(plog::debug  ,    ApplicationLogFile.c_str());
-        PLOGI << "current path: " << ApplicationExePath;
+        PLOGI << gettext("start application: ") << ApplicationExeFile;
 
         // ----------------------------------
         // registering the clean-up function
         // ----------------------------------
         if (atexit(cleanup) != 0) {
+            PLOGE << gettext("register cleanup function.") << ApplicationExeFile;
             std::cerr << gettext("error: can not register cleanup function.") <<
             std::endl ;
             return EXIT_FAILURE;
@@ -1388,10 +1404,9 @@ int main(int argc, char **argv)
         // if all fails, use default en = English
         // --------------------------------------
         if (locale_str.empty()) {
-            locale_str = "en";
+            locale_str = "en_US";
             found_args = true;
         }
-        
         
         // --------------------------------------
         // open textual GUI: TurboVision for DOS

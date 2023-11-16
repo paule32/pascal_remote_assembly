@@ -14,5 +14,5 @@ void MyErrorHandler::handleError(
     Error err,
     const char* message,
     BaseEmitter* origin) {
-    std::cerr << _("AsmJit error: ") << message << std::endl;
+    std::cerr << gettext("AsmJit error: ") << message << std::endl;
 }

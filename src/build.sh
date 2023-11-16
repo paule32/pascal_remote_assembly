@@ -827,6 +827,8 @@ if [[ -n "${built_dis}" ]]; then
     cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo2.o  -c ${SRC}/tvdemo2.cpp   2>&1 ); run_check $? "${cmd}"
     cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo3.o  -c ${SRC}/tvdemo3.cpp   2>&1 ); run_check $? "${cmd}"
     
+    cmd=$(${GXX} ${FLAGS} -o${TMP}/edits.o    -c ${SRC}/edits.cpp     2>&1 ); run_check $? "${cmd}"
+    
     #cmd=$(${GXX} ${FLAGS} -o${TMP}/puzzle.o   -c ${SRC}/puzzle.cpp    2>&1 ); run_check $? "${cmd}"
     #cmd=$(${GXX} ${FLAGS} -o${TMP}/calendar.o -c ${SRC}/calendar.cpp  2>&1 ); run_check $? "${cmd}"
     #cmd=$(${GXX} ${FLAGS} -o${TMP}/calc.o     -c ${SRC}/calc.cpp      2>&1 ); run_check $? "${cmd}"
@@ -842,6 +844,8 @@ if [[ -n "${built_dis}" ]]; then
     # ----------------------------------------
     cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -o ${TMP}/diss.exe \
         -L${TMP}/ -L./asmjit        \
+        \
+        ${TMP}/edits.o              \
         \
         ${TMP}/ascii.o              \
         ${TMP}/calc.o               \

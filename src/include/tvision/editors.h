@@ -179,6 +179,11 @@ class TEditor : public TView
 {
 
 public:
+// added: paule32 at: 2023-11-16
+// change the text & background color of TEditor, default is blue on yellow
+// the BIOS color code: 0x1e
+TColorAttr EditorTextColor = 0x1e;
+
 
     friend void genRefs();
 
