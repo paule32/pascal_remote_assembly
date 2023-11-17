@@ -302,26 +302,50 @@ public:
     class MyEditorChild: public TEditor {
     public:
         MyEditorChild(
-            TMyTvInfoWindow* parent,
-            const TRect& bounds,
-            TScrollBar * hScrollBar,
-            TScrollBar * vScrollBar,
-            TIndicator * indicator,
-            TStringView  filename):
-            TEditor( bounds,hScrollBar,vScrollBar,indicator,999999999),
-            owner(parent) {
-                std::map< std::string, TColorAttr > PascalToken =
-                {
-                    { "program", 0x2f },    // 0x2f = green on white
-                    { "begin",   0x2f },
-                    { "end",     0x2f }
-                };
-                EditorSyntaxToken  = PascalToken;   // use Pascal Highlighter
-                
-                EditorTextColor    = 0x20;          // green on black
-                EditorCommentColor = 0x21;          // green on blze
-            }
-        void handleEvent( TEvent &event )
+        TMyTvInfoWindow * parent,
+        const TRect     & bounds,
+        TScrollBar      * hScrollBar,
+        TScrollBar      * vScrollBar,
+        TIndicator      * indicator,
+        TStringView       filename):
+        TEditor( bounds,hScrollBar,vScrollBar,indicator,999999999),
+        owner(parent) {
+        std::map< std::string, TColorAttr > PascalToken =
+        {
+            { "program",        0x2f },    // 0x2f = green on white
+            
+            { "array",          0x2f },
+            { "begin",          0x2f },
+            { "byte",           0x2f },
+            { "case",           0x2f },
+            { "char",           0x2f },
+            { "class",          0x2f },
+            { "do",             0x2f },
+            { "dec",            0x2f },
+            { "else",           0x2f },
+            { "end",            0x2f },
+            { "for",            0x2f },
+            { "if",             0x2f },
+            { "implementation", 0x2f },
+            { "inc",            0x2f },
+            { "integer",        0x2f },
+            { "interface",      0x2f },
+            { "of",             0x2f },
+            { "record",         0x2f },
+            { "string",         0x2f },
+            { "then",           0x2f },
+            { "unit",           0x2f },
+            { "until",          0x2f },
+            { "uses",           0x2f },
+            { "while",          0x2f },
+            { "word",           0x2f }
+        };
+        EditorSyntaxToken  = PascalToken;   // use Pascal Highlighter
+        
+        EditorTextColor    = 0x20;          // green on black
+        EditorCommentColor = 0x21;          // green on blze
+    }
+    void handleEvent( TEvent &event )
         {
             TEditor::handleEvent( event );
             if (event.what == evKeyDown) {

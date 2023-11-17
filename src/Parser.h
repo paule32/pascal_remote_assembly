@@ -35,6 +35,8 @@
 // -----------------------------------------------------------------
 // standard header stuff ...
 // -----------------------------------------------------------------
+# include <winsock2.h>      // for TCP/ip
+
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>

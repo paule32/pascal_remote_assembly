@@ -691,8 +691,10 @@ function run_build_doc_xml () {
 # ----------------------------------------
 function run_build_application ()
 {
-    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -o ${TMP}/diss.exe \
+    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -D__USE_W32_SOCKETS -o ${TMP}/diss.exe \
         -L${TMP}/ -L./asmjit        \
+        \
+        ${TMP}/ApplicationTcpConnection.o \
         \
         ${TMP}/ascii.o              \
         ${TMP}/calc.o               \
@@ -840,7 +842,10 @@ if [[ -n "${built_dis}" ]]; then
     run_build_locales 30
     
     # TODO - remove !!!
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo2.o  -c ${SRC}/tvdemo2.cpp   2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS}                       \
+        -o ${TMP}/ApplicationTcpConnection.o    \
+        -c ${SRC}/ApplicationTcpConnection.cc   2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo2.o  -c ${SRC}/tvdemo2.cpp   2>&1 ); run_check $? "${cmd}"
     run_build_application
 
     # ----------------------------------------
