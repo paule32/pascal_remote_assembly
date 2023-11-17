@@ -686,6 +686,55 @@ function run_build_doc_xml () {
         eval "$dlg"
     fi
 }
+# ----------------------------------------
+# link diss.exe application ...
+# ----------------------------------------
+function run_build_application ()
+{
+    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -o ${TMP}/diss.exe \
+        -L${TMP}/ -L./asmjit        \
+        \
+        ${TMP}/ascii.o              \
+        ${TMP}/calc.o               \
+        ${TMP}/evntview.o           \
+        ${TMP}/gadgets.o            \
+        ${TMP}/puzzle.o             \
+        ${TMP}/tvdemo2.o            \
+        ${TMP}/backgrnd.o           \
+        ${TMP}/calendar.o           \
+        ${TMP}/fileview.o           \
+        ${TMP}/mousedlg.o           \
+        ${TMP}/tvdemo1.o            \
+        ${TMP}/tvdemo3.o            \
+        ${TMP}/Interpreter.o        \
+        ${TMP}/AssemblerParser.o    \
+        ${TMP}/AssemblerScanner.o   \
+        \
+        ${TMP}/dwarf.o              \
+        \
+        -lasmjit                    \
+        -ltvision                   \
+        -ldwarf64                   \
+        -lz                         \
+        -lintl                      \
+        -lboost_program_options-mt  \
+        -static-libgcc -static-libstdc++ 2>&1 ); run_check $? "${cmd}"
+
+    if [[ -z "${DLG}" ]]; then
+        echo "compile disassemler..."
+    else
+        printf '\033[8;%d;%dt' $rows $cols
+        dlg="(exit 1) | $dlgs --title \"${!errloc[27]}\" \
+        --gauge \"${!errloc[28]}\" 10 79 78"
+        eval "$dlg"
+    fi
+    
+    # ----------------------------------------
+    # strip debug informations, shrink .exe
+    # ----------------------------------------
+    cmd=$(strip ${TMP}/diss.exe 2>&1); run_check $? "${cmd}"
+}
+
 # -----------------------------------------------------------------
 # display help informations:
 # -----------------------------------------------------------------
@@ -789,6 +838,24 @@ if [[ -n "${built_dis}" ]]; then
         eval "$dlg"
     fi
     run_build_locales 30
+    
+    # TODO - remove !!!
+    cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo2.o  -c ${SRC}/tvdemo2.cpp   2>&1 ); run_check $? "${cmd}"
+    run_build_application
+
+    # ----------------------------------------
+    # display "done" message ...
+    # ----------------------------------------
+    if [[ -n "${DLG}" ]]; then
+        printf '\033[8;%d;%dt' $rows $cols
+        dlg="(exit 1) | $dlgs --title \"${!errloc[25]}\" \
+        --msgbox \"${!errloc[26]}\" 10 79"
+        eval "$dlg"
+        clear
+    fi
+    cd ${SRC}
+    exit 1
+
     # ----------------------------------------
     # buils parser script files ...
     # ----------------------------------------
@@ -827,8 +894,6 @@ if [[ -n "${built_dis}" ]]; then
     cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo2.o  -c ${SRC}/tvdemo2.cpp   2>&1 ); run_check $? "${cmd}"
     cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo3.o  -c ${SRC}/tvdemo3.cpp   2>&1 ); run_check $? "${cmd}"
     
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/edits.o    -c ${SRC}/edits.cpp     2>&1 ); run_check $? "${cmd}"
-    
     #cmd=$(${GXX} ${FLAGS} -o${TMP}/puzzle.o   -c ${SRC}/puzzle.cpp    2>&1 ); run_check $? "${cmd}"
     #cmd=$(${GXX} ${FLAGS} -o${TMP}/calendar.o -c ${SRC}/calendar.cpp  2>&1 ); run_check $? "${cmd}"
     #cmd=$(${GXX} ${FLAGS} -o${TMP}/calc.o     -c ${SRC}/calc.cpp      2>&1 ); run_check $? "${cmd}"
@@ -842,50 +907,7 @@ if [[ -n "${built_dis}" ]]; then
     # ----------------------------------------
     # link diss.exe application ...
     # ----------------------------------------
-    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -o ${TMP}/diss.exe \
-        -L${TMP}/ -L./asmjit        \
-        \
-        ${TMP}/edits.o              \
-        \
-        ${TMP}/ascii.o              \
-        ${TMP}/calc.o               \
-        ${TMP}/evntview.o           \
-        ${TMP}/gadgets.o            \
-        ${TMP}/puzzle.o             \
-        ${TMP}/tvdemo2.o            \
-        ${TMP}/backgrnd.o           \
-        ${TMP}/calendar.o           \
-        ${TMP}/fileview.o           \
-        ${TMP}/mousedlg.o           \
-        ${TMP}/tvdemo1.o            \
-        ${TMP}/tvdemo3.o            \
-        ${TMP}/Interpreter.o        \
-        ${TMP}/AssemblerParser.o    \
-        ${TMP}/AssemblerScanner.o   \
-        \
-        ${TMP}/dwarf.o              \
-        \
-        -lasmjit                    \
-        -ltvision                   \
-        -ldwarf64                   \
-        -lz                         \
-        -lintl                      \
-        -lboost_program_options-mt  \
-        -static-libgcc -static-libstdc++ 2>&1 ); run_check $? "${cmd}"
-
-    if [[ -z "${DLG}" ]]; then
-        echo "compile disassemler..."
-    else
-        printf '\033[8;%d;%dt' $rows $cols
-        dlg="(exit 1) | $dlgs --title \"${!errloc[27]}\" \
-        --gauge \"${!errloc[28]}\" 10 79 78"
-        eval "$dlg"
-    fi
-    
-    # ----------------------------------------
-    # strip debug informations, shrink .exe
-    # ----------------------------------------
-    cmd=$(strip ${TMP}/diss.exe 2>&1); run_check $? "${cmd}"
+    run_build_application
 
     # ----------------------------------------
     # display "done" message ...
@@ -897,7 +919,7 @@ if [[ -n "${built_dis}" ]]; then
         eval "$dlg"
         clear
     fi
-    
+
     cd ${SRC}
     exit 1
 fi

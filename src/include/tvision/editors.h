@@ -33,6 +33,10 @@
 #pragma option -po-
 #endif
 
+# include <iostream>
+# include <string>
+# include <map>
+
 #if !defined( __EDIT_COMMAND_CODES )
 #define __EDIT_COMMAND_CODES
 
@@ -179,11 +183,16 @@ class TEditor : public TView
 {
 
 public:
+
+// added: paule32 at: 2023-11-17
+// provide DSL Token & Color for highlight text
+std::map< std::string, TColorAttr > EditorSyntaxToken;
+
 // added: paule32 at: 2023-11-16
 // change the text & background color of TEditor, default is blue on yellow
 // the BIOS color code: 0x1e
-TColorAttr EditorTextColor = 0x1e;
-
+TColorAttr EditorTextColor    = 0x1e;  // blue on yellow
+TColorAttr EditorCommentColor = 0x30;  // green on black
 
     friend void genRefs();
 

@@ -196,7 +196,7 @@ public:
             TFileEditor( bounds,hScrollBar,vScrollBar,indicator,filename),
             owner(parent) {
                 EditorTextColor    = 0x1e;
-                EditorCommentColor = 0x31;
+                EditorCommentColor = 0x40;
             }
         void handleEvent( TEvent &event )
         {
@@ -310,7 +310,16 @@ public:
             TStringView  filename):
             TEditor( bounds,hScrollBar,vScrollBar,indicator,999999999),
             owner(parent) {
-                EditorTextColor = 0x30;
+                std::map< std::string, TColorAttr > PascalToken =
+                {
+                    { "program", 0x2f },    // 0x2f = green on white
+                    { "begin",   0x2f },
+                    { "end",     0x2f }
+                };
+                EditorSyntaxToken  = PascalToken;   // use Pascal Highlighter
+                
+                EditorTextColor    = 0x20;          // green on black
+                EditorCommentColor = 0x21;          // green on blze
             }
         void handleEvent( TEvent &event )
         {
@@ -363,7 +372,7 @@ public:
         indicator = new TIndicator( TRect( 2, size.y - 1, 16, size.y) );
         insert(indicator);
         
-        editor = new MyEditorChild(this, TRect(1, 1, size.x - 24, size.y - 1), hScrollBar, vScrollBar, indicator, "www.txt");
+        editor = new MyEditorChild(this, TRect(2, 1, size.x - 24, size.y - 1), hScrollBar, vScrollBar, indicator, "www.txt");
         insert(editor);
 
     }
