@@ -32,18 +32,23 @@
 #error This Applications was created under Microsoft-Windows...
 #else
 
+# define __STDC_WANT_LIB_EXT1__ 1
+
 // -----------------------------------------------------------------
 // standard header stuff ...
 // -----------------------------------------------------------------
 # include <winsock2.h>      // for TCP/ip
+# include <ws2tcpip.h>
 
 # include <stdio.h>
-# include <stdlib.h>
+# include <stdlib.h>        // for _countof
+# include <string.h>        // for strcpy_s
 # include <unistd.h>
 # include <libintl.h>
 # include <locale.h>
 # include <sys/stat.h>
 # include <strings.h>
+# include <errno.h>         // return values
 
 // -----------------------------------------------------------------
 // GNU dwarf debug header stuff ...
@@ -107,8 +112,9 @@
 // -----------------------------------------------------------------
 // platform speciefic stuff ...
 // -----------------------------------------------------------------
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
 extern "C" {
+# include <winsock2.h>
 # include <windows.h>
 # include <tchar.h>
 # include <strsafe.h>

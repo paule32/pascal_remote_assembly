@@ -23,17 +23,20 @@ class TVDemo : public TApplication
 public:
 
     TVDemo( int argc, char **argv );
-    static TStatusLine *initStatusLine( TRect r );
-    static TMenuBar *initMenuBar( TRect r );
+
+    static TStatusLine * initStatusLine( TRect r );
+    static TMenuBar    * initMenuBar( TRect r );
+
     virtual void handleEvent(TEvent& Event);
     virtual void getEvent(TEvent& event);
-//    virtual TPalette& getPalette() const;
     virtual void idle();              // Updates heap and clock views
 
+    bool initialized = false;
+    
 private:
-
-    THeapView *heap;                  // Heap view
-    TClockView *clock;                // Clock view
+    
+    THeapView  * heap;                // Heap view
+    TClockView * clock;               // Clock view
 
     void aboutDlgBox();               // "About" box
     void puzzle();                    // Puzzle
@@ -55,4 +58,5 @@ private:
 
     void tvEditor();
     void create_info_window();
+    void put_exception_message(const char* text);
 };

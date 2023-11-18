@@ -24,7 +24,6 @@
 # define Uses_TEditWindow
 # define Uses_TDeskTop
 # define Uses_TRect
-# define Uses_TEditor
 # define Uses_TFileEditor
 # define Uses_TFileDialog
 # define Uses_TChDirDialog
@@ -55,8 +54,6 @@
 # define Uses_THistory
 # define Uses_TRect
 # define Uses_TCheckBoxes
-# define Uses_TButton
-# define Uses_TButton
 # define Uses_MsgBox
 # define Uses_TSItem
 # define Uses_TEditor
@@ -87,72 +84,71 @@ void TVDemo::handleEvent(TEvent &event)
 {
     TApplication::handleEvent(event);
 
-    if (event.what == evCommand)
-    {
+    if (event.what == evCommand) {
         switch (event.message.command)
-            {
-            case cmAboutCmd:            //  About Dialog Box
-                aboutDlgBox();
-                break;
+        {
+        case cmAboutCmd:            //  About Dialog Box
+            aboutDlgBox();
+            break;
 
-            case cmCalendarCmd:         //  Calendar Window
-                calendar();
-                break;
+        case cmCalendarCmd:         //  Calendar Window
+            calendar();
+            break;
 
-            case cmAsciiCmd:            //  Ascii Table
-                asciiTable();
-                break;
+        case cmAsciiCmd:            //  Ascii Table
+            asciiTable();
+            break;
 
-            case cmCalcCmd:             //  Calculator
-                calculator();
-                break;
+        case cmCalcCmd:             //  Calculator
+            calculator();
+            break;
 
-            case cmPuzzleCmd:           //  Puzzle
-                puzzle();
-                break;
+        case cmPuzzleCmd:           //  Puzzle
+            puzzle();
+            break;
 
-            case cmEventViewCmd:        //  Open Event Viewer
-                eventViewer();
-                break;
+        case cmEventViewCmd:        //  Open Event Viewer
+            eventViewer();
+            break;
 
-            case cmChBackground:        //  Change Background pattern
-                chBackground();
-                break;
+        case cmChBackground:        //  Change Background pattern
+            chBackground();
+            break;
 
-            case cmOpenCmd:             //  View a file
-                openFile("*.*");
-                break;
+        case cmOpenCmd:             //  View a file
+            openFile("*.*");
+            break;
 
-            case cmChDirCmd:            //  Change directory
-                changeDir();
-                break;
+        case cmChDirCmd:            //  Change directory
+            changeDir();
+            break;
 
-            case cmMouseCmd:            //  Mouse control dialog box
-                mouse();
-                break;
+        case cmMouseCmd:            //  Mouse control dialog box
+            mouse();
+            break;
 
-            case cmColorCmd:            //  Color control dialog box
-                colors();
-                break;
+        case cmColorCmd:            //  Color control dialog box
+            colors();
+            break;
 
-            case cmTvEditorCmd:
-                tvEditor();
-                break;
+        case cmTvEditorCmd:
+            tvEditor();
+            break;
 
         case cmSaveCmd:             //  Save current desktop
-                saveDesktop();
-                break;
- 
+            saveDesktop();
+            break;
+
         case cmRestoreCmd:          //  Restore saved desktop
-                retrieveDesktop();
-                break;
+            retrieveDesktop();
+            break;
 
-            default:                    //  Unknown command
-                return;
+        default:                    //  Unknown command
+            return;
 
-            }
-        clearEvent (event);
         }
+        clearEvent (event);
+    }
 }
 
 
@@ -163,10 +159,10 @@ void TVDemo::handleEvent(TEvent &event)
 
 void TVDemo::aboutDlgBox()
 {
-    TDialog *aboutBox = new TDialog(TRect(0, 0, 39, 13), gettext("About"));
+    TDialog *aboutBox = new TDialog(TRect(0, 0, 45, 13), gettext("About"));
 
     aboutBox->insert(
-      new TStaticText(TRect(9, 2, 42, 9),
+      new TStaticText(TRect(7, 2, 38, 9),
         "\003Turbo Vision asmjit Demo\n\n"
         "\003C++ Version\n\n"
         "\003Copyright (c) 2023 paule32\n\n"
@@ -175,13 +171,21 @@ void TVDemo::aboutDlgBox()
       );
 
     aboutBox->insert(
-      new TButton(TRect(14, 10, 26, 12), " OK", cmOK, bfDefault)
+      new TButton(TRect(18, 10, 29, 12), " OK", cmOK, bfDefault)
       );
 
     aboutBox->options |= ofCentered;
 
     executeDialog(aboutBox);
 
+    BOOST_THROW_EXCEPTION(
+           boost::enable_error_info(std::runtime_error("gettext(err)"))
+        << boost::errinfo_api_function("mainzer")
+        << boost::errinfo_errno(42)
+    
+        << boost::throw_function(__FUNCTION__)
+        << boost::throw_file(__FILE__)
+        << boost::throw_line(__LINE__));
 }
 
 void TVDemo::asciiTable() {
@@ -348,11 +352,12 @@ void TVDemo::colors()
     {
         c->helpCtx = hcOCColorsDBox;  // set context help constant
         c->setData(&getPalette());
-        if( deskTop->execView( c ) != cmCancel )
-            {
+        
+        if( deskTop->execView( c ) != cmCancel ) {
             getPalette() = *(c->pal);
             setScreenMode(TScreen::screenMode);
-            }
+        }
+        
         destroy( c );
     }
 }

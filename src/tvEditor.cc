@@ -94,90 +94,109 @@ TDialog *createReplaceDialog()
 
 ushort doEditDialog( int dialog, ... )
 {
-        va_list arg;
+    va_list arg;
 
     char buf[256] = {0};
     ostrstream os( buf, sizeof( buf )-1 );
     switch( dialog )
-        {
-        case edOutOfMemory:
-            return messageBox( gettext("Not enough memory for this operation"),
-                               mfError | mfOKButton );
-        case edReadError:
-            {
-            va_start( arg, dialog );
-            os << gettext("Error reading file ") << va_arg( arg, _charPtr )
-               << "." << ends;
-            va_end( arg );
-            return messageBox( buf, mfError | mfOKButton );
-            }
-        case edWriteError:
-            {
-            va_start( arg, dialog );
+    {
+    case edOutOfMemory:
+        return messageBox(
+            gettext("Not enough memory for this operation"),
+            mfError | mfOKButton );
+            
+    case edReadError: {
+        va_start( arg, dialog );
+            os << gettext("Error reading file ")
+               << va_arg( arg, _charPtr )
+               << "."
+               << ends;
+        va_end( arg );
+        return messageBox(
+            buf,
+            mfError | mfOKButton );
+    }
+    case edWriteError: {
+        va_start( arg, dialog );
             os << gettext("Error writing file ") << va_arg( arg,_charPtr )
-               << "." << ends;
-            va_end( arg );
-            return messageBox( buf, mfError | mfOKButton );
-            }
-        case edCreateError:
-            {
-            va_start( arg, dialog );
-            os << gettext("Error creating file ") << va_arg( arg, _charPtr )
-               << "." << ends;
-            va_end( arg );
-            return messageBox( buf, mfError | mfOKButton );
-            }
-        case edSaveModify:
-            {
-            va_start( arg, dialog );
-            os << va_arg( arg, _charPtr )
-               << gettext(" has been modified. Save?") << ends;
-            va_end( arg );
-            return messageBox( buf, mfInformation | mfYesNoCancel );
-            }
-        case edSaveUntitled:
-            return messageBox( gettext("Save untitled file?"),
-                               mfInformation | mfYesNoCancel );
-        case edSaveAs:
-            {
-            va_start( arg, dialog );
-            return execDialog( new TFileDialog( "*.*",
-                                                gettext("Save file as"),
-                                                "~N~ame",
-                                                fdOKButton,
-                                                101 ), va_arg( arg, _charPtr ) );
-            }
+               << "."
+               << ends;
+        va_end( arg );
+        return messageBox(
+            buf,
+            mfError | mfOKButton );
+    }
+    case edCreateError: {
+        va_start( arg, dialog );
+        os  << gettext("Error creating file ")
+            << va_arg( arg, _charPtr )
+            << "."
+            << ends;
+        va_end( arg );
+        return messageBox(
+        buf,
+        mfError | mfOKButton );
+    }
+    case edSaveModify: {
+        va_start( arg, dialog );
+          os << va_arg( arg, _charPtr )
+             << gettext(" has been modified. Save?")
+             << ends;
+        va_end( arg );
+        return messageBox(
+            buf,
+            mfInformation | mfYesNoCancel );
+    }
+    case edSaveUntitled:
+        return messageBox( gettext("Save untitled file?"),
+                           mfInformation | mfYesNoCancel );
+    case edSaveAs: {
+        va_start( arg, dialog );
+            return execDialog(
+            new TFileDialog( "*.*",
+                gettext("Save file as"),
+                "~N~ame",
+                fdOKButton,
+                101 ),
+        va_arg( arg, _charPtr ) );
+    }
 
-        case edFind:
-            {
-            va_start( arg, dialog );
-            return execDialog( createFindDialog(), va_arg( arg, _charPtr ) );
-            }
+    case edFind: {
+        va_start( arg, dialog );
+        return execDialog(
+            createFindDialog(),
+            va_arg( arg, _charPtr ) );
+    }
 
-        case edSearchFailed:
-            return messageBox( gettext("Search string not found."),
-                               mfError | mfOKButton );
-        case edReplace:
-            {
-            va_start( arg, dialog );
-            return execDialog( createReplaceDialog(), va_arg( arg, _charPtr ) );
-            }
+    case edSearchFailed:
+        return messageBox(
+            gettext("Search string not found."),
+            mfError | mfOKButton );
+            
+    case edReplace: {
+        va_start( arg, dialog );
+        return execDialog(
+            createReplaceDialog(),
+            va_arg( arg, _charPtr ) );
+    }
 
-        case edReplacePrompt:
-            //  Avoid placing the dialog on the same line as the cursor
-            TRect r( 0, 1, 40, 8 );
-            r.move( (TProgram::deskTop->size.x-r.b.x)/2, 0 );
-            TPoint t = TProgram::deskTop->makeGlobal( r.b );
-            t.y++;
-            va_start( arg, dialog );
+    case edReplacePrompt:
+        //  Avoid placing the dialog on the same line as the cursor
+        TRect r( 0, 1, 40, 8 );
+        r.move( (  TProgram::deskTop->size.x-r.b.x)/2, 0 );
+        TPoint t = TProgram::deskTop->makeGlobal( r.b );
+        t.y++;
+        
+        va_start( arg, dialog );
             TPoint *pt = va_arg( arg, PPoint );
             if( pt->y <= t.y )
-                r.move( 0, TProgram::deskTop->size.y - r.b.y - 2 );
-            va_end( arg );
-            return messageBoxRect( r, gettext("Replace this occurence?"),
-                                   mfYesNoCancel | mfInformation );
-
-        }
+            r.move( 0, TProgram::deskTop->size.y - r.b.y - 2 );
+        va_end( arg );
+        
+        return messageBoxRect(
+            r, gettext("Replace this occurence?"),
+            mfYesNoCancel | mfInformation );
+    }
 
     return cmCancel;
 }
@@ -294,7 +313,7 @@ private:
 };
 
 #define cpGreenDialog \
-        "\x11\x75\x62\x63\x64\x65\x66\x67\x68\x69\x6a\x6b\x6c\x6d\x6e\x6f"\
+        "\x75\x75\x75\x63\x64\x65\x66\x67\x68\x69\x6a\x6b\x6c\x6d\x6e\x6f"\
         "\x70\x71\x72\x73\x74\x75\x76\x77\x78\x79\x7a\x7b\x7c\x7d\x7e\x7f"
 
 class TMyTvInfoWindow : public TDialog {
@@ -415,7 +434,13 @@ public:
         static TPalette palette( cpGreenDialog, sizeof(cpGreenDialog)-1 );
         return palette;
     }
-
+    bool insertText(const void* text, uint length) {
+        if (editor) {
+            editor->insertText(text,length,false);
+            return true;
+        }
+        return false;
+    }
 private:
     MyEditorChild * editor;
     TIndicator    * indicator;
@@ -435,13 +460,20 @@ void TVDemo::tvEditor()
     }
 }
 
+static TMyTvInfoWindow * info_message_window = nullptr;
 void TVDemo::create_info_window()
 {
-    TMyTvInfoWindow *p = (TMyTvInfoWindow*) validView(
-    new TMyTvInfoWindow(TRect(2,size.y-10,size.x-4,size.y-3)));
+    info_message_window = (TMyTvInfoWindow*) validView(
+    new TMyTvInfoWindow(
+        TRect(2,size.y-10,size.x-4,size.y-3)));
 
-    if (p != nullptr) {
-        p->helpCtx = hcCalendar;
-        deskTop->insert( p );
+    if (info_message_window != nullptr) {
+        info_message_window->helpCtx = hcCalendar;
+        deskTop->insert( info_message_window );
     }
+}
+
+void TVDemo::put_exception_message(const char* text)
+{
+    info_message_window->insertText(text,strlen(text));
 }

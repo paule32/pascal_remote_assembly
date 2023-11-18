@@ -342,3 +342,36 @@ msgstr "AsmJit Fehler: "
 
 msgid "register cleanup function."
 msgstr "kann nicht registriert werden."
+
+msgid "Failed to initialize Winsock."
+msgstr "Windows socket Bibliothek konnte nicht initializiert werden."
+
+msgid "error in function: "
+msgstr "Fehler in Funktion: "
+
+msgid "file: "
+msgstr "Datei: "
+
+msgid "line: "
+msgstr "Zeile: "
+
+msgid "Exception occured"
+msgstr "Ausnahme geworfen"
+
+msgid "error code; "
+msgstr "Fehler code: "
+
+msgid "exception in function: "
+msgstr "Ausnahme in Funktion: "
+
+msgid "Could not find desktop file"
+msgstr "kann Arbeitsplatz-Datei nicht finden"
+
+msgid "Could not open desktop file"
+msgstr "kann Arbeitsplatz-Datei nicht öffnen"
+
+msgid "Error reading desktop file"
+msgstr "Fehler beim lesen der Arbeitsplatz-Datei"
+
+msgid "Could not create "
+msgstr "Date konnte nicht erstellt werden: "

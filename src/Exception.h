@@ -24,10 +24,3 @@ CreatePascalException (Pascal);
 CreatePascalException (Argument);
 CreatePascalException (FileNotFound);
 CreatePascalException (FileNotOpen);
-
-/*
-throw boost::enable_error_info(std::runtime_error("Beispiel mit errinfo_at_line"))
-      << boost::throw_function("main")
-      << boost::throw_file("example.cpp")
-      << boost::throw_line(42);
-*/

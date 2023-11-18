@@ -11,7 +11,7 @@
 // TODO: change in build.sh script ...
 // -----------------------------------------------------------------
 # undef  ASMJIT_APPNAME
-# define ASMJIT_APPNAME "asmjitapp"
+# define ASMJIT_APPNAME "asmjit""app"
 
 // -----------------------------------------------------------------
 // global variable's / constant's ...
@@ -57,6 +57,8 @@ std::string ApplicationHlpFile;
 std::string ApplicationIniFile;
 std::string ApplicationLogFile;
 
+std::stringstream ApplicationCurrentExceptionText;
+
 // -----------------------------------------------------------------
 // hard coded supported standard locales:
 // -----------------------------------------------------------------
@@ -71,10 +73,16 @@ std::string locale_codepage_new;    //
 LCID locale_LCID_old;               // for restore the old locale
 LCID locale_LCID_new;               //
 
-HANDLE g_hChildStd_IN_Rd  = NULL;
-HANDLE g_hChildStd_IN_Wr  = NULL;
-HANDLE g_hChildStd_OUT_Rd = NULL;
-HANDLE g_hChildStd_OUT_Wr = NULL;
+// -----------------------------------------------------------------
+// Windows OS variable's, constant's ...
+// -----------------------------------------------------------------
+HANDLE  g_hChildStd_IN_Rd  = NULL;
+HANDLE  g_hChildStd_IN_Wr  = NULL;
+HANDLE  g_hChildStd_OUT_Rd = NULL;
+HANDLE  g_hChildStd_OUT_Wr = NULL;
+
+WSADATA      wsaData;               // for TCP/ip socket library
+ini::IniFile myini;
 
 // -----------------------------------------------------------------
 // function member forwarder's ...
@@ -1224,7 +1232,7 @@ void removeLocaleFile( std::string ls )
         }
     }
     catch (std::exception &ex) {
-        std::cerr << _("Error: file could not be deleted: ")
+        std::cerr << gettext("Error: file could not be deleted: ")
                   << ex.what()
                   <<
         std::endl ;
@@ -1234,7 +1242,13 @@ void removeLocaleFile( std::string ls )
 // -----------------------------------------------------------------
 // clean-up the workspace ...
 // -----------------------------------------------------------------
-void cleanup() {
+void cleanup()
+{
+    // -----------------
+    // clean up Winsock
+    // -----------------
+    WSACleanup();
+    
     // -------------------------------------------------------------
     // at terminating application, delete de-packed .mo file.
     // this make space for other usage, with other application's ...
@@ -1270,10 +1284,7 @@ int main(int argc, char **argv)
         ApplicationLogFile  = ASMJIT_APPNAME_LOGFILE;
         
         ApplicationExePath  = ExtractFilePath(argv[0]);
-/*throw boost::enable_error_info(std::runtime_error("Beispiel mit errinfo_at_line"))
-      << boost::throw_function(__FUNCTION__)
-      << boost::throw_file(__FILE__)
-      << boost::throw_line(__LINE__);*/
+
         // ----------------------------------
         // try to get user locale translation
         // ----------------------------------
@@ -1281,10 +1292,24 @@ int main(int argc, char **argv)
         if (handle_codepage() ==            0) return EXIT_FAILURE;
 
         // ----------------------------------
+        // Windows socket need initialization
+        // ----------------------------------
+        if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+            BOOST_THROW_EXCEPTION(
+                   boost::enable_error_info(std::runtime_error(gettext("Failed to initialize Winsock.")))
+                << boost::errinfo_api_function("main")
+                << boost::errinfo_errno(42)
+                
+                << boost::throw_function(__FUNCTION__)
+                << boost::throw_file(__FILE__)
+                << boost::throw_line(__LINE__));
+                
+            return EXIT_FAILURE;
+        }
+        
+        // ----------------------------------
         // read .ini file for custom set's:
         // ----------------------------------
-        ini::IniFile myini;
-        
         myini.setMultiLineValues(true);
         myini.load(ApplicationIniFile);
         
@@ -1302,9 +1327,19 @@ int main(int argc, char **argv)
         // registering the clean-up function
         // ----------------------------------
         if (atexit(cleanup) != 0) {
-            PLOGE << gettext("register cleanup function.") << ApplicationExeFile;
-            std::cerr << gettext("error: can not register cleanup function.") <<
-            std::endl ;
+            std::stringstream ss;
+            ss  << gettext("error: can not register cleanup function.")
+                << ApplicationExeFile;
+                
+            BOOST_THROW_EXCEPTION(
+                   boost::enable_error_info(std::runtime_error(gettext(ss.str().c_str())))
+                << boost::errinfo_api_function("main")
+                << boost::errinfo_errno(42)
+
+                << boost::throw_function(__FUNCTION__)
+                << boost::throw_file(__FILE__)
+                << boost::throw_line(__LINE__));
+                
             return EXIT_FAILURE;
         }
 
@@ -1377,7 +1412,17 @@ int main(int argc, char **argv)
             locale_str = vm["locale"].as< std::string >();
             
             if (locale_str.length() <  2) {
-                std::cerr << gettext("invalid locale parameter length.") << std::endl;
+                std::string err(gettext("invalid locale parameter length."));
+                
+                BOOST_THROW_EXCEPTION(
+                       boost::enable_error_info(std::runtime_error(gettext(err.c_str())))
+                    << boost::errinfo_api_function("main")
+                    << boost::errinfo_errno(42)
+
+                    << boost::throw_function(__FUNCTION__)
+                    << boost::throw_file(__FILE__)
+                    << boost::throw_line(__LINE__));
+                    
                 return EXIT_FAILURE;
             }
             // ----------------------------
@@ -1419,7 +1464,17 @@ int main(int argc, char **argv)
         // check, if input, and output file is ok
         // --------------------------------------
         if (file_input_asm.empty()) {
-            std::cerr << "// " <<  gettext("input assembly file missing.") << std::endl;
+            std::string err(gettext("input assembly file missing."));
+            
+            BOOST_THROW_EXCEPTION(
+                   boost::enable_error_info(std::runtime_error(gettext(err.c_str())))
+                << boost::errinfo_api_function("main")
+                << boost::errinfo_errno(42)
+                
+                << boost::throw_function(__FUNCTION__)
+                << boost::throw_file(__FILE__)
+                << boost::throw_line(__LINE__));
+                
             return EXIT_FAILURE;
         }   else {
             std::stringstream ss;
@@ -1427,8 +1482,17 @@ int main(int argc, char **argv)
             // asm input
             std::string ext(ExtractFileExtension(file_input_asm));
             if (ext != ".asm") {
-                std::cerr << "// " <<  gettext("input main C++ file must have extension .asm")
-                          << std::endl;
+                std::string err(gettext("input main C++ file must have extension .asm"));
+                
+                BOOST_THROW_EXCEPTION(
+                       boost::enable_error_info(std::runtime_error(gettext(err.c_str())))
+                    << boost::errinfo_api_function("main")
+                    << boost::errinfo_errno(42)
+                    
+                    << boost::throw_function(__FUNCTION__)
+                    << boost::throw_file(__FILE__)
+                    << boost::throw_line(__LINE__));
+
                 return EXIT_FAILURE;
             }
             
@@ -1456,8 +1520,17 @@ int main(int argc, char **argv)
             else {
                 std::string ext(ExtractFileExtension(file_output_ch));
                 if ((ext != ".h") || (ext != ".H")) {
-                    std::cout << "// " <<  gettext("output header C++ file must have extension .h")
-                              << std::endl;
+                    std::string err(gettext("output header C++ file must have extension .h"));
+                    
+                    BOOST_THROW_EXCEPTION(
+                           boost::enable_error_info(std::runtime_error(gettext(err.c_str())))
+                        << boost::errinfo_api_function("main")
+                        << boost::errinfo_errno(42)
+
+                        << boost::throw_function(__FUNCTION__)
+                        << boost::throw_file(__FILE__)
+                        << boost::throw_line(__LINE__));
+                        
                     return EXIT_FAILURE;
                 }
             }
@@ -1471,18 +1544,35 @@ int main(int argc, char **argv)
             else {
                 std::string ext(ExtractFileExtension(file_output_ct));
                 if ((ext != ".cc") || (ext != ".cc")) {
-                    std::cout << "// " <<  gettext("output misc C++ file must have extension .cc") <<
-                    std::endl ;
+                    std::string err(gettext("output misc C++ file must have extension .cc"));
+                    
+                    BOOST_THROW_EXCEPTION(
+                           boost::enable_error_info(std::runtime_error(gettext(err.c_str())))
+                        << boost::errinfo_api_function("main")
+                        << boost::errinfo_errno(42)
+                    
+                        << boost::throw_function(__FUNCTION__)
+                        << boost::throw_file(__FILE__)
+                        << boost::throw_line(__LINE__));
+                       
                     return EXIT_FAILURE;
                 }
             }
-            
             return handle_asm_file( file_input_asm.c_str() );
         }
         
         if (file_input_obj.empty()) {
-            std::cerr << gettext("input object file missing.") <<
-            std::endl ;
+            std::string err(gettext("input object file missing."));
+            
+            BOOST_THROW_EXCEPTION(
+                   boost::enable_error_info(std::runtime_error(gettext(err.c_str())))
+                << boost::errinfo_api_function("main")
+                << boost::errinfo_errno(42)
+            
+                << boost::throw_function(__FUNCTION__)
+                << boost::throw_file(__FILE__)
+                << boost::throw_line(__LINE__));
+                
             return EXIT_FAILURE;
         }   else {
             return handle_object_file( file_input_obj.c_str() );
@@ -1492,20 +1582,33 @@ int main(int argc, char **argv)
     // we use try catch for errors:
     // ----------------------------
     catch (const boost::exception &e) {
-        std::cerr << "Fehler in Funktion: " << *boost::get_error_info<boost::throw_function>(e) << std::endl;
-        std::cerr << "Datei: "              << *boost::get_error_info<boost::throw_file>    (e) << std::endl;
-        std::cerr << "Zeile: "              << *boost::get_error_info<boost::throw_line>    (e) << std::endl;
+        std::stringstream err;
+        
+        err <<   boost::diagnostic_information(e)                << std::endl << gettext("error in function: ")
+            << * boost::get_error_info<boost::throw_function>(e) << std::endl << gettext("file: ")
+            << * boost::get_error_info<boost::throw_file>    (e) << std::endl << gettext("line: ")
+            << * boost::get_error_info<boost::throw_line>    (e) ;
+            
+        PLOGE     << err.str() ;
+        std::cerr << err.str() << std::endl;
+        
         return EXIT_FAILURE;
     }
     catch (std::exception &e) {
-        std::cerr << gettext("exception: ")
-                  << e.what()
-                  << std::endl;
+        std::stringstream err;
+        err << gettext("exception:")
+            << std::endl << e.what()
+            << std::endl ;
+            
+        PLOGE     << err.str() ;
+        std::cerr << err.str() << std::endl;
+        
         return EXIT_FAILURE;
     }
     catch (...) {
-        std::cerr << gettext("exception: common")
-                  << std::endl;
+        std::string err(gettext("exception: common"));
+        PLOGE     << err ;
+        std::cerr << err << std::endl;
                   
         return EXIT_FAILURE;
     }   return EXIT_SUCCESS;

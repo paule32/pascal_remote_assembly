@@ -51,7 +51,7 @@ public:
     }
 
 private:
-    tcp_connection(
+    ApplicationTcpConnection(
         boost::asio::io_context& io_context)
         : socket_(io_context) {
     }
