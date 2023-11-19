@@ -375,3 +375,30 @@ msgstr "Fehler beim lesen der Arbeitsplatz-Datei"
 
 msgid "Could not create "
 msgstr "Date konnte nicht erstellt werden: "
+
+msgid " Decimal: "
+msgstr " dezimal: "
+
+msgid "December"
+msgstr "Dezember"
+
+msgid "October"
+msgstr "Oktober"
+
+msgid "June"
+msgstr "Juni"
+
+msgid "May"
+msgstr "Mai"
+
+msgid "March"
+msgstr "März"
+
+msgid "February"
+msgstr "Februar"
+
+msgid "January"
+msgstr "Januar"
+
+msgid "Calendar"
+msgstr "Kalender"

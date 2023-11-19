@@ -7,6 +7,7 @@
 # only for education, and non-profit usage !
 # -----------------------------------------------------------------
 PWD=$(pwd)
+TVD="/E/Projekte/TVision"
 
 # -----------------------------------------------------------------
 # custom stuff ...
@@ -48,10 +49,11 @@ FLAGS=$(echo "-std=c++20 -O2 -fPIC "        \
     "-U__BORLANDC__ " \
     "-I/E/msys64/mingw64/usr/include   " \
     "-I${SRC}/include                  " \
-    "-I${SRC}/include/tvision          " \
-    "-I${SRC}/include/tvision/compat   " \
-    "-I${SRC}/include/tvision/compat/borland " \
-    "-I${SRC}/include/tvision/internal " \
+    "-I${TVD}/include                  " \
+    "-I${TVD}/include/tvision          " \
+    "-I${TVD}/include/tvision/compat   " \
+    "-I${TVD}/include/tvision/compat/borland " \
+    "-I${TVD}/include/tvision/internal " \
     "-I${SRC}/asmjit -I${TMP}")
 # -----------------------------------------------------------------
 ST1="s/\\\"Last\\-Translator\\: .*\\n\\\"/\\\"Last-Translator\\:"

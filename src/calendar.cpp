@@ -19,6 +19,10 @@
 #define Uses_TStreamable
 #define Uses_TView
 #define Uses_TWindow
+
+#ifdef  __FLAT__
+# undef __FLAT__
+#endif
 #include <tvision/tv.h>
 
 #include <string.h>
@@ -46,11 +50,22 @@ using std::strstreambuf;
 
 #include "calendar.h"
 
+extern "C" const char* gettext(const char*);
 
 static const char *monthNames[] = {
     "",
-    "January",  "February", "March",    "April",    "May",      "June",
-    "July",     "August",   "September","October",  "November", "December"
+    gettext("January"),
+    gettext("February"),
+    gettext("March"),
+    gettext("April"),
+    gettext("May"),
+    gettext("June"),
+    gettext("July"),
+    gettext("August"),
+    gettext("September"),
+    gettext("October"),
+    gettext("November"),
+    gettext("December")
 };
 
 
@@ -279,7 +294,7 @@ TStreamableClass RCalendarWindow( TCalendarWindow::name,
 
 TCalendarWindow::TCalendarWindow() :
     TWindowInit( &TCalendarWindow::initFrame ),
-    TWindow( TRect(1, 1, 23, 11), "Calendar", wnNoNumber )
+    TWindow( TRect(1, 1, 23, 11), gettext("Calendar"), wnNoNumber )
 {
     TRect r(getExtent());
 

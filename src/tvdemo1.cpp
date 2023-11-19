@@ -19,6 +19,11 @@
 # define Uses_TWindow
 # define Uses_TDeskTop
 # define Uses_TScreen
+# define Uses_TEditor
+
+#ifdef  __FLAT__
+# undef __FLAT__
+#endif
 
 # include <winsock2.h>
 # include <tvision/tv.h>
@@ -107,6 +112,8 @@ int demoRunner()
         
         ApplicationCurrentExceptionText.str(std::string(""));
         ApplicationCurrentExceptionText <<  err.str();
+        
+        demoProgram->putEvent(event);
 
         if (demoProgram->initialized)
         return demoRunner();
@@ -123,6 +130,8 @@ int demoRunner()
         
         ApplicationCurrentExceptionText.str(std::string(""));
         ApplicationCurrentExceptionText <<  err;
+        
+        demoProgram->putEvent(event);
 
         if (demoProgram->initialized)
         return demoRunner();

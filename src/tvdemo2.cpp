@@ -58,6 +58,11 @@
 # define Uses_TSItem
 # define Uses_TEditor
 # define Uses_TKeys
+# define Uses_TScrollBar
+
+#ifdef  __FLAT__
+# undef __FLAT__
+#endif
 
 # include <tvision/tv.h>
 

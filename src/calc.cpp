@@ -23,6 +23,10 @@
 #define Uses_TDialog
 #define Uses_ipstream
 #define Uses_opstream
+
+#ifdef  __FLAT__
+# undef __FLAT__
+#endif
 #include <tvision/tv.h>
 
 #include <string.h>

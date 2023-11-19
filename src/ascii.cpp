@@ -22,6 +22,11 @@
 #define Uses_TStreamable
 #define Uses_TView
 #define Uses_TWindow
+
+#ifdef  __FLAT__
+# undef __FLAT__
+#endif
+
 #include <tvision/tv.h>
 
 #include <string.h>
@@ -47,7 +52,7 @@ using std::strstreambuf;
 
 #include "ascii.h"
 
-
+extern "C" const char* gettext(const char*);
 //
 // TTable functions
 //
@@ -222,8 +227,8 @@ void TReport::draw()
 
     statusStr
       << "  Char: " << (char ) ((asciiChar == 0) ? 0x20 : asciiChar)
-      << " Decimal: " << setw(3) << (int) asciiChar
-      << " Hex " << hex << setiosflags(ios::uppercase)
+      << gettext(" Decimal: ") << setw(3) << (int) asciiChar
+      << " Hex " << std::hex << setiosflags(std::ios::uppercase)
       << setw(2) << (int) asciiChar << "     " << ends;
 
     buf.moveStr(0, str, color);

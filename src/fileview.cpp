@@ -21,6 +21,10 @@
 #define Uses_TStreamableClass
 #define Uses_ipstream
 #define Uses_opstream
+
+#ifdef  __FLAT__
+# undef __FLAT__
+#endif
 #include <tvision/tv.h>
 
 #include <stdio.h>
@@ -29,6 +33,7 @@
 #include <ctype.h>
 
 #include <fstream>
+#include <istream>
 
 #include <iomanip>
 
@@ -52,9 +57,9 @@ using std::strstreambuf;
 #include "tvcmds.h"
 #include "fileview.h"
 
-
+using namespace std;
 const char * const TFileViewer::name = "TFileViewer";
-
+int maxLineLength = 409600;
 TFileViewer::TFileViewer( const TRect& bounds,
                           TScrollBar *aHScrollBar,
                           TScrollBar *aVScrollBar,
@@ -198,9 +203,9 @@ TFileWindow::TFileWindow( const char *fileName ) :
     TRect r( getExtent() );
     r.grow(-1, -1);
     insert(new TFileViewer( r,
-                            standardScrollBar(sbHorizontal | sbHandleKeyboard),
-                            standardScrollBar(sbVertical | sbHandleKeyboard),
-                            fileName) );
+        standardScrollBar (sbHorizontal | sbHandleKeyboard),
+        standardScrollBar (sbVertical | sbHandleKeyboard),
+        fileName) );
 }
 
 

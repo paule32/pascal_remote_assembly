@@ -4,6 +4,10 @@
 #define Uses_TTerminal
 #define Uses_TScrollBar
 #define Uses_TStreamableClass
+
+#ifdef  __FLAT__
+# undef __FLAT__
+#endif
 #include <tvision/tv.h>
 
 #include <iostream>
