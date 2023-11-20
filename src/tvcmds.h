@@ -27,3 +27,10 @@ const ushort
    cmTvEditorCmd  = 4000,
    cmButton1      = 4001,
    cmButton2      = 4002;
+
+const int
+    cmOpenNewProject    = 3001,
+    cmCloseApplication  = 3002;
+    
+const int
+    hcNewProject = 10000;

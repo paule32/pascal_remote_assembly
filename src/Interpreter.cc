@@ -1298,7 +1298,7 @@ int main(int argc, char **argv)
             BOOST_THROW_EXCEPTION(
                    boost::enable_error_info(std::runtime_error(gettext("Failed to initialize Winsock.")))
                 << boost::errinfo_api_function("main")
-                << boost::errinfo_errno(42)
+                << boost::errinfo_errno(GetLastError())
                 
                 << boost::throw_function(__FUNCTION__)
                 << boost::throw_file(__FILE__)
@@ -1314,8 +1314,26 @@ int main(int argc, char **argv)
         myini.load(ApplicationIniFile);
         
         std::string exePath = myini["common"]["path"].as<std::string>();
-        std::cout << "elen: " << exePath.length() <<
-        std::endl ;
+        if (exePath.length() < 1) {
+            LPSTR lpFileName ;
+            DWORD nSize = 255;
+            DWORD error =
+            GetModuleFileNameA(
+            GetModuleHandleA(NULL),lpFileName,nsize);
+            
+            // ---------------------------
+            // handle a possible error ...
+            // ---------------------------
+            if (error == 0) {
+                BOOST_THROW_EXCEPTION(
+                << boost::errinfo_api_function("main")
+                << boost::errinfo_errno(GetLastError())
+
+                << boost::throw_function(__FUNCTION__)
+                << boost::throw_file(__FILE__)
+                << boost::throw_line(__LINE__));
+            }
+        }
         
         // ----------------------------------
         // initialize logging stuff ...
@@ -1334,7 +1352,7 @@ int main(int argc, char **argv)
             BOOST_THROW_EXCEPTION(
                    boost::enable_error_info(std::runtime_error(gettext(ss.str().c_str())))
                 << boost::errinfo_api_function("main")
-                << boost::errinfo_errno(42)
+                << boost::errinfo_errno(0)
 
                 << boost::throw_function(__FUNCTION__)
                 << boost::throw_file(__FILE__)
@@ -1584,7 +1602,7 @@ int main(int argc, char **argv)
     catch (const boost::exception &e) {
         std::stringstream err;
         
-        err <<   boost::diagnostic_information(e)                << std::endl << gettext("error in function: ")
+        err <<   gettext("error in function: ")
             << * boost::get_error_info<boost::throw_function>(e) << std::endl << gettext("file: ")
             << * boost::get_error_info<boost::throw_file>    (e) << std::endl << gettext("line: ")
             << * boost::get_error_info<boost::throw_line>    (e) ;

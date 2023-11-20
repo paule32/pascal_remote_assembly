@@ -59,6 +59,8 @@ extern ushort doEditDialog( int dialog, ... );
 # define cmUserMessage 20000
 
 extern std::stringstream ApplicationCurrentExceptionText;
+extern std::string getErrorCode(DWORD);
+
 static TVDemo * demoProgram;
 
 // -----------------------------------------------------------------
@@ -70,20 +72,37 @@ int demoRunner()
     try {
         demoProgram->run();
     }
+    // -----------------------------------
+    // dummy, to exit the application ...
+    // -----------------------------------
+    catch (EPascalException_NoErrorExcpetion &e) {
+        if (demoProgram != nullptr) delete demoProgram;
+            demoProgram  = nullptr;
+        exit(0);
+    }
     // ----------------------------
     // we use try catch for errors:
     // ----------------------------
     catch (const boost::exception &e) {
         std::stringstream err;
+        std::string lastError;
         
-        const int* errno_info = boost::get_error_info<boost::errinfo_errno>(e);
+        // ------------------------------
+        // handle, and get GetLastError()
+        // ------------------------------
+        lastError.append(
+            getErrorCode(
+            boost::get_error_info<
+            boost::errinfo_errno >
+            (e)) );
         
         err   <<   gettext("exception in function: ")
               << * boost::get_error_info<boost::throw_function>(e) << std::endl << gettext("file: ")
               << * boost::get_error_info<boost::throw_file>    (e) << std::endl << gettext("line: ")
               << * boost::get_error_info<boost::throw_line>    (e) << std::endl << gettext("code: ")
-              << * errno_info <<   std::endl;
-        PLOGE <<   err.str()  ;
+              << * boost::get_error_info<boost::errinfo_errno> (e) << std::endl << gettext("text: ")
+              <<   lastError;
+        PLOGE <<   err.str();
         
         TEvent event;
         event.what = evBroadcast;
@@ -208,7 +227,7 @@ void TVDemo::getEvent(TEvent &event)
             helpStrm = new fpstream(HELP_FILENAME, ios::in|ios::binary);
             hFile = new THelpFile(*helpStrm);
             if (!helpStrm) {
-                messageBox("Could not open help file", mfError | mfOKButton);
+                messageBox(gettext("Could not open help file"), mfError | mfOKButton);
                 delete hFile;
             }   else {
                 w = new THelpWindow(hFile, getHelpCtx());
@@ -219,6 +238,20 @@ void TVDemo::getEvent(TEvent &event)
                 clearEvent(event);
             }
             helpInUse = False;
+        }   else
+        if (event.message.command == cmCloseApplication) {
+            clearEvent(event);
+            // ------------------------------------------
+            // if clicked result = yes/12, then close ...
+            // ------------------------------------------
+            int result = messageBoxRect(
+                TRect( 14,7,59,16),
+                gettext("Would you realy close the Application ?"),
+                mfYesNoCancel | mfInformation );
+                std::stringstream ss;
+            if (result == 12) {
+                throw EPascalException_NoErrorExcpetion("exit");
+            }
         }   else
         if (event.message.command == cmVideoMode) {
             int newMode = TScreen::screenMode ^ TDisplay::smFont8x8;
@@ -243,18 +276,18 @@ TStatusLine *TVDemo::initStatusLine( TRect r )
     r.a.y = r.b.y - 1;
 
     return (new TStatusLine( r,
-      *new TStatusDef( 0, 50 ) +
-        *new TStatusItem( "~F1~ Help", kbF1, cmHelp ) +
-        *new TStatusItem( "~Alt-X~ Exit", kbAltX, cmQuit ) +
-        *new TStatusItem( 0, kbShiftDel, cmCut ) +
-        *new TStatusItem( 0, kbCtrlIns, cmCopy ) +
-        *new TStatusItem( 0, kbShiftIns, cmPaste ) +
-        *new TStatusItem( 0, kbAltF3, cmClose ) +
-        *new TStatusItem( 0, kbF10, cmMenu ) +
-        *new TStatusItem( 0, kbF5, cmZoom ) +
-        *new TStatusItem( 0, kbCtrlF5, cmResize ) +
-      *new TStatusDef( 50, 0xffff ) +
-        *new TStatusItem( "Howdy", kbF1, cmHelp )
+        *new TStatusDef( 0, 50 ) +
+            *new TStatusItem( gettext("~F1~ Help")   , kbF1  , cmHelp ) +
+            *new TStatusItem( gettext("~Alt-X~ Exit"), kbAltX, cmCloseApplication ) +
+            *new TStatusItem( 0, kbShiftDel, cmCut ) +
+            *new TStatusItem( 0, kbCtrlIns, cmCopy ) +
+            *new TStatusItem( 0, kbShiftIns, cmPaste ) +
+            *new TStatusItem( 0, kbAltF3, cmClose ) +
+            *new TStatusItem( 0, kbF10, cmMenu ) +
+            *new TStatusItem( 0, kbF5, cmZoom ) +
+            *new TStatusItem( 0, kbCtrlF5, cmResize ) +
+        *new TStatusDef( 50, 0xffff ) +
+            *new TStatusItem( "Howdy", kbF1, cmHelp )
         )
     );
 }

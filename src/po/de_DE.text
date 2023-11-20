@@ -17,7 +17,7 @@ msgstr "Datei"
 msgid "New"
 msgstr "Neu"
 msgid "Open"
-msgstr "Öffnen"
+msgstr "Ã–ffnen"
 msgid "Save"
 msgstr "Speichern"
 msgid "Save as ..."
@@ -25,9 +25,9 @@ msgstr "Speichern als ..."
 msgid "Save all"
 msgstr "Alles speichern"
 msgid "Close all"
-msgstr "Alle schließen"
+msgstr "Alle schlieÃŸen"
 msgid "Close"
-msgstr "Schließen"
+msgstr "SchlieÃŸen"
 msgid "Print"
 msgstr "Drucken"
 msgid "Exit"
@@ -36,7 +36,7 @@ msgstr "Beenden"
 msgid "Edit"
 msgstr "Bearbeiten"
 msgid "Undo"
-msgstr "Rückgängig"
+msgstr "RÃ¼ckgÃ¤ngig"
 msgid "Redo"
 msgstr "Wiederherstellen"
 msgid "Cut"
@@ -44,11 +44,11 @@ msgstr "Ausschneiden"
 msgid "Copy"
 msgstr "Kopieren"
 msgid "Paste"
-msgstr "Einfügen"
+msgstr "EinfÃ¼gen"
 msgid "Delete"
-msgstr "Löschen"
+msgstr "LÃ¶schen"
 msgid "Select all"
-msgstr "Alles auswählen"
+msgstr "Alles auswÃ¤hlen"
 
 msgid "View"
 msgstr "Ansicht"
@@ -65,19 +65,19 @@ msgid "Help"
 msgstr "Hilfe"
 
 msgid "About"
-msgstr "Über..."
+msgstr "Ãœber..."
 
 msgid "no input file given."
 msgstr "keine Eingabe-Datei angegeben."
 
 msgid "parser file could not be open."
-msgstr "Parser-Datei konnte nicht geöffnet werden."
+msgstr "Parser-Datei konnte nicht geÃ¶ffnet werden."
 
 msgid "parser file dont exists."
 msgstr "Parser-Datei existiert nicht."
 
 msgid "Invalide character: "
-msgstr "Ungültiges Zeichen: "
+msgstr "UngÃ¼ltiges Zeichen: "
 
 msgid "not a valid pre-processor command."
 msgstr "falsches Pre-Prozessor Kommando."
@@ -98,13 +98,13 @@ msgid "Text: none."
 msgstr "Text: keine Angaben."
 
 msgid "detected locale not supported."
-msgstr "erkannte Locale wird nicht unterstützt."
+msgstr "erkannte Locale wird nicht unterstÃ¼tzt."
 
 msgid "localization en_US does not exists."
-msgstr "Locale für en_US existiert nicht."
+msgstr "Locale fÃ¼r en_US existiert nicht."
 
 msgid "localization de_DE does not exists."
-msgstr "Locale für de_DE existiert nicht."
+msgstr "Locale fÃ¼r de_DE existiert nicht."
 
 msgid "can not get locale, use default en-en."
 msgstr "Locale kann nicht ermittelt werden. Standard ist en-en."
@@ -125,7 +125,7 @@ msgid "add function fail."
 msgstr "Runtime-Add Function fehlgeschlagen."
 
 msgid "Runtime add: "
-msgstr "Laufzeit hinzufügen: "
+msgstr "Laufzeit hinzufÃ¼gen: "
 
 msgid "failed to create .data section"
 msgstr ".data Section konnte nicht erstellt werden."
@@ -149,25 +149,25 @@ msgid "output header C++ file missing, use default."
 msgstr "C++ Header-Datei nicht angegeben, verwende Standard."
 
 msgid "output header C++ file must have extension .h"
-msgstr "Für die C++ Header-Datei wird .h als Datei-Erweiterung erwartet."
+msgstr "FÃ¼r die C++ Header-Datei wird .h als Datei-Erweiterung erwartet."
 
 msgid "use --help for help."
 msgstr "benutzen Sie --help um die Hilfe anzeigen zu lassen."
 
 msgid "error: can not register cleanup function."
-msgstr "Fehler: die Aufräum-Funktion kann nicht registriert werden."
+msgstr "Fehler: die AufrÃ¤um-Funktion kann nicht registriert werden."
 
 msgid "the given file does not exists."
 msgstr "die angegebene Datei existiert nicht."
 
 msgid "error: file could not be deleted: "
-msgstr "Fehler: die Datei konnte nicht gelöscht werden."
+msgstr "Fehler: die Datei konnte nicht gelÃ¶scht werden."
 
 msgid "General Options"
 msgstr "Allgemeine Optionen"
 
 msgid "country locale"
-msgstr "Ländersprache"
+msgstr "LÃ¤ndersprache"
 
 msgid "Input assembler file"
 msgstr "Assembler Eingabedatei"
@@ -176,13 +176,13 @@ msgid "Input object file"
 msgstr "Object Eingabedatei"
 
 msgid "Output C++ tool file"
-msgstr "Ausgabedatei für C++ Tool"
+msgstr "Ausgabedatei fÃ¼r C++ Tool"
 
 msgid "Output C++ header file"
-msgstr "Ausgabedatei für C++ Header"
+msgstr "Ausgabedatei fÃ¼r C++ Header"
 
 msgid "Output C++ main file"
-msgstr "Ausgabedatei für C++ Hauptteil"
+msgstr "Ausgabedatei fÃ¼r C++ Hauptteil"
 
 msgid "Output Options (short)"
 msgstr "Ausgabeoptionen (kurz)"
@@ -215,16 +215,16 @@ msgid "input main assembly file must have extension .asm"
 msgstr "Haupt-Eingabe-Assembler-Datei muss die Dateierweiterung .asm haben."
 
 msgid "option for output main C++ file missing, use default."
-msgstr "Option für C++ Haupt-Ausgabe-Datei nicht verfügbar, verwende standard."
+msgstr "Option fÃ¼r C++ Haupt-Ausgabe-Datei nicht verfÃ¼gbar, verwende standard."
 
 msgid "option for output header C++ file missing, use default."
-msgstr "Option für C++ Header-Ausgabe-Datei fehlt, verwende standard."
+msgstr "Option fÃ¼r C++ Header-Ausgabe-Datei fehlt, verwende standard."
 
 msgid "output tool C++ file missing, use default."
-msgstr "Ausgabe-Datei für C++ Tools nicht angegeben, verwende standard."
+msgstr "Ausgabe-Datei fÃ¼r C++ Tools nicht angegeben, verwende standard."
 
 msgid "option for C++ output tool file must have extension .cc"
-msgstr "Ausgabe-Datei für C++ Tool Datei muss die Erweiterung .cc haben."
+msgstr "Ausgabe-Datei fÃ¼r C++ Tool Datei muss die Erweiterung .cc haben."
 
 msgid "input object file missing."
 msgstr "Object-Eingabe-Datei fehlt."
@@ -239,13 +239,13 @@ msgid "use: --help for more options."
 msgstr "benutzen Sie --help, um mehr Hilfeoptionen anzuzeigen."
 
 msgid "  contain executable code"
-msgstr "  enthält ausführbaren Code"
+msgstr "  enthÃ¤lt ausfÃ¼hrbaren Code"
 
 msgid "can not get code section."
 msgstr "die Code-Sektion kann nicht ermittelt werden."
 
 msgid "invalid size."
-msgstr "falsche größe."
+msgstr "falsche grÃ¶ÃŸe."
 
 msgid "no symbols found."
 msgstr "keine Symbole gefunden."
@@ -257,28 +257,28 @@ msgid "machine: could not determine."
 msgstr "Computer-Typ konnte nicht ermittelt werden."
 
 msgid "file is execute able."
-msgstr "Datei ist ausführbar."
+msgstr "Datei ist ausfÃ¼hrbar."
 
 msgid "has invalid size."
-msgstr "hat die falsche größe."
+msgstr "hat die falsche grÃ¶ÃŸe."
 
 msgid "could not be open."
-msgstr "konnte nicht geöffnet werden."
+msgstr "konnte nicht geÃ¶ffnet werden."
 
 msgid "error: file"
 msgstr "Fehler: Datei"
 
 msgid "file is not open."
-msgstr "Datei ist nicht geöffnet."
+msgstr "Datei ist nicht geÃ¶ffnet."
 
 msgid " does not exists."
 msgstr " existiert nicht."
 
 msgid "error at open output file."
-msgstr "Fehler beim öffnen der Ausgabe-Datei."
+msgstr "Fehler beim Ã¶ffnen der Ausgabe-Datei."
 
 msgid "error at open input file."
-msgstr "Fehler beim öffnen der Eingabe-Datei."
+msgstr "Fehler beim Ã¶ffnen der Eingabe-Datei."
 
 msgid "error"
 msgstr "Fehler"
@@ -296,7 +296,7 @@ msgid "~T~ext to find"
 msgstr "~T~ext suche"
 
 msgid "~C~ase sensitive"
-msgstr "~G~roß/KlSchr. beachten"
+msgstr "~G~roÃŸ/KlSchr. beachten"
 
 msgid "~N~ew text"
 msgstr "~N~euer Text"
@@ -308,7 +308,7 @@ msgid "~P~rompt on replace"
 msgstr "~A~nhalten an Position"
 
 msgid "Not enough memory for this operation"
-msgstr "Nich genügend Speicher vorhanden."
+msgstr "Nich genÃ¼gend Speicher vorhanden."
 
 msgid "Error reading file "
 msgstr "Fehler beim lesen der Datei: "
@@ -320,7 +320,7 @@ msgid "Error creating file "
 msgstr "Fehler beim erstellen der Datei: "
 
 msgid " has been modified. Save?"
-msgstr " wurde geändert. Speichern?"
+msgstr " wurde geÃ¤ndert. Speichern?"
 
 msgid "Save untitled file?"
 msgstr "Datei speichern?"
@@ -368,7 +368,7 @@ msgid "Could not find desktop file"
 msgstr "kann Arbeitsplatz-Datei nicht finden"
 
 msgid "Could not open desktop file"
-msgstr "kann Arbeitsplatz-Datei nicht öffnen"
+msgstr "kann Arbeitsplatz-Datei nicht Ã¶ffnen"
 
 msgid "Error reading desktop file"
 msgstr "Fehler beim lesen der Arbeitsplatz-Datei"
@@ -392,7 +392,7 @@ msgid "May"
 msgstr "Mai"
 
 msgid "March"
-msgstr "März"
+msgstr "MÃ¤rz"
 
 msgid "February"
 msgstr "Februar"
@@ -402,3 +402,87 @@ msgstr "Januar"
 
 msgid "Calendar"
 msgstr "Kalender"
+
+msgid "Could not open help file"
+msgstr "Hilfedatei konnte nicht geÃ¶ffnet werden."
+
+msgid "~F1~ Help"
+msgstr "~F1~ Hilfe"
+
+msgid "~Alt-X~ Exit"
+msgstr "~Alt-X~ Beenden"
+
+msgid "Open a File"
+msgstr "Datei Ã¶ffnen"
+
+msgid "~A~bout..."
+msgstr "~Ãœ~ber..."
+
+msgid "Ca~l~endar"
+msgstr "Ka~l~ender"
+
+msgid "~P~uzzle"
+msgstr "~P~uzzel"
+
+msgid "Ascii ~T~able"
+msgstr "ASCII ~T~abelle"
+
+msgid "~C~alculator"
+msgstr "~R~echner"
+
+msgid "~F~ile"
+msgstr "~D~atei"
+
+msgid "~O~pen..."
+msgstr "~Ã–~ffnen..."
+
+msgid "~C~hange Dir..."
+msgstr "~V~erzeichnis wechseln..."
+
+msgid "E~x~it"
+msgstr "B~e~enden"
+
+msgid "~W~indows"
+msgstr "~F~enster"
+
+msgid "~N~ext"
+msgstr "~N~Ã¤chstes"
+
+msgid "~C~lose"
+msgstr "~S~chlieÃŸen"
+
+msgid "~T~ile"
+msgstr "~A~ufteilen"
+
+msgid "C~a~scade"
+msgstr "Gt~a~peln"
+
+msgid "~O~ptions"
+msgstr "~O~ptionen"
+
+msgid "~M~ouse..."
+msgstr "~M~aus..."
+
+msgid "~C~olors..."
+msgstr "~F~arben---"
+
+msgid "~B~ackground..."
+msgstr "~H~intergrund..."
+
+msgid "~D~esktop"
+msgstr "~A~rbeitsplatz"
+
+msgid "~S~ave desktop"
+msgstr "~S~peichern"
+
+msgid "~R~etrieve desktop"
+msgstr "~W~iederherstellen"
+
+msgid "~P~roject"
+msgstr "~P~rojekt"
+
+msgid "~N~ew..."
+msgstr "~N~eu..."
+
+msgid "Would you realy close the Application ?"
+msgstr "MÃ¶chten Sie die Anwendung schlieÃŸen ?"

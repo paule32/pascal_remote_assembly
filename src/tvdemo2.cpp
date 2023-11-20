@@ -161,7 +161,6 @@ void TVDemo::handleEvent(TEvent &event)
 //
 // About Box function()
 //
-
 void TVDemo::aboutDlgBox()
 {
     TDialog *aboutBox = new TDialog(TRect(0, 0, 45, 13), gettext("About"));

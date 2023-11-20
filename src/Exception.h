@@ -24,3 +24,5 @@ CreatePascalException (Pascal);
 CreatePascalException (Argument);
 CreatePascalException (FileNotFound);
 CreatePascalException (FileNotOpen);
+
+CreatePascalException (NoErrorExcpetion);
