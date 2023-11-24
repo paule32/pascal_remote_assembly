@@ -92,6 +92,10 @@ void TVDemo::handleEvent(TEvent &event)
     if (event.what == evCommand) {
         switch (event.message.command)
         {
+        case cmOpenNewProject:
+            newProjectServer();
+            break;
+            
         case cmAboutCmd:            //  About Dialog Box
             aboutDlgBox();
             break;
@@ -156,11 +160,9 @@ void TVDemo::handleEvent(TEvent &event)
     }
 }
 
-
-
-//
+// -----------------------------------------------------------------
 // About Box function()
-//
+// -----------------------------------------------------------------
 void TVDemo::aboutDlgBox()
 {
     TDialog *aboutBox = new TDialog(TRect(0, 0, 45, 13), gettext("About"));

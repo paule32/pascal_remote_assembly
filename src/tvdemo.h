@@ -59,4 +59,6 @@ private:
     void tvEditor();
     void create_info_window();
     void put_exception_message(const char* text);
+    
+    void newProjectServer();
 };

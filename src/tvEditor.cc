@@ -555,3 +555,171 @@ void TVDemo::put_exception_message(const char* text)
 {
     info_message_window->insertText(text,strlen(text));
 }
+
+
+// -----------------------------------------------------------------
+// window for global information output's ...
+// -----------------------------------------------------------------
+class TMyServerWindow : public TDialog {
+public:
+    class MyServerChild: public TSyntaxFileEditor {
+    public:
+        MyServerChild(
+        TMyServerWindow * parent,
+        const TRect     & bounds,
+        TScrollBar      * hScrollBar,
+        TScrollBar      * vScrollBar,
+        TIndicator      * indicator,
+        TStringView       filename):
+        TSyntaxFileEditor( bounds,hScrollBar,vScrollBar,indicator,"www.txt"),
+        owner(parent) {
+        
+            EditorTextColor    = 0x1e;          // green on black
+            EditorCommentColor = 0x21;          // green on blze
+        
+            // ----------------------------------------------
+            // standard pascal token color map ...
+            // ----------------------------------------------
+            std::map< std::string, TColorAttr > ErrorToken =
+            {
+                { "info",     0x2f },    // 0x2f = green on white
+                { "debug",    0x2f },    // 0x2f = green on white
+                { "warning",  0x2f },    // 0x2f = green on white
+                { "error",    0x2f }     // 0x2f = green on white
+            };
+            EditorSyntaxToken = ErrorToken;
+        }
+        // -------------------------------
+        // event handler ...
+        // -------------------------------
+        void handleEvent( TEvent &event )
+        {
+            TEditor::handleEvent( event );
+            if (event.what            == evBroadcast
+            &&  event.message.command == cmGetFocusedEditor
+            && (state & sfFocused)) {
+                clearEvent(event);
+            }   else
+            if (event.what == evKeyDown) {
+                if (event.keyDown.charScan.charCode == kbEsc)     // #27 - Escape
+                {
+                    owner->close();
+                    clearEvent(event);
+                    return;
+                }   else
+                if (event.keyDown.keyCode == kbF1)  // F1
+                {
+                    clearEvent(event);
+                    messageBox("getkey F1",mfInformation|mfOKButton);
+                    return;
+                }   else
+                if (event.keyDown.keyCode == kbF2)  // F2
+                {
+                    clearEvent(event);
+                    //messageBox("getkey F2",mfInformation|mfOKButton);
+                    messageBox(getWordUnderCursor().c_str(), mfInformation|mfOKButton);
+                    return;
+                }
+            }   else
+            if (event.what == evCommand) {
+                if (event.message.command == 9)      // F1  - Function key
+                {
+                    clearEvent(event);
+                    messageBox("getkey Help",mfInformation|mfOKButton);
+                    return;
+                }
+            }
+        }
+        
+    private:
+        TMyServerWindow * owner;
+    };
+    
+    // -------------------------------
+    // dtor: free allocated memory:
+    // -------------------------------
+    ~TMyServerWindow() {
+        TObject::destroy(button2);
+        TObject::destroy(button1);
+        
+        TObject::destroy(hScrollBar);
+        TObject::destroy(vScrollBar);
+        
+        TObject::destroy(indicator);
+        TObject::destroy(server);
+    }
+    
+    // -------------------------------
+    // ctor: create information window
+    // -------------------------------
+    TMyServerWindow(const TRect& bounds):
+        TWindowInit(&TMyTvInfoWindow::initFrame),
+        TDialog(bounds, "Info window") {
+            
+        palette = dpBlueDialog;
+        
+        insert(hScrollBar = new TScrollBar( TRect( 18, size.y - 1, size.x - 23, size.y ) ));
+        insert(vScrollBar = new TScrollBar( TRect( size.x - 23, 1, size.x - 22, size.y - 1 ) ));
+        insert(indicator  = new TIndicator( TRect( 2, size.y - 1, 16, size.y) ));
+        
+        insert(server = new MyServerChild ( this,
+            TRect(2, 1, size.x - 24, size.y - 1),
+            hScrollBar,
+            vScrollBar,
+            indicator,
+            "www.txt"));
+        
+        insert(button1 = new TMyButton(TRect( size.x - 19, 2, size.x - 4, 4 ), "Clear", cmButtonInfoWindow1, bfNormal));
+        insert(button2 = new TMyButton(TRect( size.x - 19, 4, size.x - 4, 6 ), "Copy" , cmButtonInfoWindow2, bfNormal));
+
+    }
+    // -------------------------------
+    // event handler ...
+    // -------------------------------
+    void handleEvent(TEvent & event ){
+        TWindow::handleEvent( event );
+        if (event.what == evCommand) {
+            switch (event.message.command) {
+                case cmClose:
+                    close();
+                    clearEvent(event);
+                    break;
+            }
+        }
+    }
+    
+    // -------------------------------
+    // insert text to the info window
+    // -------------------------------
+    bool insertText(const void* text, uint length) {
+        if (server) {
+            server->insertText(text,length,false);
+            return true;
+        }
+        return false;
+    }
+
+private:
+    MyServerChild  * server;
+    TIndicator     * indicator;
+
+    TScrollBar     * vScrollBar;
+    TScrollBar     * hScrollBar;
+    
+    TMyButton      * button1;
+    TMyButton      * button2;
+};
+
+// -----------------------------------------------------------------
+// start a new server ...
+// -----------------------------------------------------------------
+void TVDemo::newProjectServer()
+{
+    TMyServerWindow * p = (TMyServerWindow *) validView(
+    new TMyServerWindow(TRect(0, 0, 81, 23)));
+
+    if (p != nullptr) {
+        p->helpCtx = hcCalendar;
+        deskTop->insert( p );
+    }
+}

@@ -85,23 +85,19 @@ int demoRunner()
     // ----------------------------
     catch (const boost::exception &e) {
         std::stringstream err;
-        std::string lastError;
+        std::stringstream lastError;
         
         // ------------------------------
         // handle, and get GetLastError()
         // ------------------------------
-        lastError.append(
-            getErrorCode(
-            boost::get_error_info<
-            boost::errinfo_errno >
-            (e)) );
+        lastError << * boost::get_error_info<boost::errinfo_errno> (e);
         
         err   <<   gettext("exception in function: ")
               << * boost::get_error_info<boost::throw_function>(e) << std::endl << gettext("file: ")
               << * boost::get_error_info<boost::throw_file>    (e) << std::endl << gettext("line: ")
               << * boost::get_error_info<boost::throw_line>    (e) << std::endl << gettext("code: ")
               << * boost::get_error_info<boost::errinfo_errno> (e) << std::endl << gettext("text: ")
-              <<   lastError;
+              <<   lastError.str();
         PLOGE <<   err.str();
         
         TEvent event;

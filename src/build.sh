@@ -30,12 +30,12 @@ SRC=$(echo "${PWD}")
 TEMP="temp"
 TMP=$(echo "${PWD}/${TEMP}")
 FLAGS=$(echo "-std=c++20 -O2 -fPIC "        \
-    "-DASMJIT_APPNAME=\"asmjit\"" \
-    "-DASMJIT_APPNAME_EXEFILE=${ASMJIT_APPNAME_EXEFILE}" \
-    "-DASMJIT_APPNAME_EXEPATH=${ASMJIT_APPNAME_EXEPATH}" \
-    "-DASMJIT_APPNAME_HLPFILE=${ASMJIT_APPNAME_HLPFILE}" \
-    "-DASMJIT_APPNAME_INIFILE=${ASMJIT_APPNAME_INIFILE}" \
-    "-DASMJIT_APPNAME_LOGFILE=${ASMJIT_APPNAME_LOGFILE}" \
+    "-DASMJIT_APPNAME=\"asmjit\" " \
+    "-DASMJIT_APPNAME_EXEFILE=${ASMJIT_APPNAME_EXEFILE} " \
+    "-DASMJIT_APPNAME_EXEPATH=${ASMJIT_APPNAME_EXEPATH} " \
+    "-DASMJIT_APPNAME_HLPFILE=${ASMJIT_APPNAME_HLPFILE} " \
+    "-DASMJIT_APPNAME_INIFILE=${ASMJIT_APPNAME_INIFILE} " \
+    "-DASMJIT_APPNAME_LOGFILE=${ASMJIT_APPNAME_LOGFILE} " \
     "-Wno-pmf-conversions   " \
     "-Wno-deprecated        " \
     "-Wno-register          " \
@@ -898,8 +898,8 @@ if [[ -n "${built_dis}" ]]; then
     # build parser object files ...
     # ----------------------------------------
     cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/Interpreter.o      -c ${SRC}/Interpreter.cc      2>&1 ); run_check $? "${cmd}"
-    #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/AssemblerParser.o  -c ${TMP}/AssemblerParser.cc  2>&1 ); run_check $? "${cmd}"
-    #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/AssemblerScanner.o -c ${TMP}/AssemblerScanner.cc 2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/AssemblerParser.o  -c ${TMP}/AssemblerParser.cc  2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/AssemblerScanner.o -c ${TMP}/AssemblerScanner.cc 2>&1 ); run_check $? "${cmd}"
     
     # ----------------------------------------
     # build turbo vision stuff ...

@@ -32,8 +32,6 @@
 #error This Applications was created under Microsoft-Windows...
 #else
 
-# define __STDC_WANT_LIB_EXT1__ 1
-
 // -----------------------------------------------------------------
 // standard header stuff ...
 // -----------------------------------------------------------------

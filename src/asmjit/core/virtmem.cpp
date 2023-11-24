@@ -319,23 +319,17 @@ ASMJIT_MAYBE_UNUSED
 static inline int mmMaxProtFromMemoryFlags(MemoryFlags memoryFlags) noexcept {
   MemoryFlags acc = maxAccessFlagsToRegularAccessFlags(memoryFlags);
   if (acc != MemoryFlags::kNone) {
-#if defined(__NetBSD__) && defined(PROT_MPROTECT)
-    return PROT_MPROTECT(mmProtFromMemoryFlags(acc));
-#elif defined(PROT_MAX)
-    return PROT_MAX(mmProtFromMemoryFlags(acc));
-#else
     return 0;
-#endif
   }
 
   return 0;
 }
 
 static void detectVMInfo(Info& vmInfo) noexcept {
-  uint32_t pageSize = uint32_t(::getpagesize());
+//  uint32_t pageSize = uint32_t(::getpagesize());
 
-  vmInfo.pageSize = pageSize;
-  vmInfo.pageGranularity = Support::max<uint32_t>(pageSize, 65536);
+//  vmInfo.pageSize = pageSize;
+//  vmInfo.pageGranularity = Support::max<uint32_t>(pageSize, 65536);
 }
 
 static size_t detectLargePageSize() noexcept {
@@ -546,9 +540,9 @@ public:
   }
 
   Error allocate(size_t size) noexcept {
-    // TODO: Improve this by using `posix_fallocate()` when available.
-    if (ftruncate(_fd, off_t(size)) != 0)
-      return DebugUtils::errored(asmjitErrorFromErrno(errno));
+//    // TODO: Improve this by using `posix_fallocate()` when available.
+//    if (posix_ftruncate(_fd, off_t(size)) != 0)
+//      return DebugUtils::errored(asmjitErrorFromErrno(errno));
 
     return kErrorOk;
   }
@@ -621,7 +615,7 @@ static bool hasHardenedRuntime() noexcept {
 
   uint32_t flag = globalHardenedFlag.load();
   if (flag == kHardenedFlagUnknown) {
-    size_t pageSize = size_t(::getpagesize());
+    size_t pageSize = 65535; //size_t(::getpagesize());
     void* ptr = mmap(nullptr, pageSize, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
     if (ptr == MAP_FAILED) {

@@ -50,12 +50,12 @@ using namespace std;                // c++ std container
 // -----------------------------------------------------------------
 std::string ApplicationName;
 
-std::string ApplicationExePath;
+std::string ApplicationExePath;     // argv[0]
 std::string ApplicationExeFile;
 std::string ApplicationHlpFile;
 
-std::string ApplicationIniFile;
-std::string ApplicationLogFile;
+std::string ApplicationIniFile;     // .ini file
+std::string ApplicationLogFile;     // .log
 
 std::stringstream ApplicationCurrentExceptionText;
 
@@ -1275,7 +1275,7 @@ int main(int argc, char **argv)
     try {
         namespace fs = std::filesystem;
         
-        ApplicationName     = ASMJIT_APPNAME;
+        ApplicationName     = ASMJIT_APPNAME; std::cout << "--> " << ApplicationName << std::endl;
         
         ApplicationExeFile  = ASMJIT_APPNAME_EXEFILE;
         ApplicationHlpFile  = ASMJIT_APPNAME_HLPFILE;
@@ -1312,33 +1312,17 @@ int main(int argc, char **argv)
         // ----------------------------------
         myini.setMultiLineValues(true);
         myini.load(ApplicationIniFile);
-        
+
         std::string exePath = myini["common"]["path"].as<std::string>();
         if (exePath.length() < 1) {
-            LPSTR lpFileName ;
-            DWORD nSize = 255;
-            DWORD error =
-            GetModuleFileNameA(
-            GetModuleHandleA(NULL),lpFileName,nsize);
-            
-            // ---------------------------
-            // handle a possible error ...
-            // ---------------------------
-            if (error == 0) {
-                BOOST_THROW_EXCEPTION(
-                << boost::errinfo_api_function("main")
-                << boost::errinfo_errno(GetLastError())
-
-                << boost::throw_function(__FUNCTION__)
-                << boost::throw_file(__FILE__)
-                << boost::throw_line(__LINE__));
-            }
+            myini["common"]["path"] = ExtractFilePath(argv[0]);
         }
+        myini.save( ApplicationIniFile );
         
         // ----------------------------------
         // initialize logging stuff ...
         // ----------------------------------
-        plog::init(plog::debug  ,    ApplicationLogFile.c_str());
+        plog::init(plog::debug, ApplicationLogFile.c_str());
         PLOGI << gettext("start application: ") << ApplicationExeFile;
 
         // ----------------------------------
@@ -1451,8 +1435,8 @@ int main(int argc, char **argv)
                 size_t found_de ;
                 size_t found = 0;
                 
-                found_en  = locale_str.find( std::string("en") );
-                found_de  = locale_str.find( std::string("de") );
+                found_en  = locale_str.find( std::string("en_US") );
+                found_de  = locale_str.find( std::string("de_DE") );
                 
                 if (found_en != std::string::npos) { found = 1; locale_str = "en_US"; } else
                 if (found_de != std::string::npos) { found = 1; locale_str = "de_DE"; } else
