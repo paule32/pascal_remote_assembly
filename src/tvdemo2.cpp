@@ -7,7 +7,12 @@
 // -----------------------------------------------------------------
 # define Uses_TDialog
 # define Uses_TRect
+# define Uses_TFrame
+# define Uses_TScroller
 # define Uses_TStaticText
+# define Uses_TListBox
+# define Uses_TSortedListBox
+# define Uses_TCollection
 # define Uses_TButton
 # define Uses_TEvent
 # define Uses_TWindow
@@ -83,6 +88,7 @@
 
 # include "Parser.h"
 
+# include "TSyntaxFileEditor.h"
 # include "tvEditor.cc"
 
 void TVDemo::handleEvent(TEvent &event)
@@ -158,6 +164,11 @@ void TVDemo::handleEvent(TEvent &event)
         }
         clearEvent (event);
     }
+}
+
+void TVDemo::toogleZoom()
+{
+    server_window->toogleZoom();
 }
 
 // -----------------------------------------------------------------

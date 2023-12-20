@@ -255,6 +255,9 @@ void TVDemo::getEvent(TEvent &event)
             shadowSize.x = 1; else
             shadowSize.x = 2;
             setScreenMode((ushort)newMode);
+        }   else
+        if (event.message.command == cmZoom) {
+            toogleZoom();
         }
         break;
     case evMouseDown:

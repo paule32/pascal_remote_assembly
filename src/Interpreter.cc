@@ -17,11 +17,13 @@
 // global variable's / constant's ...
 // -----------------------------------------------------------------
 AsmParser    * asm_parser ;
+dBaseParser  * dbase_parser;
 
 std::map < std::string, asmjit::Label > app_Labels;
 
 std::string file_input_asm;         // input assembly file
 std::string file_input_obj;         // input coff object file
+std::string file_input_dbase;       // input dbase file
 
 std::string file_output_cm;         // output main       C++ file
 std::string file_output_ch;         // output header     C++ file
@@ -31,9 +33,14 @@ std::string file_output_ct;         // output misc/tools C++ file
 // parser stuff ...
 // -----------------------------------------------------------------
 extern void asm_parser_main(void);
-extern "C"  int yyparse(void);
-extern "C"  FILE * yyin;
+extern void dbase_parser_main(void);
+extern "C"  int ASMparse(void);
+extern "C"  int DBASEparse(void);
+extern "C"  FILE * ASMin;
+extern "C"  FILE * DBASEin;
+
 extern      int  TurboMain(int,char**);
+extern      int  TurboDBASE();
 
 static bool found_args = false;     // program command line arguments
 
@@ -1182,6 +1189,50 @@ int handle_asm_file( const char *filename )
     return EXIT_SUCCESS;
 }
 
+int handle_dbase_file( const char *filename )
+{
+    return TurboDBASE();
+    
+    std::fstream fh;
+    std::string  fpath(filename);
+    std::string  ext(ExtractFileExtension(filename));
+
+    // ----------------------------
+    // read .prg text file
+    // ----------------------------
+    if (ext == ".prg") {
+        // ----------------------------
+        // create assembler object ...
+        // ----------------------------
+        dbase_parser = new dBaseParser(filename,true);
+        
+        delete dbase_parser;
+        return EXIT_SUCCESS;
+    }   else {
+        if (asm_parser != nullptr)
+        delete asm_parser;
+
+        std::stringstream ss;
+        ss << "usage: diss.exe [-io file.o] or [-ia file.asm]" << std::endl
+           << gettext("use: --help for more options.");
+        std::cerr << ss.str() << std::endl;
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
+}
+
+void dbase_file_input( std::string i_file )
+{
+    std::cout << "dbasler" << std::endl;
+    file_input_dbase = i_file;
+}
+
+void pascal_file_input( std::string i_file )
+{
+    std::cout << "pascaler" << std::endl;
+}
+
+
 void asm_file_input( std::string i_file )
 {
     file_input_asm = i_file;
@@ -1366,6 +1417,15 @@ int main(int argc, char **argv)
             ("locale,l", value< std::string >()->default_value("en"  ), gettext("country locale"))
             ("gui,g"   , "TUI - Text User Interface");
             
+        options_description run_long(gettext("Run Options (long)"));
+            run_long.add_options()
+            ("run-dbase" , value< std::string >()->notifier(dbase_file_input), gettext("Run dBase file"))
+            ("run-pascal", value< std::string >()->notifier(pascal_file_input), gettext("Run Pascal file"));
+        options_description run_short(gettext("Run Options (short)"));
+            run_short.add_options()
+            ("rd", value< std::string >()->notifier(dbase_file_input), gettext("Run dBase file"))
+            ("rp", value< std::string >()->notifier(pascal_file_input), gettext("Run Pascal file"));
+            
         options_description input_long(gettext("Input Options (long)"));
             input_long.add_options()
             ("input-asm", value< std::string >()->notifier(asm_file_input), gettext("Input assembler file"))
@@ -1394,7 +1454,9 @@ int main(int argc, char **argv)
             .add(input_long)
             .add(input_short)
             .add(output_long)
-            .add(output_short);
+            .add(output_short)
+            .add(run_long)
+            .add(run_short);
             
         store(parse_command_line(argc, argv, allOptions), vm);
         notify(vm);
@@ -1460,6 +1522,46 @@ int main(int argc, char **argv)
         // --------------------------------------
         if (vm.count("gui")) {
             return TurboMain(argc,argv);
+        }
+        
+        if (vm.count("rd")) {
+            // --------------------------------------
+            // check, if input, and output file is ok
+            // --------------------------------------
+            if (file_input_dbase.empty()) {
+                std::string err(gettext("input dbase file missing."));
+                
+                BOOST_THROW_EXCEPTION(
+                       boost::enable_error_info(std::runtime_error(gettext(err.c_str())))
+                    << boost::errinfo_api_function("main")
+                    << boost::errinfo_errno(42)
+                    
+                    << boost::throw_function(__FUNCTION__)
+                    << boost::throw_file(__FILE__)
+                    << boost::throw_line(__LINE__));
+                    
+                return EXIT_FAILURE;
+            }   else {
+                std::stringstream ss;
+                
+                // dbase input
+                std::string ext(ExtractFileExtension(file_input_dbase));
+                if (ext != ".prg") {
+                    std::string err(gettext("input main dBase file must have extension .prg"));
+                    
+                    BOOST_THROW_EXCEPTION(
+                           boost::enable_error_info(std::runtime_error(gettext(err.c_str())))
+                        << boost::errinfo_api_function("main")
+                        << boost::errinfo_errno(42)
+                        
+                        << boost::throw_function(__FUNCTION__)
+                        << boost::throw_file(__FILE__)
+                        << boost::throw_line(__LINE__));
+
+                    return EXIT_FAILURE;
+                }
+            }
+            return handle_dbase_file( file_input_dbase.c_str() );
         }
         
         // --------------------------------------
@@ -1622,9 +1724,9 @@ AsmParser::AsmParser( const char *filename, bool mode )
     // try to open input file.
     // --------------------------------------------------------
     if (mode == false)
-        yyin = fopen( filename, "rb" ); else
-        yyin = fopen( filename, "r"  );
-    if(!yyin)
+        ASMin = fopen( filename, "rb" ); else
+        ASMin = fopen( filename, "r"  );
+    if(!ASMin)
     throw EPascalException_FileNotOpen (_("parser file could not be open."));
     
     // ----------------------------
@@ -1641,7 +1743,7 @@ AsmParser::AsmParser( const char *filename, bool mode )
     cod_code = new x86::Builder  ( code );
     asm_code = new x86::Assembler( code );
     
-    yyparse();
+    ASMparse();
     asm_parser_main();
 }
 
@@ -1656,10 +1758,57 @@ AsmParser::~AsmParser()
     delete cod_code;
     delete     code;
     
-    fclose(yyin);
+    fclose(ASMin);
 }
 
 AsmParser::AsmParser() { }
+
+
+dBaseParser::dBaseParser( const char *filename, bool mode )
+{
+    // --------------------------------------------------------
+    // try to open input file.
+    // --------------------------------------------------------
+    if (mode == false)
+        DBASEin = fopen( filename, "rb" ); else
+        DBASEin = fopen( filename, "r"  );
+    if(!DBASEin)
+    throw EPascalException_FileNotOpen (_("parser file could not be open."));
+    
+    // ----------------------------
+    // pre-tasks preparations ...
+    // ----------------------------    
+    env      = Environment::host();
+    features = CpuInfo::host().features();
+    
+    uint64_t baseAddress = uint64_t(0x1974);
+    
+    code     = new CodeHolder();
+    code->init(env, features, baseAddress);
+    
+    cod_code = new x86::Builder  ( code );
+    asm_code = new x86::Assembler( code );
+    
+    DBASEparse();
+    dbase_parser_main();
+}
+
+// -----------------------------------------------------------------
+// clean up global storage ...
+// -----------------------------------------------------------------
+dBaseParser::~dBaseParser()
+{
+    std::cout << "// " <<  gettext("please wait...") << std::endl;
+
+    delete asm_code;
+    delete cod_code;
+    delete     code;
+    
+    fclose(DBASEin);
+}
+
+dBaseParser::dBaseParser() { }
+
 
 extern "C" int test_dwarf(void);
 extern "C" int test_dwarf2(void);

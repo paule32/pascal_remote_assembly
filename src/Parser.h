@@ -267,5 +267,43 @@ extern char      * locale_utf8;
 
 #endif   // HAVA_ASM_PARSER
 
+// -----------------------------------------------------------------
+// parser class for our Assembler parser ...
+// -----------------------------------------------------------------
+#ifdef HAVE_PARSER_DBASE
+
+class dBaseParser
+{
+public:
+    // -------------------------------------------------------------
+    // ctor: initialize, and allocate memory; depend on a file name.
+    // -------------------------------------------------------------
+    dBaseParser( const char *filename, bool mode );
+    dBaseParser();
+
+    JitRuntime             rt;  // Runtime specialized for JIT code excution
+    Environment           env;
+    CpuFeatures      features;
+    
+    CodeHolder     *     code;  // Holds the code and relocation information
+    x86::Assembler * asm_code;
+    x86::Builder   * cod_code;  // attach builder to 'code'
+    
+    std::map<
+        std::string,
+        Label >
+        asm_labels ;
+
+    // -------------------------------------------------------------
+    // dtor: try to clean, and free allocated memory.
+    // -------------------------------------------------------------
+    ~dBaseParser();
+};
+// -----------------------------------------------------------------
+extern dBaseParser * dbase_parser;
+extern char        * locale_utf8;
+
+#endif   // HAVA_PARSER_DBASE
+
 #endif   // __MINGW32__ || __MINGW64__
 #endif   // PARSER__H_

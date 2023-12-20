@@ -12,8 +12,6 @@ const ushort
     
     cmGetFocusedEditor  = 5010;
 
-# include "TSyntaxFileEditor.cc"
-
 void outOfMemory()
 {
     messageBox(gettext("Not enough memory for this operation."),
@@ -218,8 +216,15 @@ ushort doEditDialog( int dialog, ... )
 // -----------------------------------------------------------------
 class TMyButton : public TButton {
 public:
-    TMyButton(const TRect& bounds, const char* text, ushort cmd, ushort aOptions) :
-    TButton(bounds, text, cmd, aOptions) {}
+    TMyButton(
+        const TRect& bounds,
+        const char * text,
+        ushort cmd,
+        ushort aOptions):
+        TButton(bounds, text, cmd, aOptions) {
+        
+        growMode = gfGrowLoX | gfGrowHiX;
+    }
     
     TColorAttr mapColor(uchar index) noexcept {
         switch (index) {
@@ -234,6 +239,84 @@ public:
             default:  return errorAttr;
         }
     }
+};
+
+// -----------------------------------------------------------------
+// server panel window buttons implementation ...
+// -----------------------------------------------------------------
+class TMyPanelButton : public TButton {
+public:
+    TMyPanelButton(
+        const TRect& bounds,
+        const char * text,
+        ushort cmd,
+        ushort aOptions):
+        TButton(bounds, text, cmd, aOptions) {
+        
+        growMode = gfGrowLoX | gfGrowHiX;
+    }
+    
+    TColorAttr mapColor(uchar index) noexcept {
+        switch (index) {
+            case  1:  return {0xffff00, 0x008000};
+            case  2:  return {0xffff00, 0x008000};
+            case  3:  return {0x0000ff, 0xffff00};
+            case  4:  return {0x438939, 0x091297};
+            case  5:  return {0x438939, 0x091297};
+            case  6:  return {0x438939, 0x091297};
+            case  7:  return {0x438939, 0x091297};
+            case  8:  return {0x000000, 0x0000a0};  // shadow
+            default:  return errorAttr;
+        }
+    }
+};
+
+// -----------------------------------------------------------------
+// information window listbox implementation ...
+// -----------------------------------------------------------------
+class TMyListBox : public TListBox {
+public:
+    class LB_Collection: public TCollection {
+    public:
+        LB_Collection(short lim, short delta):
+        TCollection(lim, delta)
+		{}
+        virtual void  freeItem(void *p) {
+            delete[] (char *) p;
+        }
+    private:
+        virtual void *readItem( ipstream& ) { return 0; }
+        virtual void writeItem( void *, opstream& ) {}
+    };
+
+    TMyListBox(
+        const TRect& listBounds,
+        int   cols ,
+        std::vector< std::string > data,
+        TScrollBar * listScrollBar):
+        vScrollBar(  listScrollBar),
+        TListBox( listBounds,  cols, listScrollBar) {
+
+        growMode = gfGrowHiX | gfGrowHiY | gfGrowLoX;
+        
+        collection = new LB_Collection(5,5);
+        collection->insert( newStr("Hello") );
+        collection->insert( newStr("World") );
+        
+        newList(collection);
+    }
+    
+    ~TMyListBox() {
+        delete collection;
+    }
+
+    void setState(ushort aState, bool enable) {
+        TListBox::setState(aState, enable);
+        if (vScrollBar) vScrollBar->show();
+    }
+private:
+    TScrollBar    * vScrollBar;
+    LB_Collection * collection;
 };
 
 // -----------------------------------------------------------------
@@ -557,6 +640,8 @@ void TVDemo::put_exception_message(const char* text)
 }
 
 
+static short serverWindowNumber;
+
 // -----------------------------------------------------------------
 // window for global information output's ...
 // -----------------------------------------------------------------
@@ -635,6 +720,19 @@ public:
         TMyServerWindow * owner;
     };
     
+    class MyServerPanel: public TScroller {
+    public:
+        MyServerPanel(
+            TMyServerWindow *parent,
+            const TRect& bounds,
+            TScrollBar * hBar,
+            TScrollBar * vBar):
+            TScroller(bounds,hBar,vBar) {
+                
+            growMode = gfGrowHiX | gfGrowHiY;
+        }
+    };
+    
     // -------------------------------
     // dtor: free allocated memory:
     // -------------------------------
@@ -653,10 +751,19 @@ public:
     // ctor: create information window
     // -------------------------------
     TMyServerWindow(const TRect& bounds):
-        TWindowInit(&TMyTvInfoWindow::initFrame),
+        TWindowInit(&TMyServerWindow::initFrame),
         TDialog(bounds, "Info window") {
             
-        palette = dpBlueDialog;
+        growMode = gfGrowAll | gfGrowRel;
+        zoomRect = getBounds();
+        
+        palette  = wpBlueWindow;
+        
+        options |= ofSelectable | ofTopSelect;
+        flags   |= wfMove
+                |  wfGrow
+                |  wfClose
+                |  wfZoom;
         
         insert(hScrollBar = new TScrollBar( TRect( 18, size.y - 1, size.x - 23, size.y ) ));
         insert(vScrollBar = new TScrollBar( TRect( size.x - 23, 1, size.x - 22, size.y - 1 ) ));
@@ -668,10 +775,31 @@ public:
             vScrollBar,
             indicator,
             "www.txt"));
-        
-        insert(button1 = new TMyButton(TRect( size.x - 19, 2, size.x - 4, 4 ), "Clear", cmButtonInfoWindow1, bfNormal));
-        insert(button2 = new TMyButton(TRect( size.x - 19, 4, size.x - 4, 6 ), "Copy" , cmButtonInfoWindow2, bfNormal));
+            
+            /*
+        insert(serverPanel = new MyServerPanel( this,
+            TRect(size.x - 21, 2, size.x - 2, size.y - 1),
+            hScrollBar2 = new TScrollBar( TRect(size.x-20,size.y-1,size.x-1,size.y    )),
+            vScrollBar2 = new TScrollBar( TRect(size.x-1 ,       1,size.x-1,size.y-1))));
+            */
 
+        button1 = new TMyPanelButton(TRect( size.x - 20, 2, size.x - 4, 4 ), "Connect", cmButtonInfoWindow1, bfNormal);
+        button2 = new TMyPanelButton(TRect( size.x - 20, 4, size.x - 4, 6 ), "Ping"   , cmButtonInfoWindow2, bfNormal);
+        
+        insert(button1);
+        insert(button2);
+        
+        clientListScrollBar = new TScrollBar(TRect(size.x - 3,8, size.x - 2, size.y - 2));
+        insert(clientListScrollBar);
+        
+        std::vector< std::string > data =
+        {
+            "master", "client 1", "client 2"
+        };
+        clientList = new TMyListBox( TRect(size.x - 21,8, size.x -  3, size.y - 2), 1, data,
+        clientListScrollBar);
+        
+        insert(clientList);
     }
     // -------------------------------
     // event handler ...
@@ -684,8 +812,25 @@ public:
                     close();
                     clearEvent(event);
                     break;
+                case cmZoom:
+                    toogleZoom();
+                    clearEvent(event);
+                    break;
             }
         }
+    }
+    
+    // -------------------------------
+    // zoom in/out the dialog window
+    // -------------------------------
+    void toogleZoom()
+    {/*
+        TRect R = getExtent();
+        
+        button1->changeBounds( TRect( R.a.x - 19, 2, R.a.x - 4, 4 ) );
+        button2->changeBounds( TRect( R.a.x - 19, 4, R.a.x - 4, 6 ) );
+        */
+        drawView();
     }
     
     // -------------------------------
@@ -701,25 +846,37 @@ public:
 
 private:
     MyServerChild  * server;
+    MyServerPanel  * serverPanel ;
     TIndicator     * indicator;
 
-    TScrollBar     * vScrollBar;
-    TScrollBar     * hScrollBar;
+    TScrollBar     * vScrollBar, * vScrollBar2;
+    TScrollBar     * hScrollBar, * hScrollBar2;
     
-    TMyButton      * button1;
-    TMyButton      * button2;
+    TScrollBar     * clientListScrollBar;
+    
+    TMyPanelButton * button1;
+    TMyPanelButton * button2;
+    
+    TMyListBox     * clientList;
+    
+    TRect            button1_rect;
+    TRect            button2_rect;
+    
+    bool  isZoomed  = false;
+    TRect savedRect;
 };
 
+static TMyServerWindow * server_window = nullptr;
 // -----------------------------------------------------------------
 // start a new server ...
 // -----------------------------------------------------------------
 void TVDemo::newProjectServer()
 {
-    TMyServerWindow * p = (TMyServerWindow *) validView(
+    server_window = (TMyServerWindow *) validView(
     new TMyServerWindow(TRect(0, 0, 81, 23)));
 
-    if (p != nullptr) {
-        p->helpCtx = hcCalendar;
-        deskTop->insert( p );
+    if (server_window != nullptr) {
+        server_window->helpCtx = hcCalendar;
+        deskTop->insert( server_window );
     }
 }

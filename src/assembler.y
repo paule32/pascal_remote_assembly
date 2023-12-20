@@ -24,9 +24,9 @@
 // YY parser forwarder to C library ...
 // -----------------------------------------------------------------
 extern "C" {
-    int  yylex   (void );
-    int  yyparse (void );
-    void yyerror (const char*);
+    int  ASMlex   (void );
+    int  ASMparse (void );
+    void ASMerror (const char*);
 };
 
 // -----------------------------------------------------------------
@@ -261,7 +261,7 @@ program_top
         std::string str = $4;
         
         if (str.empty())
-        yyerror(gettext("string is empty"));
+        ASMerror(gettext("string is empty"));
            
         ss << "\tx86::mov("
            << $2 << ','
@@ -302,7 +302,7 @@ program_top
         std::string str = $2;
         
         if (str.empty())
-        yyerror(gettext("string is empty"));
+        ASMerror(gettext("string is empty"));
         
         ss << "\tx86::call("
            << str

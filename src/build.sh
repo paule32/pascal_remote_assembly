@@ -221,7 +221,8 @@ function run_check () {
     else
         if [[ -n "${DLG}" ]]; then
             printf '\033[8;%d;%dt' $rows $cols
-            eval "${dlgs} --title \"Error\" --msgbox \"$2\" 14 79"
+            dlg="${dlgs} --title \"Error\" --msgbox \"$2\" 14 79"
+            eval "$dlg"
             echo "$2"
             cd ${SRC}
             #clear
@@ -696,7 +697,7 @@ function run_build_application ()
     cmd=$(${GXX} ${FLAGS} -o ${TMP}/diss.exe   \
         -D__MINGW32__ \
         -D__MINGW64__ \
-        -DHAVE_PARSER_ASM -D__USE_W32_SOCKETS  \
+        -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -D__USE_W32_SOCKETS  \
         -DBOOST_ASIO_WINDOWS=1 -DBOOST_ASIO_HAS_SECURE_RTL=1 -DBOOST_ASIO_WINDOWS_APP=1 \
         -D__USE_MINGW_ANSI_STDIO=0  \
         \
@@ -716,9 +717,13 @@ function run_build_application ()
         ${TMP}/mousedlg.o           \
         ${TMP}/tvdemo1.o            \
         ${TMP}/tvdemo3.o            \
+        ${TMP}/TSyntaxFileEditor.o  \
+        ${TMP}/TurboDBASE.o         \
         ${TMP}/Interpreter.o        \
         ${TMP}/AssemblerParser.o    \
         ${TMP}/AssemblerScanner.o   \
+        ${TMP}/dBaseParser.o        \
+        ${TMP}/dBaseScanner.o       \
         \
         ${TMP}/dwarf.o              \
         \
@@ -869,21 +874,29 @@ if [[ -n "${built_dis}" ]]; then
             dlg="(exit 1) | $dlgs --title \"${!errloc[25]}\" \
             --msgbox \"${!errloc[26]}\" 10 79"
             eval "$dlg"
-            clear
         fi
         cd ${SRC}
-        exit 1
+        #exit 1
     fi
 
     # ----------------------------------------
     # buils parser script files ...
     # ----------------------------------------
     ${BISON} -d           \
+        -p ASM            \
         -Wno-conflicts-rr \
         -Wno-conflicts-sr \
         -Wno-other        \
         -o${TMP}/AssemblerParser.cc  ${SRC}/assembler.y
-    ${FLEX}  -i -o${TMP}/AssemblerScanner.cc ${SRC}/assembler.lex
+    ${FLEX} -PASM -i -o${TMP}/AssemblerScanner.cc ${SRC}/assembler.lex
+    
+    ${BISON} -d           \
+        -p DBASE          \
+        -Wno-conflicts-rr \
+        -Wno-conflicts-sr \
+        -Wno-other        \
+        -o${TMP}/dBaseParser.cc  ${SRC}/dbase.y
+    ${FLEX} -PDBASE -i -o${TMP}/dBaseScanner.cc ${SRC}/dbase.lex
     
     if [[ -z "${DLG}" ]]; then
         echo "compile parser objects..."
@@ -897,9 +910,13 @@ if [[ -n "${built_dis}" ]]; then
     # ----------------------------------------
     # build parser object files ...
     # ----------------------------------------
-    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/Interpreter.o      -c ${SRC}/Interpreter.cc      2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/AssemblerParser.o  -c ${TMP}/AssemblerParser.cc  2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -UYY_USE_CLASS -o${TMP}/AssemblerScanner.o -c ${TMP}/AssemblerScanner.cc 2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TSyntaxFileEditor.o -c ${SRC}/TSyntaxFileEditor.cc      2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TurboDBASE.o        -c ${SRC}/TurboDBASE.cc      2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/Interpreter.o       -c ${SRC}/Interpreter.cc      2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/dBaseParser.o       -c ${TMP}/dBaseParser.cc      2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/dBaseScanner.o      -c ${TMP}/dBaseScanner.cc     2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/AssemblerParser.o  -c ${TMP}/AssemblerParser.cc  2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/AssemblerScanner.o -c ${TMP}/AssemblerScanner.cc 2>&1 ); run_check $? "${cmd}"
     
     # ----------------------------------------
     # build turbo vision stuff ...
@@ -910,19 +927,19 @@ if [[ -n "${built_dis}" ]]; then
     #mv libtvision.a ${TMP}
     #cd ${TMP}
     
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo1.o  -c ${SRC}/tvdemo1.cpp   2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo1.o  -c ${SRC}/tvdemo1.cpp   2>&1 ); run_check $? "${cmd}"
     cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo2.o  -c ${SRC}/tvdemo2.cpp   2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo3.o  -c ${SRC}/tvdemo3.cpp   2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo3.o  -c ${SRC}/tvdemo3.cpp   2>&1 ); run_check $? "${cmd}"
     
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/puzzle.o   -c ${SRC}/puzzle.cpp    2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/calendar.o -c ${SRC}/calendar.cpp  2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/calc.o     -c ${SRC}/calc.cpp      2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/backgrnd.o -c ${SRC}/backgrnd.cpp  2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/ascii.o    -c ${SRC}/ascii.cpp     2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/evntview.o -c ${SRC}/evntview.cpp  2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/fileview.o -c ${SRC}/fileview.cpp  2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/gadgets.o  -c ${SRC}/gadgets.cpp   2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/mousedlg.o -c ${SRC}/mousedlg.cpp  2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/puzzle.o   -c ${SRC}/puzzle.cpp    2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/calendar.o -c ${SRC}/calendar.cpp  2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/calc.o     -c ${SRC}/calc.cpp      2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/backgrnd.o -c ${SRC}/backgrnd.cpp  2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/ascii.o    -c ${SRC}/ascii.cpp     2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/evntview.o -c ${SRC}/evntview.cpp  2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/fileview.o -c ${SRC}/fileview.cpp  2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/gadgets.o  -c ${SRC}/gadgets.cpp   2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/mousedlg.o -c ${SRC}/mousedlg.cpp  2>&1 ); run_check $? "${cmd}"
 
     # ----------------------------------------
     # link diss.exe application ...

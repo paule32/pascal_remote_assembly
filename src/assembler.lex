@@ -12,6 +12,8 @@
 # include <libintl.h>
 # include <locale.h>
 # include <stdlib.h>
+
+# undef __FLAT__
 # include <strings.h>
 
 # include <iostream>
@@ -24,13 +26,13 @@
 
 extern "C" {
     # include "AssemblerParser.hh"
-    int  line=1,column=1;
+    
+    int  ASM_line=1,ASM_column=1;
 
-    int  yylex   (void );
-
-    int  yywrap  (void     ) { return 1; }
-    void yyerror (const char * msg) {
-        std::cerr << "error: " << (line-1) << ": " << msg << std::endl;
+    int  ASMlex   (void );
+    int  ASMwrap  (void     ) { return 1; }
+    void ASMerror (const char * msg) {
+        std::cerr << "error: " << (ASM_line-1) << ": " << msg << std::endl;
         exit(1);
     }
 };
@@ -203,37 +205,37 @@ decdigit    [0..9]*
 ".section"  { return TOK_SECTION;   }
 
 "."{ident}  {
-    yylval.string_val = strdup(yytext);
+    ASMlval.string_val = strdup(yytext);
     return TOK_SECT_ID;
 }
 
 {decdigit}  {
-    yylval.string_val = strdup(yytext);
+    ASMlval.string_val = strdup(yytext);
     return TOK_DEC;
 }
 {hexdigit}  {
-    yylval.string_val = strdup(yytext);
+    ASMlval.string_val = strdup(yytext);
     return TOK_HEX;
 }
 
 {ident}":"  {
-    yylval.string_val = strdup(yytext);
+    ASMlval.string_val = strdup(yytext);
     return TOK_LABEL;
 }
 {ident}     {
-    yylval.string_val = strdup(yytext);
+    ASMlval.string_val = strdup(yytext);
     return TOK_ID;
 }
 
 ["'][^"']*["']|[''][^']*['']* {
-    yylval.string_val = strdup(yytext);
+    ASMlval.string_val = strdup(yytext);
     return TOK_STRING;
 }
 
-\{                      { column += strlen(yytext); BEGIN(NEW_COMMENT);       }
-<NEW_COMMENT>\}         { column += strlen(yytext); BEGIN(INITIAL);           }
-<NEW_COMMENT>\n         { column += strlen(yytext); line++; }
-<NEW_COMMENT>.          { column += strlen(yytext); }
+\{                      { ASM_column += strlen(yytext); BEGIN(NEW_COMMENT);       }
+<NEW_COMMENT>\}         { ASM_column += strlen(yytext); BEGIN(INITIAL);           }
+<NEW_COMMENT>\n         { ASM_column += strlen(yytext); ASM_line++; }
+<NEW_COMMENT>.          { ASM_column += strlen(yytext); }
 
 ";".*                   { }
 
@@ -244,14 +246,14 @@ decdigit    [0..9]*
 \*          { return '*'; }
 \,          { return ','; }
 
-[ \t]                   { column += 1; }
-(\n|\r\n)               { column  = 1; line++; }
+[ \t]                   { ASM_column += 1; }
+(\n|\r\n)               { ASM_column  = 1; ASM_line++; }
 
 .   {
-    column += 1;
+    ASM_column += 1;
     std::stringstream ss;
     ss << _("Invalide character: ") << yytext[0];
-    yyerror(ss.str().c_str());
+    ASMerror(ss.str().c_str());
 }
 
 <<EOF>>      {

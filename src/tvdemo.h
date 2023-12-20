@@ -61,4 +61,5 @@ private:
     void put_exception_message(const char* text);
     
     void newProjectServer();
+    void toogleZoom();
 };
