@@ -12,6 +12,7 @@
 
 # define Uses_TKeys
 # define Uses_TApplication
+# define Uses_TView
 # define Uses_TWindow
 # define Uses_TEvent
 # define Uses_TRect
@@ -69,10 +70,19 @@ public:
     ~TdBaseOutputWindow();
     TdBaseOutputWindow(const TRect& bounds);
    
+    virtual TPalette& getPalette() const;
+    virtual void      draw();
+    
+    void createDrawBuffer(const std::string &text);
+    ushort getColor(char ch);
+    
     void handleEvent(TEvent & event );
 
-    TdBaseOutputWindowChild      * editor;
+private:
+    TDrawBuffer drawBuffer;
+    std::string textBuffer;
     
+    TdBaseOutputWindowChild      * editor;    
     TIndicator    * indicator_1, * indicator_2;
 
     TScrollBar    * vScrollBar_1, * vScrollBar_2;

@@ -51,6 +51,7 @@
 # include "demohelp.h"
 
 # include "TSyntaxFileEditor.h"
+# include "TurboDBASEoutputWindow.h"
 
 # define HELP_FILENAME "dbase.hlp"
 
@@ -180,14 +181,21 @@ public:
     void dBaseCommandEditor(void);
     
     TdBaseEditorWindow * dBaseEditor;
+    TdBaseOutputWindow * dBaseOutputWindow;
 };
 
 // TdBaseFormApp
 void TdBaseFormApp::dBaseCommandEditor(void)
 {
+    dBaseOutputWindow = (TdBaseOutputWindow *) validView(
+    new TdBaseOutputWindow(TRect(0, 0, 80, 24)));
+    if (dBaseOutputWindow != nullptr) {
+        dBaseOutputWindow->helpCtx = 5200;
+        deskTop->insert( dBaseOutputWindow );
+    }
+
     dBaseEditor = (TdBaseEditorWindow *) validView(
     new TdBaseEditorWindow(TRect(0, 0, 81, 23)));
-
     if (dBaseEditor != nullptr) {
         dBaseEditor->helpCtx = 5000;
         deskTop->insert( dBaseEditor );
