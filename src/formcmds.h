@@ -10,8 +10,7 @@
 // Misc UI commands
 const ushort
    cmAboutBox    = 2000,
-   cmChgDir      = 2001,
-   cmVideoMode   = 2002;
+   cmChgDir      = 2001;
 
 // List & form-oriented commands
 // (Cannot be disabled)
@@ -28,7 +27,6 @@ const ushort
 
 const ushort
    cmTopForm      = 3050,
-   cmRegisterForm = 3051,
    cmEditingForm  = 3052,
    cmCanCloseForm = 3053,
    cmCloseForm    = 3054,

@@ -7,6 +7,7 @@
 // -----------------------------------------------------------------
 # define Uses_TKeys
 # define Uses_TApplication
+# define Uses_TWindow
 # define Uses_TEvent
 # define Uses_TRect
 # define Uses_TDialog
@@ -34,12 +35,24 @@
 #endif
 
 # include <tvision/tv.h>
+# include <tvision/help.h>
 
 # include <string.h>
 # include <stdlib.h>
+# include <libintl.h>
+# include <locale.h>
 
+# include <iostream>
+# include <sstream>
+
+# include "Exception.h"
 # include "formcmds.h"
+# include "tvcmds.h"
+# include "demohelp.h"
+
 # include "TSyntaxFileEditor.h"
+
+# define HELP_FILENAME "dbase.hlp"
 
 extern ushort doEditDialog( int dialog, ... );
 extern ushort execDialog( TDialog *d, void *data );
@@ -105,17 +118,28 @@ public:
     }
     TdBaseEditorWindow(const TRect& bounds):
         TWindowInit(&TdBaseEditorWindow::initFrame),
-        TDialog(bounds, "Info window") {
+        TDialog(bounds, "Command Window") {
+        palette = dpBlueDialog;
+    
+        insert(hScrollBar_1 = new TScrollBar( TRect( 19, 9, size.x - 1, 10 ) ));
+        insert(vScrollBar_1 = new TScrollBar( TRect( size.x - 2, 1, size.x - 1, 9 ) ));
+        insert(indicator_1  = new TIndicator( TRect( 2, 9, 18, 10) ));
+        insert(summary = new MyEditorChild(this,
+            TRect(2, 1, size.x - 3, 9),
+            hScrollBar_1,
+            vScrollBar_1,
+            indicator_1,
+            "www.txt"));
+        insert(summary);
         
-        insert(hScrollBar = new TScrollBar( TRect( 18, size.y - 1, size.x - 23, size.y ) ));
-        insert(vScrollBar = new TScrollBar( TRect( size.x - 23, 1, size.x - 22, size.y - 1 ) ));
-        insert(indicator  = new TIndicator( TRect( 2, size.y - 1, 16, size.y) ));
-        
+        insert(hScrollBar_2 = new TScrollBar( TRect( 19, size.y - 1, size.x - 1, size.y ) ));
+        insert(vScrollBar_2 = new TScrollBar( TRect( size.x - 2, 10, size.x - 1, size.y - 1 ) ));
+        insert(indicator_2  = new TIndicator( TRect( 2, size.y - 1, 13, size.y) ));
         insert(editor = new MyEditorChild(this,
-            TRect(2, 1, size.x - 24, size.y - 1),
-            hScrollBar,
-            vScrollBar,
-            indicator,
+            TRect(2, 10, size.x - 3, size.y - 1),
+            hScrollBar_2,
+            vScrollBar_2,
+            indicator_2,
             "www.txt"));
         insert(editor);
     }
@@ -133,10 +157,12 @@ public:
     }
 private:
     MyEditorChild * editor;
-    TIndicator    * indicator;
+    MyEditorChild * summary;
+    
+    TIndicator    * indicator_1, * indicator_2;
 
-    TScrollBar    * vScrollBar;
-    TScrollBar    * hScrollBar;
+    TScrollBar    * vScrollBar_1, * vScrollBar_2;
+    TScrollBar    * hScrollBar_1, * hScrollBar_2;
 };
 
 class TdBaseFormApp : public TApplication
@@ -148,6 +174,8 @@ public:
     void handleEvent( TEvent& Event);
     static TMenuBar *initMenuBar( TRect r);
     static TStatusLine *initStatusLine( TRect r);
+
+    virtual void getEvent(TEvent& event);
     
     void dBaseCommandEditor(void);
     
@@ -173,6 +201,8 @@ TdBaseFormApp::TdBaseFormApp() :
 {
     TEvent event;
     TEditor::editorDialog = doEditDialog;
+    
+    dBaseCommandEditor();
 
     // Display about box
     //event.what = evCommand;
@@ -216,7 +246,54 @@ TStatusLine *TdBaseFormApp::initStatusLine( TRect r )
     r.a.y = r.b.y - 1;
     return new TStatusLine( r,
         *new TStatusDef( 0, 0xFFFF ) +
-            *new TStatusItem( "~F2~ Save", kbF2, cmListSave ));
+            *new TStatusItem( "~Alt-X~ Exit", kbAltX, cmCloseApplication ));
+}
+
+void TdBaseFormApp::getEvent(TEvent &event)
+{
+    TWindow *w;
+    THelpFile *hFile;
+    fpstream *helpStrm;
+    static Boolean helpInUse = False;
+    
+    TApplication::getEvent(event);
+    switch (event.what)
+    {
+        case evCommand: {
+            if ((event.message.command == cmHelp) && ( helpInUse == False)) {
+                helpInUse = True;
+                helpStrm = new fpstream(HELP_FILENAME, ios::in|ios::binary);
+                hFile = new THelpFile(*helpStrm);
+                if (!helpStrm) {
+                    messageBox(gettext("Could not open help file"), mfError | mfOKButton);
+                    delete hFile;
+                }   else {
+                    w = new THelpWindow(hFile, getHelpCtx());
+                    if (validView(w) != 0) {
+                        execView(w);
+                        destroy( w );
+                    }
+                    clearEvent(event);
+                }
+                helpInUse = False;
+            }   else
+            if (event.message.command == cmCloseApplication) {
+                clearEvent(event);
+                // ------------------------------------------
+                // if clicked result = yes/12, then close ...
+                // ------------------------------------------
+                int result = messageBoxRect(
+                    TRect( 14,7,59,16),
+                    gettext("Would you realy close the Application ?"),
+                    mfYesNoCancel | mfInformation );
+                    std::stringstream ss;
+                if (result == 12) {
+                    throw EPascalException_NoErrorExcpetion("exit");
+                }
+            }
+        }
+        break;
+    }
 }
 
 int TurboDBASE(void)

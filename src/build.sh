@@ -718,6 +718,7 @@ function run_build_application ()
         ${TMP}/tvdemo1.o            \
         ${TMP}/tvdemo3.o            \
         ${TMP}/TSyntaxFileEditor.o  \
+        ${TMP}/TurboDBASEoutputWindow.o \
         ${TMP}/TurboDBASE.o         \
         ${TMP}/Interpreter.o        \
         ${TMP}/AssemblerParser.o    \
@@ -910,9 +911,10 @@ if [[ -n "${built_dis}" ]]; then
     # ----------------------------------------
     # build parser object files ...
     # ----------------------------------------
-    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TSyntaxFileEditor.o -c ${SRC}/TSyntaxFileEditor.cc      2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TSyntaxFileEditor.o -c ${SRC}/TSyntaxFileEditor.cc      2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TurboDBASEoutputWindow.o        -c ${SRC}/TurboDBASEoutputWindow.cc      2>&1 ); run_check $? "${cmd}"
     cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TurboDBASE.o        -c ${SRC}/TurboDBASE.cc      2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/Interpreter.o       -c ${SRC}/Interpreter.cc      2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/Interpreter.o       -c ${SRC}/Interpreter.cc      2>&1 ); run_check $? "${cmd}"
     #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/dBaseParser.o       -c ${TMP}/dBaseParser.cc      2>&1 ); run_check $? "${cmd}"
     #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/dBaseScanner.o      -c ${TMP}/dBaseScanner.cc     2>&1 ); run_check $? "${cmd}"
     #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/AssemblerParser.o  -c ${TMP}/AssemblerParser.cc  2>&1 ); run_check $? "${cmd}"
@@ -928,7 +930,7 @@ if [[ -n "${built_dis}" ]]; then
     #cd ${TMP}
     
     #cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo1.o  -c ${SRC}/tvdemo1.cpp   2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo2.o  -c ${SRC}/tvdemo2.cpp   2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo2.o  -c ${SRC}/tvdemo2.cpp   2>&1 ); run_check $? "${cmd}"
     #cmd=$(${GXX} ${FLAGS} -o${TMP}/tvdemo3.o  -c ${SRC}/tvdemo3.cpp   2>&1 ); run_check $? "${cmd}"
     
     #cmd=$(${GXX} ${FLAGS} -o${TMP}/puzzle.o   -c ${SRC}/puzzle.cpp    2>&1 ); run_check $? "${cmd}"
