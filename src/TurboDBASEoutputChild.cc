@@ -38,18 +38,26 @@
 # include <tvision/tv.h>
 # include <tvision/help.h>
 
+# include <shlwapi.h>
+
 # include <string.h>
 # include <stdlib.h>
 # include <libintl.h>
 # include <locale.h>
 
 # include <iostream>
+# include <string>
 # include <sstream>
+# include <locale>
+# include <codecvt>
+# include <map>
 
 # include "Exception.h"
 # include "formcmds.h"
 # include "tvcmds.h"
 # include "demohelp.h"
+
+# include "dBaseHelp.h"
 
 # include "TSyntaxFileEditor.h"
 # include "TurboDBASEoutputWindow.h"
@@ -59,6 +67,23 @@
 
 extern ushort doEditDialog( int dialog, ... );
 extern ushort execDialog( TDialog *d, void *data );
+
+extern std::string ApplicationExePath;
+
+std::map< HelpTopics, std::string > helpTopicMap = {
+    { HELP_Welcome, "Welcome" },
+    { HELP_Introduction, "Introduction" }
+};
+
+const char*
+GetHelpTopicString(HelpTopics topic)
+{
+    std::string help = helpTopicMap[topic];
+    if (help.length() > 0) {
+        help.append(".htm");
+        return help.c_str();
+    }   return "";
+}
 
 TdBaseOutputWindowChild::TdBaseOutputWindowChild(
     TdBaseOutputWindow * parent,
@@ -85,7 +110,41 @@ void TdBaseOutputWindowChild::handleEvent( TEvent &event )
         if (event.keyDown.keyCode == kbF1)  // F1
         {
             clearEvent(event);
-            messageBox("getkey F1",mfInformation|mfOKButton);
+            
+            // -------------------------------
+            // path to the help file ...
+            // -------------------------------
+            std::stringstream ss;
+            ss << ApplicationExePath << "\\dBaseHelp.chm";
+            std::string chmFileName = ss.str();
+            
+            if (!PathFileExists(chmFileName.c_str())) {
+                messageBox("dBaseHelp.chm could not be open.",mfInformation|mfOKButton);
+                return;
+            }
+            
+            HelpTopics selectedTopic = HELP_Welcome;
+            
+            char commandLine[MAX_PATH + 50];
+            char topicString[MAX_PATH + 50];
+            
+            sprintf_s(topicString, "::/%s", GetHelpTopicString(selectedTopic));
+            sprintf_s(commandLine, "hh.exe %s%s", chmFileName.c_str(), topicString);
+            
+            STARTUPINFO si = { sizeof(si) };
+            PROCESS_INFORMATION pi;
+            
+            if (CreateProcessA(nullptr,commandLine,
+                nullptr,nullptr,FALSE,0,nullptr,
+                nullptr,&si,&pi)) {
+                WaitForSingleObject(pi.hProcess,INFINITE);
+                CloseHandle(pi.hThread);
+                CloseHandle(pi.hProcess);
+            }   else {
+                messageBox("the process could not be started.",mfInformation|mfOKButton);
+            }
+            
+            //messageBox("getkey F1",mfInformation|mfOKButton);
             return;
         }   else
         if (event.keyDown.keyCode == kbF2)  // F2

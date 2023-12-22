@@ -733,6 +733,7 @@ function run_build_application ()
         -ltvision                   \
         -ldwarf64                   \
         -lz                         \
+        -lshlwapi                   \
         -lintl                      \
         -lws2_32                    \
         -lboost_program_options-mt  \

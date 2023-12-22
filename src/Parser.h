@@ -114,6 +114,7 @@
 extern "C" {
 # include <winsock2.h>
 # include <windows.h>
+# include <shlwapi.h>
 # include <tchar.h>
 # include <strsafe.h>
 extern HINSTANCE win32_hInstance;
