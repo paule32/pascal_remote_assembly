@@ -915,7 +915,7 @@ if [[ -n "${built_dis}" ]]; then
     #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TSyntaxFileEditor.o       -c ${SRC}/TSyntaxFileEditor.cc      2>&1 ); run_check $? "${cmd}"
     cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TurboDBASEoutputWindow.o  -c ${SRC}/TurboDBASEoutputWindow.cc   2>&1 ); run_check $? "${cmd}"
     cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TurboDBASEoutputChild.o   -c ${SRC}/TurboDBASEoutputChild.cc    2>&1 ); run_check $? "${cmd}"
-    #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TurboDBASE.o              -c ${SRC}/TurboDBASE.cc      2>&1 ); run_check $? "${cmd}"
+    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TurboDBASE.o              -c ${SRC}/TurboDBASE.cc      2>&1 ); run_check $? "${cmd}"
     #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/Interpreter.o             -c ${SRC}/Interpreter.cc      2>&1 ); run_check $? "${cmd}"
     #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/dBaseParser.o       -c ${TMP}/dBaseParser.cc      2>&1 ); run_check $? "${cmd}"
     #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/dBaseScanner.o      -c ${TMP}/dBaseScanner.cc     2>&1 ); run_check $? "${cmd}"

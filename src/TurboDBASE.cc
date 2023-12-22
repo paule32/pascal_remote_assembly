@@ -130,7 +130,7 @@ public:
             hScrollBar_1,
             vScrollBar_1,
             indicator_1,
-            "www.txt"));
+            "history.log"));
         insert(summary);
         
         insert(hScrollBar_2 = new TScrollBar( TRect( 19, size.y - 1, size.x - 1, size.y ) ));
@@ -188,14 +188,14 @@ public:
 void TdBaseFormApp::dBaseCommandEditor(void)
 {
     dBaseOutputWindow = (TdBaseOutputWindow *) validView(
-    new TdBaseOutputWindow(TRect(0, 0, 80, 24)));
+    new TdBaseOutputWindow(TRect(2, 0, 84, 27)));
     if (dBaseOutputWindow != nullptr) {
         dBaseOutputWindow->helpCtx = 5200;
         deskTop->insert( dBaseOutputWindow );
     }
 
     dBaseEditor = (TdBaseEditorWindow *) validView(
-    new TdBaseEditorWindow(TRect(0, 0, 81, 23)));
+    new TdBaseEditorWindow(TRect(18, 5, 99, 25)));
     if (dBaseEditor != nullptr) {
         dBaseEditor->helpCtx = 5000;
         deskTop->insert( dBaseEditor );

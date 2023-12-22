@@ -71,22 +71,9 @@ public:
     TdBaseOutputWindow(const TRect& bounds);
    
     virtual TPalette& getPalette() const;
-    virtual void      draw();
     
-    void createDrawBuffer(const std::string &text);
-    ushort getColor(char ch);
-    
-    void handleEvent(TEvent & event );
-
 private:
-    TDrawBuffer drawBuffer;
-    std::string textBuffer;
-    
-    TdBaseOutputWindowChild      * editor;    
-    TIndicator    * indicator_1, * indicator_2;
-
-    TScrollBar    * vScrollBar_1, * vScrollBar_2;
-    TScrollBar    * hScrollBar_1, * hScrollBar_2;
+    TdBaseOutputWindowChild * commandView;
 };
 
 #endif  // TDBASE_OUTPUT_WINDOW__H_

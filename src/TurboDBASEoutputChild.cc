@@ -6,6 +6,7 @@
 // only for education, and non-profit usage !
 // -----------------------------------------------------------------
 # define Uses_TKeys
+# define Uses_TView
 # define Uses_TApplication
 # define Uses_TWindow
 # define Uses_TEvent
@@ -61,21 +62,11 @@ extern ushort execDialog( TDialog *d, void *data );
 
 TdBaseOutputWindowChild::TdBaseOutputWindowChild(
     TdBaseOutputWindow * parent,
-    const TRect& bounds,
-    TScrollBar * hScrollBar,
-    TScrollBar * vScrollBar,
-    TIndicator * indicator,
-    TStringView  filename):
-    TSyntaxFileEditor(
-        bounds,
-        hScrollBar,
-        vScrollBar,
-        indicator,
-        filename),
+    const TRect& bounds):
+    TView(bounds),
     owner(parent) {
     
-    EditorTextColor    = 0x17;
-    EditorCommentColor = 0x40;
+    options |= ofSelectable;
 }
 
 // -------------------------------
@@ -83,7 +74,7 @@ TdBaseOutputWindowChild::TdBaseOutputWindowChild(
 // -------------------------------
 void TdBaseOutputWindowChild::handleEvent( TEvent &event )
 {
-    TSyntaxFileEditor::handleEvent( event );
+    TView::handleEvent( event );
     if (event.what == evKeyDown) {
         if (event.keyDown.charScan.charCode == kbEsc)     // #27 - Escape
         {
@@ -112,4 +103,32 @@ void TdBaseOutputWindowChild::handleEvent( TEvent &event )
             return;
         }
     }
+}
+
+TColorAttr
+TdBaseOutputWindowChild::mapColorOutsideClass(uchar index)
+{
+    switch (index)
+    {
+        case  1: return 0x01; break;
+        case  2: return 0x02; break;
+        case 11: return 0x0b; break;
+        case 14: return 0x0e; break;
+        case 15: return 0x0f; break;
+        
+        default:
+            return TView::mapColor(index);
+    }
+}
+
+void TdBaseOutputWindowChild::drawContent()
+{
+    int y = 0, ymax = size.y;
+    for (y; y < ymax; ++y) {
+        writeChar(0, y, ' ', getColor(14), size.x);
+    }
+    
+    writeStr(0,1, "dBase output Console v1.0.0 (c) 2023 paule32", getColor(11));
+    writeStr(0,2, "All rights reserved.", getColor(14));
+    writeStr(0,4, "#", getColor(15));
 }

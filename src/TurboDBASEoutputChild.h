@@ -13,6 +13,7 @@
 # define Uses_TKeys
 # define Uses_TApplication
 # define Uses_TWindow
+# define Uses_TView
 # define Uses_TEvent
 # define Uses_TRect
 # define Uses_TDialog
@@ -54,18 +55,29 @@
 # include "TurboDBASEoutputWindow.h"
 
 class TdBaseOutputWindow;
-class TdBaseOutputWindowChild: public TSyntaxFileEditor {
+class TdBaseOutputWindowChild: public TView {
 public:
     TdBaseOutputWindowChild(
         TdBaseOutputWindow * parent,
-        const TRect& bounds,
-        TScrollBar * hScrollBar,
-        TScrollBar * vScrollBar,
-        TIndicator * indicator,
-        TStringView  filename);
+        const TRect& bounds);
 
+    virtual TColorAttr mapColor(uchar index) noexcept override {
+        return mapColorOutsideClass(index);
+    }
+
+    void draw() override {
+        TView::draw();
+        drawContent();
+    }
+    
     void handleEvent( TEvent &event );
 private:
+    TColorAttr mapColorOutsideClass(uchar index);
+    void       drawContent         ();
+
+    TDrawBuffer drawBuffer;
+    std::string textBuffer;
+
     TdBaseOutputWindow * owner;
 };
 
