@@ -42,11 +42,21 @@ FLAGS=$(echo "-std=c++20 -O2 -fPIC "        \
     "-Wno-volatile          " \
     "-Wno-write-strings     " \
     "-Wno-invalid-offsetof  " \
+    "-D__MINGW32__ " \
+    "-D__MINGW64__ " \
+    "-D__USE_W32_SOCKETS    " \
+    "-DBOOST_ASIO_WINDOWS=1 -DBOOST_ASIO_HAS_SECURE_RTL=1 " \
+    "-DBOOST_ASIO_WINDOWS_APP=1        " \
+    "-DBOOST_USE_WINAPI_VERSION=0x0A00 " \
+    "-D__USE_MINGW_ANSI_STDIO=0        " \
     "-DASMJIT_STATIC        " \
     "-DASMJIT_BUILD_RELEASE " \
     "-DASMJIT_NO_AARCH64    " \
     "-D__FLAT__     " \
     "-U__BORLANDC__ " \
+    "-DHAVE_PARSER_ASM   " \
+    "-DHAVE_PARSER_DBASE " \
+    "-UYY_USE_CLASS      " \
     "-I/E/msys64/mingw64/usr/include   " \
     "-I${SRC}/include                  " \
     "-I${TVD}/include                  " \
@@ -55,6 +65,15 @@ FLAGS=$(echo "-std=c++20 -O2 -fPIC "        \
     "-I${TVD}/include/tvision/compat/borland " \
     "-I${TVD}/include/tvision/internal " \
     "-I${SRC}/asmjit -I${TMP}")
+
+LIBS=$(echo "" \
+    "-lws2_32                   " \
+    "-lssl -lcrypto             " \
+    "-lboost_system-mt          " \
+    "-lboost_thread-mt          " \
+    "-lboost_program_options-mt " \
+    "-lboost_date_time-mt       " \
+    "-lboost_regex-mt ")
 # -----------------------------------------------------------------
 ST1="s/\\\"Last\\-Translator\\: .*\\n\\\"/\\\"Last-Translator\\:"
 ST2="Jens Kallup \\<paule32\\.jk\\@gmail\\.com\\>\\n\\\"/g"
@@ -696,11 +715,6 @@ function run_build_application ()
 {
     flagg="1"
     cmd=$(${GXX} ${FLAGS} -o ${TMP}/diss.exe   \
-        -D__MINGW32__ \
-        -D__MINGW64__ \
-        -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -D__USE_W32_SOCKETS  \
-        -DBOOST_ASIO_WINDOWS=1 -DBOOST_ASIO_HAS_SECURE_RTL=1 -DBOOST_ASIO_WINDOWS_APP=1 \
-        -D__USE_MINGW_ANSI_STDIO=0  \
         \
         -L${TMP}/ -L./asmjit        \
         \
@@ -736,42 +750,74 @@ function run_build_application ()
         -lz                         \
         -lshlwapi                   \
         -lintl                      \
-        -lws2_32                    \
-        -lssl -lcrypto              \
-        -lboost_program_options-mt  \
+        ${LIBS}                     \
         -static-libgcc -static-libstdc++ 2>&1 ); run_check $? "${cmd}"
     
     if [[ "$flagg" == "1" ]]; then
-        cmd=$(${GXX} ${FLAGS} -UYY_USE_CLASS -o${TMP}/BoostServer.o -c ${SRC}/BoostServer.cc 2>&1 ); run_check $? "${cmd}"
-        cmd=$(${GXX} ${FLAGS} -UYY_USE_CLASS -o${TMP}/BoostClient.o -c ${SRC}/BoostClient.cc 2>&1 ); run_check $? "${cmd}"
+        cmd=$(${GXX} ${FLAGS} -o${TMP}/BoostServer.o -c ${SRC}/BoostServer.cc 2>&1 ); run_check $? "${cmd}"
+        cmd=$(${GXX} ${FLAGS} -o${TMP}/BoostClient.o -c ${SRC}/BoostClient.cc 2>&1 ); run_check $? "${cmd}"
         cmd=$(${GXX} ${FLAGS} -o ${TMP}/BoostServer.exe   \
-            -D__MINGW32__ \
-            -D__MINGW64__ \
-            -D__USE_W32_SOCKETS  \
-            -DBOOST_ASIO_WINDOWS=1 -DBOOST_ASIO_HAS_SECURE_RTL=1 -DBOOST_ASIO_WINDOWS_APP=1 \
-            -D__USE_MINGW_ANSI_STDIO=0  \
             \
             ${TMP}/BoostServer.o \
             \
-            -lws2_32             \
-            -lssl -lcrypto       \
-            -lboost_system-mt    \
-            -lboost_thread-mt    \
+            ${LIBS}              \
             -static-libgcc -static-libstdc++ 2>&1 ); run_check $? "${cmd}"
         cmd=$(${GXX} ${FLAGS} -o ${TMP}/BoostClient.exe   \
-            -D__MINGW32__ \
-            -D__MINGW64__ \
-            -D__USE_W32_SOCKETS  \
-            -DBOOST_ASIO_WINDOWS=1 -DBOOST_ASIO_HAS_SECURE_RTL=1 -DBOOST_ASIO_WINDOWS_APP=1 \
-            -D__USE_MINGW_ANSI_STDIO=0  \
             \
             ${TMP}/BoostClient.o \
             \
-            -lws2_32             \
-            -lssl -lcrypto       \
-            -lboost_system-mt    \
-            -lboost_thread-mt    \
+            ${LIBS}              \
             -static-libgcc -static-libstdc++ 2>&1 ); run_check $? "${cmd}"
+        
+        # --------------------------------------------------
+        # create config file for auto create certificate ...
+        # --------------------------------------------------
+        cat <<EOF > ${TMP}/openssl.cnf
+openssl = openssl_init
+
+[openssl_init]
+ssl_conf = ssl_sect
+
+[ssl_sect]
+CipherString = DEFAULT:@SECLEVEL=1
+Options = ServerPreference
+
+[req]
+prompt = no
+distinguished_name = dn
+req_extensions = req_ext
+x509_extensions = x509_ext
+
+[dn]
+C = DE
+ST = State
+L = City
+O = kallup non-profit
+OU = dev-lab
+CN = myserver.example.com
+
+[req_ext]
+subjectAltName = @alt_names
+
+[x509_ext]
+subjectAltName = @alt_names
+
+[alt_names]
+IP.1 = 127.0.0.1
+DNS.1 = localhost
+EOF
+        # ----------------------------------
+        # create self-signed certificate ...
+        # ----------------------------------
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout ${TMP}/server.key.pem \
+        -out    ${TMP}/server.crt.pem \
+        -config ${TMP}/openssl.cnf
+        
+        #openssl genpkey -algorithm RSA -out server.key.pem
+        #openssl req -new -key server.key.pem -out server.csr.pem
+        #openssl x509 -req -days 365 -in server.csr.pem -signkey server.key.pem -out server.cert.pem
+        #cat server.key.pem cert.pem > server.pem
     fi
     
     if [[ -z "${DLG}" ]]; then
@@ -948,17 +994,17 @@ if [[ -n "${built_dis}" ]]; then
     # ----------------------------------------
     # build parser object files ...
     # ----------------------------------------
-    #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TSyntaxFileEditor.o       -c ${SRC}/TSyntaxFileEditor.cc      2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} o${TMP}/TSyntaxFileEditor.o       -c ${SRC}/TSyntaxFileEditor.cc      2>&1 ); run_check $? "${cmd}"
     
-    ##cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TurboDBASEoutputWindow.o  -c ${SRC}/TurboDBASEoutputWindow.cc   2>&1 ); run_check $? "${cmd}"
-    ##cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TurboDBASEoutputChild.o   -c ${SRC}/TurboDBASEoutputChild.cc    2>&1 ); run_check $? "${cmd}"
-    ##cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TurboDBASE.o              -c ${SRC}/TurboDBASE.cc      2>&1 ); run_check $? "${cmd}"
+    ##cmd=$(${GXX} ${FLAGS} -o${TMP}/TurboDBASEoutputWindow.o  -c ${SRC}/TurboDBASEoutputWindow.cc   2>&1 ); run_check $? "${cmd}"
+    ##cmd=$(${GXX} ${FLAGS} -o${TMP}/TurboDBASEoutputChild.o   -c ${SRC}/TurboDBASEoutputChild.cc    2>&1 ); run_check $? "${cmd}"
+    ##cmd=$(${GXX} ${FLAGS} -o${TMP}/TurboDBASE.o              -c ${SRC}/TurboDBASE.cc      2>&1 ); run_check $? "${cmd}"
     
-    #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/Interpreter.o             -c ${SRC}/Interpreter.cc      2>&1 ); run_check $? "${cmd}"
-    #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/dBaseParser.o       -c ${TMP}/dBaseParser.cc      2>&1 ); run_check $? "${cmd}"
-    #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/dBaseScanner.o      -c ${TMP}/dBaseScanner.cc     2>&1 ); run_check $? "${cmd}"
-    #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/AssemblerParser.o  -c ${TMP}/AssemblerParser.cc  2>&1 ); run_check $? "${cmd}"
-    #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/AssemblerScanner.o -c ${TMP}/AssemblerScanner.cc 2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/Interpreter.o      -c ${SRC}/Interpreter.cc      2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/dBaseParser.o      -c ${TMP}/dBaseParser.cc      2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/dBaseScanner.o     -c ${TMP}/dBaseScanner.cc     2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/AssemblerParser.o  -c ${TMP}/AssemblerParser.cc  2>&1 ); run_check $? "${cmd}"
+    #cmd=$(${GXX} ${FLAGS} -o${TMP}/AssemblerScanner.o -c ${TMP}/AssemblerScanner.cc 2>&1 ); run_check $? "${cmd}"
     
     # ----------------------------------------
     # build turbo vision stuff ...
