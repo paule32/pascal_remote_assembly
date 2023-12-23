@@ -694,6 +694,7 @@ function run_build_doc_xml () {
 # ----------------------------------------
 function run_build_application ()
 {
+    flagg="1"
     cmd=$(${GXX} ${FLAGS} -o ${TMP}/diss.exe   \
         -D__MINGW32__ \
         -D__MINGW64__ \
@@ -736,9 +737,43 @@ function run_build_application ()
         -lshlwapi                   \
         -lintl                      \
         -lws2_32                    \
+        -lssl -lcrypto              \
         -lboost_program_options-mt  \
         -static-libgcc -static-libstdc++ 2>&1 ); run_check $? "${cmd}"
-
+    
+    if [[ "$flagg" == "1" ]]; then
+        cmd=$(${GXX} ${FLAGS} -UYY_USE_CLASS -o${TMP}/BoostServer.o -c ${SRC}/BoostServer.cc 2>&1 ); run_check $? "${cmd}"
+        cmd=$(${GXX} ${FLAGS} -UYY_USE_CLASS -o${TMP}/BoostClient.o -c ${SRC}/BoostClient.cc 2>&1 ); run_check $? "${cmd}"
+        cmd=$(${GXX} ${FLAGS} -o ${TMP}/BoostServer.exe   \
+            -D__MINGW32__ \
+            -D__MINGW64__ \
+            -D__USE_W32_SOCKETS  \
+            -DBOOST_ASIO_WINDOWS=1 -DBOOST_ASIO_HAS_SECURE_RTL=1 -DBOOST_ASIO_WINDOWS_APP=1 \
+            -D__USE_MINGW_ANSI_STDIO=0  \
+            \
+            ${TMP}/BoostServer.o \
+            \
+            -lws2_32             \
+            -lssl -lcrypto       \
+            -lboost_system-mt    \
+            -lboost_thread-mt    \
+            -static-libgcc -static-libstdc++ 2>&1 ); run_check $? "${cmd}"
+        cmd=$(${GXX} ${FLAGS} -o ${TMP}/BoostClient.exe   \
+            -D__MINGW32__ \
+            -D__MINGW64__ \
+            -D__USE_W32_SOCKETS  \
+            -DBOOST_ASIO_WINDOWS=1 -DBOOST_ASIO_HAS_SECURE_RTL=1 -DBOOST_ASIO_WINDOWS_APP=1 \
+            -D__USE_MINGW_ANSI_STDIO=0  \
+            \
+            ${TMP}/BoostClient.o \
+            \
+            -lws2_32             \
+            -lssl -lcrypto       \
+            -lboost_system-mt    \
+            -lboost_thread-mt    \
+            -static-libgcc -static-libstdc++ 2>&1 ); run_check $? "${cmd}"
+    fi
+    
     if [[ -z "${DLG}" ]]; then
         echo "compile disassemler..."
     else
@@ -914,9 +949,11 @@ if [[ -n "${built_dis}" ]]; then
     # build parser object files ...
     # ----------------------------------------
     #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TSyntaxFileEditor.o       -c ${SRC}/TSyntaxFileEditor.cc      2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TurboDBASEoutputWindow.o  -c ${SRC}/TurboDBASEoutputWindow.cc   2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TurboDBASEoutputChild.o   -c ${SRC}/TurboDBASEoutputChild.cc    2>&1 ); run_check $? "${cmd}"
-    cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TurboDBASE.o              -c ${SRC}/TurboDBASE.cc      2>&1 ); run_check $? "${cmd}"
+    
+    ##cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TurboDBASEoutputWindow.o  -c ${SRC}/TurboDBASEoutputWindow.cc   2>&1 ); run_check $? "${cmd}"
+    ##cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TurboDBASEoutputChild.o   -c ${SRC}/TurboDBASEoutputChild.cc    2>&1 ); run_check $? "${cmd}"
+    ##cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/TurboDBASE.o              -c ${SRC}/TurboDBASE.cc      2>&1 ); run_check $? "${cmd}"
+    
     #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/Interpreter.o             -c ${SRC}/Interpreter.cc      2>&1 ); run_check $? "${cmd}"
     #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/dBaseParser.o       -c ${TMP}/dBaseParser.cc      2>&1 ); run_check $? "${cmd}"
     #cmd=$(${GXX} ${FLAGS} -DHAVE_PARSER_ASM -DHAVE_PARSER_DBASE -UYY_USE_CLASS -o${TMP}/dBaseScanner.o      -c ${TMP}/dBaseScanner.cc     2>&1 ); run_check $? "${cmd}"
