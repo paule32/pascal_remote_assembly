@@ -8,6 +8,7 @@
 # -----------------------------------------------------------------
 PWD=$(pwd)
 TVD="/E/Projekte/TVision"
+SSL_DEBUG="1"
 
 # -----------------------------------------------------------------
 # custom stuff ...
@@ -29,8 +30,9 @@ export ASMJIT_APPNAME_LOGFILE="\"${ASMJIT_APPNAMEENV}.log\""
 SRC=$(echo "${PWD}")
 TEMP="temp"
 TMP=$(echo "${PWD}/${TEMP}")
-FLAGS=$(echo "-std=c++20 -O2 -fPIC "        \
-    "-DASMJIT_APPNAME=\"asmjit\" " \
+FLAGS=$(echo "-std=c++20 -O2 -fPIC " \
+    "-DSSL_DEBUG=${SSL_DEBUG}      " \
+    "-DASMJIT_APPNAME=\"asmjit\"   " \
     "-DASMJIT_APPNAME_EXEFILE=${ASMJIT_APPNAME_EXEFILE} " \
     "-DASMJIT_APPNAME_EXEPATH=${ASMJIT_APPNAME_EXEPATH} " \
     "-DASMJIT_APPNAME_HLPFILE=${ASMJIT_APPNAME_HLPFILE} " \
@@ -66,7 +68,14 @@ FLAGS=$(echo "-std=c++20 -O2 -fPIC "        \
     "-I${TVD}/include/tvision/internal " \
     "-I${SRC}/asmjit -I${TMP}")
 
-LIBS=$(echo "" \
+LIBS=$(echo  "" \
+    "-L${TMP} " \
+    "-lasmjit                   " \
+    "-ltvision                  " \
+    "-ldwarf64                  " \
+    "-lz                        " \
+    "-lshlwapi                  " \
+    "-lintl                     " \
     "-lws2_32                   " \
     "-lssl -lcrypto             " \
     "-lboost_system-mt          " \
@@ -74,6 +83,7 @@ LIBS=$(echo "" \
     "-lboost_program_options-mt " \
     "-lboost_date_time-mt       " \
     "-lboost_regex-mt ")
+
 # -----------------------------------------------------------------
 ST1="s/\\\"Last\\-Translator\\: .*\\n\\\"/\\\"Last-Translator\\:"
 ST2="Jens Kallup \\<paule32\\.jk\\@gmail\\.com\\>\\n\\\"/g"
@@ -744,12 +754,6 @@ function run_build_application ()
         \
         ${TMP}/dwarf.o              \
         \
-        -lasmjit                    \
-        -ltvision                   \
-        -ldwarf64                   \
-        -lz                         \
-        -lshlwapi                   \
-        -lintl                      \
         ${LIBS}                     \
         -static-libgcc -static-libstdc++ 2>&1 ); run_check $? "${cmd}"
     
@@ -794,7 +798,7 @@ ST = State
 L = City
 O = kallup non-profit
 OU = dev-lab
-CN = myserver.example.com
+CN = localhost
 
 [req_ext]
 subjectAltName = @alt_names

@@ -5,6 +5,12 @@
 //
 // only for education, and non-profit usage !
 // -----------------------------------------------------------------
+
+# include <winsock2.h>
+# include <ws2tcpip.h>
+
+# include <windows.h>
+
 # include <stdio.h>
 # include <stdlib.h>
 # include <sys/types.h>
@@ -14,11 +20,8 @@
 # include <functional>
 # include <thread>
 # include <memory>
+# include <vector>
 
-# include <boost/asio.hpp>
-# include <boost/asio/ssl.hpp>
-
-using namespace boost::asio;
 using namespace std;
 
 // -----------------------------------------------------------------
@@ -50,164 +53,128 @@ void handle_exception(const std::string& message) {
     << std::endl;
 }
 
-class SSLServer: public std::enable_shared_from_this<SSLServer> {
+void HandleClient(SOCKET clientSocket) {
+    // -------------------------------
+    // Nachricht an den Client senden
+    // -------------------------------
+    std::string message = "Hello from server!";
+    send(clientSocket, message.c_str(), message.size(), 0);
+    
+    // -------------------------------
+    // Schließe den Client-Socket
+    // -------------------------------
+    closesocket(clientSocket);
+}
+
+// -----------------------------------------------------------------
+// @brief This class is out main ssl server class ...
+// -----------------------------------------------------------------
+class SSLServer {
 public:
-    SSLServer(io_service& service, uint16_t port):
-        acceptor_(service, ip::tcp::endpoint(ip::tcp::v4(), port)),
-        context_ (ssl::context::tlsv12) {
+    SSLServer(uint16_t port) {
+        if ((serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
+        throw std::string("Failed to create socket.");
+    
+        // -------------------------------
+        // Konfiguriere die Serveradresse
+        // -------------------------------
+        serverAddr.sin_family      = AF_INET;
+        serverAddr.sin_addr.s_addr = INADDR_ANY;
+        serverAddr.sin_port        = htons(port);
         
-        if (isAcceptorInitialized()
-        &&  isContextInitialized ()) {
-            std::cout << "acceptor ok" << std::endl;
-            std::cout << "context  ok" << std::endl;
-            
-            start_accept();
-        }   else {
-            std::cout << "server init error" << std::endl;
+        // -------------------------------
+        // Binde den Socket an die Adresse
+        // -------------------------------
+        if (bind(serverSocket, (struct sockaddr*)&serverAddr,
+            sizeof(serverAddr)) == SOCKET_ERROR) {
+            closesocket(serverSocket);
+            throw std::string("Bind failed.");
         }
+        
+        // -------------------------------
+        // Warte auf Verbindungen
+        // -------------------------------
+        if (listen(serverSocket, 5) == SOCKET_ERROR) {
+            closesocket(serverSocket);
+            throw std::string("Listen failed.");
+        }
+        
+        std::cout << "Server waiting for connections..."
+        << std::endl;
+        
+        while (true) {
+            // -------------------------------
+            // Akzeptiere Verbindungen
+            // -------------------------------
+            SOCKET clientSocket = accept(serverSocket, NULL, NULL);
+            if (clientSocket == INVALID_SOCKET) {
+                closesocket(serverSocket);
+                throw std::string("Accept failed");
+            }
+
+            std::cout << "Client connected!" << std::endl;
+
+            // -------------------------------
+            // Starte einen Thread für die
+            // Bearbeitung des Clients
+            // -------------------------------
+            threads.emplace_back(&HandleClient, clientSocket);
+        }
+        
+        // --------------------------------
+        // Warte auf das Ende aller Threads
+        // --------------------------------
+        for (auto& thread : threads) {
+            thread.join();
+        }
+        
+        // --------------------------------
+        // Schließe den Server-Socket
+        // --------------------------------
+        closesocket(serverSocket);
     }
 private:
-    void start_accept() {
-        ssl_socket_ = std::make_shared<ssl::stream<ip::tcp::socket> >(acceptor_.get_executor(), context_);
-
-        // ----------------------------------
-        // Starte den asynchronen Handshake
-        // ----------------------------------
-        ssl_socket_->async_handshake(ssl::stream_base::server,
-        [this](const boost::system::error_code& error) {
-            if (!error) {
-                // -----------------------------------
-                // Wenn der Handshake erfolgreich ist,
-                // akzeptiere die Verbindung
-                // -----------------------------------
-                if (ssl_socket_ && ssl_socket_->lowest_layer().is_open()) {
-                    std::cout << "SSL-Handshake erfolgreich und verbunden."
-                    << std::endl;
-                    acceptor_.async_accept(ssl_socket_->lowest_layer(),
-                    [this](const boost::system::error_code& accept_error) {
-                        if (!accept_error) {
-                            handle_client();
-                        } else {
-                            std::cerr
-                            << "Accept error: "
-                            << accept_error.message()
-                            << std::endl;
-                        }
-                    });
-                }   else {
-                    std::cerr << "SSL-Handshake erfolgreich, aber Verbindung nicht geöffnet."
-                    << std::endl;
-                }
-            }   else {
-                std::cerr
-                << "Handshake error: "
-                << error.message()
-                << " ("
-                << error.value()
-                << ")"
-                << std::endl;
-            }
-        });
-    }
-    void handle_client() {
-        // ------------------------------------
-        // Lese/Schreibe Daten mit ssl_socket_
-        // ------------------------------------
-        boost::asio::async_read_until(*ssl_socket_, buffer_, '\n',
-        [this](const boost::system::error_code& read_error, std::size_t bytes_transferred) {
-            if (!read_error) {
-                std::istream is(&buffer_);
-                std::string received_data;
-                std::getline(is, received_data);
-                
-                std::cout << "Received data from client: "
-                << received_data
-                << std::endl;
-
-                // -----------------------------------------
-                // Hier kannst du auf die empfangenen Daten
-                // reagieren und die Antwort vorbereiten
-                // -----------------------------------------
-                std::string response = "Hello from the server!\n";
-
-                // -----------------------------------------
-                // Sende die Antwort an den Client
-                // -----------------------------------------
-                boost::asio::async_write(*ssl_socket_, boost::asio::buffer(response),
-                [this](const boost::system::error_code& write_error, std::size_t) {
-                    if (!write_error) {
-                        // -----------------------------
-                        // Schließe die Verbindung
-                        // -----------------------------
-                        ssl_socket_->lowest_layer().close();
-
-                        // -----------------------------
-                        // Starte die nächste Akzeptanz
-                        // -----------------------------
-                        start_accept();
-                    } else {
-                        std::cerr
-                        << "Write error: "
-                        << write_error.message()
-                        << std::endl;
-                    }
-                });
-            }   else {
-                std::cerr
-                << "Read error: "
-                << read_error.message()
-                << std::endl;
-            }
-        });
-    }
-
-    // ------------------------------------------------
-    // Überprüfung, ob der Acceptor initialisiert wurde
-    // ------------------------------------------------
-    bool isAcceptorInitialized() const {
-        return acceptor_.is_open();
-    }
-
-    // ------------------------------------------------
-    // Überprüfung, ob der Context initialisiert wurde
-    // ------------------------------------------------
-    bool isContextInitialized() {
-        try {
-            // ----------------------------------
-            // load certificate, and private key
-            // ----------------------------------
-            context_.use_certificate_chain_file("server.crt.pem");
-            context_.use_private_key_file("server.key.pem", ssl::context::pem);
-            return true;
-        }
-        catch (const boost::system::system_error& e) {
-            handle_exception(e.what());
-            return false;
-        }
-    }
-private:
-    ip::tcp::acceptor acceptor_;
-    ssl::context context_;
-    std::shared_ptr<ssl::stream<ip::tcp::socket>> ssl_socket_;
-    boost::asio::streambuf buffer_;
+    SOCKET      serverSocket;
+    sockaddr_in serverAddr;
+    
+    std::vector<std::thread> threads;
 };
 }   // namespace: dBaseRelease
+
+// -----------------------------------------------------------------
+// called function at application end ...
+// -----------------------------------------------------------------
+void exitFunction(void) {
+    // WinSock beenden
+    WSACleanup();
+
+    std::cout << "The End."
+    << std::endl;
+}
 
 int main(int argc, char **argv) {
     using namespace dBaseRelease;
 
+    // ---------------------------------------
+    // register "atexit" calling function ...
+    // ---------------------------------------
+    if (atexit(exitFunction) != 0) {
+        std::cerr << "Failed to register exit function."
+        << std::endl;
+        return EXIT_FAILURE;
+    }
+    
     try {
-        ApplicationExeName = argv[0];
-        io_service service;
+        WSADATA wsaData;
+        if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+        throw std::string("Fehler beim initializieren von WinSock.");
         
-        std::shared_ptr<SSLServer> server = std::make_shared<SSLServer>(service, 12345);
-        service.run();
+        ApplicationExeName = argv[0];
+        
+        SSLServer server(12345);
     }
     catch (const std::exception& e) {
-        std::cerr << "Exception: "
-        << e.what()
-        << std::endl;
-        
+        handle_exception(e.what());
         return EXIT_FAILURE;
     }   return EXIT_SUCCESS;
 }

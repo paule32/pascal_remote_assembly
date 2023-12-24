@@ -5,75 +5,47 @@
 //
 // only for education, and non-profit usage !
 // -----------------------------------------------------------------
-# include <cstdlib>
+# include <winsock2.h>
+# include <ws2tcpip.h>
+
+# include <windows.h>
+
+# include <stdio.h>
+# include <stdlib.h>
+# include <sys/types.h>
+
 # include <iostream>
+# include <string>
+# include <functional>
 # include <thread>
+# include <memory>
+# include <vector>
 
-# include <boost/asio.hpp>
-# include <boost/array.hpp>
-
-# include <openssl/ssl.h>
-# include <openssl/err.h>
-
-using namespace boost::asio;
 using namespace std;
 
 // -----------------------------------------------------------------
 // namespace for the project ...
 // -----------------------------------------------------------------
 namespace dBaseRelease {
-SSL_CTX * ssl_context;
-SSL     * ssl_connection;
+void CommunicateWithServer(SOCKET clientSocket) {
+    // Hier kannst du die Logik für die Kommunikation mit dem Server implementieren
+    // Beispiel: Sende und empfange Daten
 
-void read_from_server(ip::tcp::socket& socket) {
+//    std::string message = "Hello from client!";
+    //send(clientSocket, message.c_str(), message.size(), 0);
+
+    // ---------------------------------------
+    // Empfange die Antwort vom Server
+    // ---------------------------------------
     char buffer[1024];
-    int  bytes_recieved;
-    
-    try {
-        // ------------------------------------
-        // Zugriff auf den Socket-Deskriptor
-        // ------------------------------------
-        ip::tcp::socket::native_handle_type socket_descriptor =
-        socket.native_handle();
-        
-        // ------------------------------------
-        // Setze die Verbindung zum Server auf
-        // ------------------------------------
-        SSL_set_fd(ssl_connection, socket_descriptor);
-        
-        if (SSL_connect(ssl_connection) != 1) {
-            std::cerr << "Fehler beim Herstellen der SSL-Verbindung." << std::endl;
-            ERR_print_errors_fp(stderr);
-            return;
-        }
+    int bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
+    if (bytesReceived > 0) {
+        buffer[bytesReceived] = '\0';
+        std::cout << "Received from server: " << buffer << std::endl;
+    }
 
-        while(true) {
-            bytes_recieved = SSL_read(ssl_connection, buffer, sizeof(buffer));
-            
-            if (bytes_recieved <= 1) {
-                std::cerr
-                << "Error: could not read data from server."
-                << std::endl;
-                break;
-            }
-            
-            std::cout
-            << "Empfangene Daten: "
-            << std::string(buffer, bytes_recieved)
-            << std::endl;
-        }
-    }
-    catch (const std::exception& e) {
-        std::string error_message;
-        for (int len = 0; len < strlen(e.what()); ++len) {
-            if (e.what()[len] == '[') break;
-            error_message.push_back(e.what()[len]);
-        }
-        std::cerr
-        << "Exception "
-        << error_message
-        << std::endl;
-    }
+    // Schließe den Socket
+    //closesocket(clientSocket);
 }
 
 // -----------------------------------------------------------------
@@ -81,12 +53,15 @@ void read_from_server(ip::tcp::socket& socket) {
 // -----------------------------------------------------------------
 void exitFunction()
 {
-    // Schließe die Verbindung und räume auf
-    SSL_shutdown(ssl_connection);
-    SSL_free    (ssl_connection);
-    SSL_CTX_free(ssl_context);
+    // ---------------------------------------
+    // WinSock beenden
+    // ---------------------------------------
+    WSACleanup();
+
+    std::cout << "The End."
+    << std::endl;
 }
-}
+}   // namespace: dBaseRelease
 
 // -----------------------------------------------------------------
 // client entrypoint/connection member ...
@@ -102,67 +77,50 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    // -----------------------
-    // initialize OpenSSL ...
-    // -----------------------
-    SSL_library_init();
-    SSL_load_error_strings();    
-    
-    // -----------------------
-    // create an SSL-Context
-    // -----------------------
-    ssl_context = SSL_CTX_new(SSLv23_client_method());
-    if (!ssl_context) {
-        std::cerr << "Fehler beim Erstellen des SSL-Kontexts." << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    // -----------------------
-    // create an SSL-Object
-    // -----------------------
-    ssl_connection = SSL_new(ssl_context);
-    if (!ssl_connection) {
-        std::cerr << "Fehler beim Erstellen des SSL-Objekts." << std::endl;
-        return EXIT_FAILURE;
-    }
-    
-    // ------------------------------------------------
-    // create a end-to-end connection point ...
-    // ------------------------------------------------
-    io_service service;
-    ip::tcp::socket socket(service);
-    ip::tcp::endpoint endpoint(ip::address::from_string("127.0.0.1"), 1234);
-    
     try {
-        // ----------------------------------------------
-        // Use a separate thread to read from the server
-        // ----------------------------------------------
-        socket.connect(endpoint);
-        std::thread([&socket](){ read_from_server(socket); }).detach();
+        // ------------------------------
+        // init MS-Windows socket lib ...
+        // ------------------------------
+        WSADATA wsaData;
+        if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+        throw std::string("Fehler beim initializieren von WinSock.");
 
-        // ----------------------------------------------
-        // Main thread can perform other tasks
-        // For simplicity, we'll just sleep for a while
-        // ----------------------------------------------
-        std::this_thread::sleep_for(std::chrono::seconds(5));
-    }
-    catch (const boost::system::system_error& e) {
-        std::string error_message;
-        for (int len = 0; len < strlen(e.what()); ++len) {
-            if (e.what()[len] == '[') break;
-            error_message.push_back(e.what()[len]);
+        // -----------------------
+        // Erstelle einen Socket
+        // -----------------------
+        SOCKET clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+        
+        if (clientSocket == INVALID_SOCKET)
+        throw std::string("Failed to create socket");
+        
+        // ------------------------------
+        // Konfiguriere die Serveradresse
+        // ------------------------------
+        sockaddr_in serverAddr;
+        
+        serverAddr.sin_family      = AF_INET;
+        serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+        serverAddr.sin_port        = htons(12345);
+        
+        // ------------------------------
+        // Verbinde mit dem Server
+        // ------------------------------
+        if (connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+            closesocket(clientSocket);
+            throw std::string("Connection failed");
         }
-        std::cerr << "Exception "
-                  << error_message
-                  << std::endl;
-                  
-        return EXIT_FAILURE;
+        
+        std::cout << "Connected to server!" << std::endl;
+        
+        std::thread connectionThread(CommunicateWithServer, clientSocket);
+        connectionThread.join();
+        
     }
-    catch (const std::exception& e) {
-        std::cerr
-        << "Exception: "
+    catch (const exception& e) {
+        std::cerr << "Exception: "
         << e.what()
         << std::endl;
+        
         return EXIT_FAILURE;
     }   return EXIT_SUCCESS;
 }
