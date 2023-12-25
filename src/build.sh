@@ -718,6 +718,31 @@ function run_build_doc_xml () {
         eval "$dlg"
     fi
 }
+# -----------------------------------------------------------------
+# create the documentation to the server project/package:
+# DEU = German
+# ENU = English
+# -----------------------------------------------------------------
+function run_buld_create_server_documentation ()
+{
+    rm   -rf ${SRC}/dox/enu
+    rm   -rf ${SRC}/dox/deu
+    
+    mkdir -p ${SRC}/dox/enu
+    mkdir -p ${SRC}/dox/deu
+
+    doxygen  ${SRC}/Doxyfile.Server.chm.ENU.ini
+    doxygen  ${SRC}/Doxyfile.Server.chm.DEU.ini
+    
+    cp ${SRC}/dox/enu/html/server.enu.chm ${SRC}/dox/server.enu.chm
+    cp ${SRC}/dox/deu/html/server.deu.chm ${SRC}/dox/server.deu.chm
+    
+    cp ${SRC}/dox/enu/html/server.enu.chi ${SRC}/dox/server.enu.chi
+    cp ${SRC}/dox/deu/html/server.deu.chi ${SRC}/dox/server.deu.chi
+    
+    rm   -rf ${SRC}/dox/enu
+    rm   -rf ${SRC}/dox/deu
+}
 # ----------------------------------------
 # link diss.exe application ...
 # ----------------------------------------
@@ -848,6 +873,7 @@ function help () {
     HELP+="Options:\n"
     HELP+="--------\n"
     HELP+=" -h display this screen.\n"
+    HELP+=" -d create documentation in different formats.\n"
     HELP+=" -l convert locale files only.\n"
     HELP+=" -a compile application.      file: test.pas\n"
     HELP+=" -i compile interpreter.      file: test.asm\n"
@@ -860,11 +886,12 @@ function help () {
 # -----------------------------------------------------------------
 # switch back to developer source path ...
 # -----------------------------------------------------------------
-while getopts "lair:t:h" option; do
+while getopts "laidr:t:h" option; do
     case "${option}" in
         h)  help ;;
         a)  built_app="OPTARG";;
         i)  built_dis="OPTARG";;
+        d)  built_doc="OPTARG";;
         r)  built_run=${OPTARG};;
         t)  built_tst=${OPTARG};;
         l)  built_lng="OPTARG";;
@@ -889,6 +916,14 @@ if [[ -n "${built_lng}" ]]; then
         echo "ok. =]"
     fi
     exit 1
+fi
+# ----------------------------------------
+# creqte documentation ...
+# ----------------------------------------
+if [[ -n "${built_doc}" ]]; then
+    echo "create documentation..."
+    run_buld_create_server_documentation
+    exit 0
 fi
 # ----------------------------------------
 # compile application ...

@@ -6,6 +6,22 @@
 // @brief   only for education, and non-profit usage !
 // -----------------------------------------------------------------
 
+// @mainpage BOOST Server Project
+//
+// Herzlich Willkommen auf der Hauptseite des BOOST Server Projektes !
+// Diese Dokumentation enthält Informationen zur Anwendung.
+//
+// @section intro Einführung
+// Der BOOST Server hat nicht direkt was mit der C++ BOOST-Bibliothek
+// zu tun. Vielmehr ist es eine Server-Anwendung, die es ermöglicht,
+// Terminal Server Anwendungen remote zu betreiben.
+// Dabei werden die Programme "entfernt" ausgeführt, und brauchen nicht
+// lokal auf dem Arbeitsplatz- oder Heimcomputer liegen.
+//
+// Achtung: Der aktuelle Stand ist ein Entwickler-System, was bedeutet,
+//          das keine SSL-Verschlüsselung verwendet wird, um die Verbindung
+//          zwischen Client und Server zu sichern.
+
 // -----------------------------------------------------------------
 // @brief The follow #define's are used by TurboVision, to automatic
 //        include the neccassary headers by this FrameWork.
