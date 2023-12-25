@@ -1,28 +1,97 @@
 // -----------------------------------------------------------------
-// File:   BoostServer.cc
-// Author: (c) 2023 Jens Kallup - paule32
-// All rights reserved
+// @file:   BoostServer.cc
+// @author: (c) 2023 Jens Kallup - paule32
+//          All rights reserved
 //
-// only for education, and non-profit usage !
+// @brief   only for education, and non-profit usage !
 // -----------------------------------------------------------------
 
+// -----------------------------------------------------------------
+// @brief The follow #define's are used by TurboVision, to automatic
+//        include the neccassary headers by this FrameWork.
+// -----------------------------------------------------------------
+# define Uses_TKeys
+# define Uses_TApplication
+# define Uses_TWindow
+# define Uses_TView
+# define Uses_TEvent
+# define Uses_TRect
+# define Uses_TDialog
+# define Uses_TStaticText
+# define Uses_TButton
+# define Uses_TMenuBar
+# define Uses_TSubMenu
+# define Uses_TMenuItem
+# define Uses_TStatusLine
+# define Uses_TStatusItem
+# define Uses_TStatusDef
+# define Uses_TDeskTop
+# define Uses_TChDirDialog
+# define Uses_TFileDialog
+# define Uses_MsgBox
+# define Uses_TDisplay
+# define Uses_TScreen
+# define Uses_TEditor
+# define Uses_TEditWindow
+# define Uses_TMemo
+# define Uses_TStreamableClass
+
+// -----------------------------------------------------------------
+// Microsoft Windows header stuff (winsock must be before windows.h)
+// -----------------------------------------------------------------
 # include <winsock2.h>
 # include <ws2tcpip.h>
 
 # include <windows.h>
 
+// -----------------------------------------------------------------
+// standard C header stuff ...
+// -----------------------------------------------------------------
 # include <stdio.h>
 # include <stdlib.h>
 # include <sys/types.h>
 
+// -----------------------------------------------------------------
+// BORLAND TurboVision - Pascal like Text User Interface (TUI) ...
+// -----------------------------------------------------------------
+#ifdef  __FLAT__
+# undef __FLAT__
+#endif
+
+# include <tvision/tv.h>
+# include <tvision/help.h>
+
+// -----------------------------------------------------------------
+// standard C++ header stuff ...
+// -----------------------------------------------------------------
 # include <iostream>
 # include <string>
+# include <sstream>
 # include <functional>
 # include <thread>
 # include <memory>
 # include <vector>
 
+// -----------------------------------------------------------------
+// for query the data, and time with C++ container ...
+// -----------------------------------------------------------------
+# include <ctime>
+# include <chrono>
+
 using namespace std;
+
+// -----------------------------------------------------------------
+// some constant's and variable's used in this source code:
+// -----------------------------------------------------------------
+# define DT_DATE false
+# define DT_TIME true
+
+// -----------------------------------------------------------------
+// @brief this are the "codes" for interactive client/server access.
+// -----------------------------------------------------------------
+# define CODE_ACCESS_GRANT    200
+# define CODE_ACCESS_ERROR    201
+# define CODE_ACCESS_PASSWORD 202
 
 // -----------------------------------------------------------------
 // @brief namespace name for Version 1.0.0 of our project ...
@@ -53,6 +122,110 @@ void handle_exception(const std::string& message) {
     << std::endl;
 }
 
+// -----------------------------------------------------------------
+// @brief   get the date/time for local server ...
+//
+// @param  bool mode    -  If mode false, then return date, else time.
+//                         The default mode is false.
+//
+// @return std::string  -  The date or time in std::string format.
+//
+// @since  dBaseRelease
+// @author paule32
+// -----------------------------------------------------------------
+std::string getDateTime(bool mode = false) {
+    auto now = std::chrono::system_clock::now();  // current time
+    std::time_t time = std::chrono::system_clock::to_time_t(now);
+    
+    // -----------------------
+    // Lokale Zeit darstellen
+    // -----------------------
+    std::tm localTime = *std::localtime(&time);
+    
+    // -----------------------------------
+    // Datum aus dem tm-Objekt extrahieren
+    // -----------------------------------
+    int year   = localTime.tm_year + 1900; // tm_year years since 1900
+    int month  = localTime.tm_mon  + 1;    // tm_mon  month 0 to 11
+    int day    = localTime.tm_mday;
+    
+    // -----------------------------------
+    // Zeit aus dem tm-Objekt extrahieren
+    // -----------------------------------
+    int hour   = localTime.tm_hour;
+    int minute = localTime.tm_min;
+    int second = localTime.tm_sec;
+    
+    std::stringstream sd, st;
+    sd  << year                                        << "-"
+        << std::setw(2) << std::setfill('0') << month  << "-"
+        << std::setw(2) << std::setfill('0') << day    ;
+        
+    st  << std::setw(2) << std::setfill('0') << hour   << ":"
+        << std::setw(2) << std::setfill('0') << minute << ":"
+        << std::setw(2) << std::setfill('0') << second ;
+    
+    if (!mode)
+    return sd.str();
+    return st.str();
+}
+
+// -----------------------------------------------------------------
+// @brief  Each request, and response send/recieve a header + body.
+//
+// @param  uint32_t bcode   -  The code for the header
+// @param  uint32_t btype   -  The type for the header
+// @param  uint32_t length  -  The length for the body
+//
+// @return std::string      -  The combined header string
+//
+// @since  dBaseRelease
+// @author paule32
+// -----------------------------------------------------------------
+std::string responseHeader(
+    uint32_t bcode,
+    uint32_t btype,
+    uint32_t length) {
+    std::stringstream hdr;
+    hdr << "VERSION 1"          << std::endl
+        << "DATE "   << getDateTime(DT_DATE) << std::endl
+        << "TIME "   << getDateTime(DT_TIME) << std::endl
+        << "CODE "   << bcode   << std::endl
+        << "TYPE "   << btype   << std::endl
+        << "LENGTH " << length  << std::endl;
+
+    return hdr.str();
+}
+
+std::string responseBody() {
+    std::stringstream body;
+    body << "Dies ist ein Test." << std::endl
+         << "zweite Zeile"       << std::endl;
+         
+    return body.str();
+}
+
+// -----------------------------------------------------------------
+// @brief This class handle the user interaction with the client
+//        thread.
+// -----------------------------------------------------------------
+class ClientHandler {
+public:
+    ClientHandler(SOCKET socket_):
+    socket(sock_) {
+    }
+    // -----------------------------------------
+    // send message to the Client, to check the
+    // username and password ...
+    // -----------------------------------------
+    checkUserPassword() {
+        std::string message = USERPASSWORD_CODE;
+        send(clientSocket, message.c_str(), message.size(), 0);
+    }
+private:
+    SOCKET socket;
+};
+
 void HandleClient(SOCKET clientSocket) {
     // -------------------------------
     // Nachricht an den Client senden
@@ -69,7 +242,7 @@ void HandleClient(SOCKET clientSocket) {
 // -----------------------------------------------------------------
 // @brief This class is out main ssl server class ...
 // -----------------------------------------------------------------
-class SSLServer {
+class Server {
 public:
     SSLServer(uint16_t port) {
         if ((serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
@@ -145,13 +318,21 @@ private:
 // called function at application end ...
 // -----------------------------------------------------------------
 void exitFunction(void) {
+    #ifdef __WIN32__
     // WinSock beenden
     WSACleanup();
+    #eendif
 
     std::cout << "The End."
     << std::endl;
 }
 
+// -----------------------------------------------------------------
+// @brief  Starting the TUI - text user interface from command line
+//         or console, we check, if this Application is used under
+//         Microsoft or Linux, The Microsoft Version need WinMain,
+//         under Linux there is "main".
+// -----------------------------------------------------------------
 int main(int argc, char **argv) {
     using namespace dBaseRelease;
 
@@ -165,13 +346,15 @@ int main(int argc, char **argv) {
     }
     
     try {
+        #ifdef __WIN32__
         WSADATA wsaData;
         if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
         throw std::string("Fehler beim initializieren von WinSock.");
+        #endif
         
         ApplicationExeName = argv[0];
         
-        SSLServer server(12345);
+        Server server(12345);
     }
     catch (const std::exception& e) {
         handle_exception(e.what());
