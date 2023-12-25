@@ -24,6 +24,8 @@ export ASMJIT_APPNAME_HLPFILE="\"${ASMJIT_APPNAMEENV}.hlp\""
 export ASMJIT_APPNAME_INIFILE="\"${ASMJIT_APPNAMEENV}.ini\""
 export ASMJIT_APPNAME_LOGFILE="\"${ASMJIT_APPNAMEENV}.log\""
 
+DOXYGEN="/E/doxygen/bin/doxygen.exe"
+
 # -----------------------------------------------------------------
 # internal stuff ...
 # -----------------------------------------------------------------
@@ -725,20 +727,30 @@ function run_build_doc_xml () {
 # -----------------------------------------------------------------
 function run_buld_create_server_documentation ()
 {
-    rm   -rf ${SRC}/dox/enu
-    rm   -rf ${SRC}/dox/deu
+    rm   -rf ${SRC}/dox
     
-    mkdir -p ${SRC}/dox/enu
-    mkdir -p ${SRC}/dox/deu
+    mkdir -p ${SRC}/dox/enu/light
+    mkdir -p ${SRC}/dox/enu/dark
+    
+    mkdir -p ${SRC}/dox/deu/light
+    mkdir -p ${SRC}/dox/deu/dark
 
-    doxygen  ${SRC}/Doxyfile.Server.chm.ENU.ini
-    doxygen  ${SRC}/Doxyfile.Server.chm.DEU.ini
+    ${DOXYGEN} ${SRC}/Doxyfile.Server.chm.ENU.light.ini
+    ${DOXYGEN} ${SRC}/Doxyfile.Server.chm.ENU.dark.ini
+    ${DOXYGEN} ${SRC}/Doxyfile.Server.chm.DEU.light.ini
+    ${DOXYGEN} ${SRC}/Doxyfile.Server.chm.DEU.dark.ini
     
-    cp ${SRC}/dox/enu/html/server.enu.chm ${SRC}/dox/server.enu.chm
-    cp ${SRC}/dox/deu/html/server.deu.chm ${SRC}/dox/server.deu.chm
+    cp ${SRC}/dox/enu/light/html/server.light.enu.chm ${SRC}/dox/server.light.enu.chm
+    cp ${SRC}/dox/deu/light/html/server.light.deu.chm ${SRC}/dox/server.light.deu.chm
     
-    cp ${SRC}/dox/enu/html/server.enu.chi ${SRC}/dox/server.enu.chi
-    cp ${SRC}/dox/deu/html/server.deu.chi ${SRC}/dox/server.deu.chi
+    cp ${SRC}/dox/enu/dark/html/server.dark.enu.chm ${SRC}/dox/server.dark.enu.chm
+    cp ${SRC}/dox/deu/dark/html/server.dark.deu.chm ${SRC}/dox/server.dark.deu.chm
+    
+    cp ${SRC}/dox/enu/light/html/server.light.enu.chi ${SRC}/dox/server.light.enu.chi
+    cp ${SRC}/dox/deu/light/html/server.light.deu.chi ${SRC}/dox/server.light.deu.chi
+    
+    cp ${SRC}/dox/enu/dark/html/server.dark.enu.chi ${SRC}/dox/server.dark.enu.chi
+    cp ${SRC}/dox/deu/dark/html/server.dark.deu.chi ${SRC}/dox/server.dark.deu.chi
     
     rm   -rf ${SRC}/dox/enu
     rm   -rf ${SRC}/dox/deu

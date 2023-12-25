@@ -1,26 +1,43 @@
-// -----------------------------------------------------------------
-// @file:   BoostServer.cc
-// @author: (c) 2023 Jens Kallup - paule32
-//          All rights reserved
-//
-// @brief   only for education, and non-profit usage !
-// -----------------------------------------------------------------
+/**
+ * @file:   BoostServer.cc
+ * @author: (c) 2023 Jens Kallup - paule32
+ *          All rights reserved
+ *
+ * \cond english
+ * @brief only for education, and non-profit usage !
+ * \endcond
+ *
+ * \cond german
+ * @brief nur für Bildungszwecke, und non-profit Nutzung !
+ * \endcond
+ */
 
-// @mainpage BOOST Server Project
-//
-// Herzlich Willkommen auf der Hauptseite des BOOST Server Projektes !
-// Diese Dokumentation enthält Informationen zur Anwendung.
-//
-// @section intro Einführung
-// Der BOOST Server hat nicht direkt was mit der C++ BOOST-Bibliothek
-// zu tun. Vielmehr ist es eine Server-Anwendung, die es ermöglicht,
-// Terminal Server Anwendungen remote zu betreiben.
-// Dabei werden die Programme "entfernt" ausgeführt, und brauchen nicht
-// lokal auf dem Arbeitsplatz- oder Heimcomputer liegen.
-//
-// Achtung: Der aktuelle Stand ist ein Entwickler-System, was bedeutet,
-//          das keine SSL-Verschlüsselung verwendet wird, um die Verbindung
-//          zwischen Client und Server zu sichern.
+/**
+ * \cond german
+ * @mainpage BOOST Server Projekt
+ *
+ * Herzlich Willkommen auf der Hauptseite des BOOST Server Projektes !
+ * Diese Dokumentation enthält Informationen zur Anwendung.
+ *
+ * @section intro Einführung
+ * Der BOOST Server hat nicht direkt was mit der C++ BOOST-Bibliothek
+ * zu tun. Vielmehr ist es eine Server-Anwendung, die es ermöglicht,
+ * Terminal Server Anwendungen remote zu betreiben.
+ * Dabei werden die Programme "entfernt" ausgeführt, und brauchen nicht
+ * lokal auf dem Arbeitsplatz- oder Heimcomputer liegen.
+ *
+ * <b>Achtung</b>: Der aktuelle Stand ist ein Entwickler-System, was bedeutet,
+ *          das keine SSL-Verschlüsselung verwendet wird, um die Verbindung
+ *          zwischen Client und Server zu sichern.
+ *
+ * \endcond
+ * \cond english
+ * @mainpage BOOST Server Project
+ *
+ * Welcome to the landing page of the BOOST Server Project !
+ * This documentation contain informations about the Server Application
+ * \endcond
+ */
 
 // -----------------------------------------------------------------
 // @brief The follow #define's are used by TurboVision, to automatic
@@ -99,8 +116,8 @@ using namespace std;
 // -----------------------------------------------------------------
 // some constant's and variable's used in this source code:
 // -----------------------------------------------------------------
-# define DT_DATE false
-# define DT_TIME true
+# define DT_DATE false  //! get date
+# define DT_TIME true   //! get time
 
 // -----------------------------------------------------------------
 // @brief this are the "codes" for interactive client/server access.
@@ -116,17 +133,63 @@ namespace dBaseRelease
 {
 std::string ApplicationExeName;
 
-// -----------------------------------------------------------------
-// @brief This member handle the exception message text that is use
-//         to "try catch" exception's during the runtime of the
-//         application.
-//
-// @param  std::string& message  -  The e.what() message.
-// @return nothing
-//
-// @since  dBaseRelease
-// @author paule32
-// -----------------------------------------------------------------
+/**
+ * \fn void handle_exception(const std::string& message)
+ * \cond english
+ * \brief   This member handle the exception message text that is use
+ *          to "try catch" exception's during the runtime of the
+ *          application.
+ *
+ * When an exception is throw, the catch block contain an exception type/class.
+ * This type must then provide a referenced object:
+ *
+ * @section ExampleHeader Example
+ * \code{.cpp}
+int foo(void) {
+    try {
+    ...
+    }
+    catch (exception& e) {
+        handle_exception( e.what() );
+        
+        return EXIT_FAILURE;
+    }   return EXIT_SUCCESS;
+}
+ * \endcode
+ *
+ * \param   message The exception message e.what().
+ * \return  nothing
+ *
+ * \endcond
+ * \cond german
+ * \brief   Behandelt die im Parameter \a_colorYellow{message}
+ *          angegebene Ausnahme-Nachricht.
+ *
+ * Wenn eine Ausnahme (Exception) auftritt, werden mit dieser Funktion die
+ * in \a_colorYellow{message} enthaltenen Zeichen geprüft und entfernt, sofern
+ * eine eckige Klammer gefunden wird.
+ * Die Ausnahme-Behandlung könnte dann wie folgt aussehen:
+ *
+ * @section BeispielHeader Beispiel
+ * \code{.cpp}
+int foo(void) {
+    try {
+    ...
+    }
+    catch (exception& e) {
+        handle_exception( e.what() );
+        return EXIT_FAILURE;
+    }   return EXIT_SUCCESS;
+}
+ * \endcode
+ *
+ * \param   message  -  Die Ausnahme-Nachricht e.what().
+ * \return  void
+ * \endcond
+ *
+ * \since  dBaseRelease
+ * \author paule32
+ */
 void handle_exception(const std::string& message) {
     std::string error_message;
     for (int len = 0; len < message.length(); ++len) {
