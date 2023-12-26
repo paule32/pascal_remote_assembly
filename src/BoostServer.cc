@@ -30,6 +30,7 @@
  *          das keine SSL-Verschlüsselung verwendet wird, um die Verbindung
  *          zwischen Client und Server zu sichern.
  *
+ * \example{example1.cc}
  * \endcond
  * \cond english
  * @mainpage BOOST Server Project
