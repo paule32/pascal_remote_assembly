@@ -1,14 +1,14 @@
 /**
  * @file:   BoostServer.cc
- * @author: (c) 2023 Jens Kallup - paule32
+ * @author: (c) 2023 Jens Kallup - \a_currentAuthors
  *          All rights reserved
  *
  * \cond english
- * @brief only for education, and non-profit usage !
+ * \brief only for education, and non-profit usage !
  * \endcond
  *
  * \cond german
- * @brief nur für Bildungszwecke, und non-profit Nutzung !
+ * \brief nur für Bildungszwecke, und non-profit Nutzung !
  * \endcond
  */
 
@@ -26,18 +26,34 @@
  * Dabei werden die Programme "entfernt" ausgeführt, und brauchen nicht
  * lokal auf dem Arbeitsplatz- oder Heimcomputer liegen.
  *
- * <b>Achtung</b>: Der aktuelle Stand ist ein Entwickler-System, was bedeutet,
- *          das keine SSL-Verschlüsselung verwendet wird, um die Verbindung
- *          zwischen Client und Server zu sichern.
+ * \note Der aktuelle Stand ist ein Entwickler-System, was bedeutet,
+ *       das keine SSL-Verschlüsselung verwendet wird, um die Verbindung
+ *       zwischen Client und Server zu sichern.
  *
- * \example{example1.cc}
  * \endcond
+ *
  * \cond english
  * @mainpage BOOST Server Project
  *
  * Welcome to the landing page of the BOOST Server Project !
- * This documentation contain informations about the Server Application
+ * This documentation contain informations about the Server Application.
+ *
+ * @section intro Getting started
+ * This BOOST Server Project has nothing to do with the C++ Boost Library
+ * directly. It is a free Server Application which make it possible to
+ * emulate a Terminal Application Server, to serve remote Application's
+ * on local Desktop.
+ * So, the Application's you need, dont need to be installed on the local
+ * Desktop Computer,
+ *
+ * <b>Warning</b>: The current state of development provides a non-productive
+ *                 System. That means, that no SSL security will be use, to
+ *                 secure the Connection between Client, and Server.
+ *                 So, you have to use a Terminal Application that support
+ *                 encrypting the Connection to Server, and back.
+ *
  * \endcond
+ * \author \a_currentAuthors
  */
 
 // -----------------------------------------------------------------
@@ -127,9 +143,23 @@ using namespace std;
 # define CODE_ACCESS_ERROR    201
 # define CODE_ACCESS_PASSWORD 202
 
-// -----------------------------------------------------------------
-// @brief namespace name for Version 1.0.0 of our project ...
-// -----------------------------------------------------------------
+/**
+ * \cond english
+ * \brief  namespace name for \a_currentVersion of this project.
+ *
+ * This namespace was introduce, to avoid name conflicts between other
+ * namespaces and/or function, and class names.
+ * \endcond
+ *
+ * \cond german
+ * \brief  Namensraum für das Projekt \a_currentVersion.
+ *
+ * Dieser Namensraum wurde eingeführt, um Konflikte zwischen anderen
+ * Namensräume und/oder Funktion-, und Klassen-Namen zu vermeiden.
+ * \endcond
+ * \since  \a_currentVersion
+ * \author \a_currentAuthors
+ */
 namespace dBaseRelease
 {
 std::string ApplicationExeName;
@@ -144,7 +174,8 @@ std::string ApplicationExeName;
  * When an exception is throw, the catch block contain an exception type/class.
  * This type must then provide a referenced object:
  *
- * @section ExampleHeader Example
+ * \param[in] message - The exception message from e.what().
+ * \section ExampleHeader Example
  * \code{.cpp}
 int foo(void) {
     try {
@@ -157,11 +188,9 @@ int foo(void) {
     }   return EXIT_SUCCESS;
 }
  * \endcode
- *
- * \param   message The exception message e.what().
- * \return  nothing
- *
+ * \return  void - nothing
  * \endcond
+ *
  * \cond german
  * \brief   Behandelt die im Parameter \a_colorYellow{message}
  *          angegebene Ausnahme-Nachricht.
@@ -171,7 +200,8 @@ int foo(void) {
  * eine eckige Klammer gefunden wird.
  * Die Ausnahme-Behandlung könnte dann wie folgt aussehen:
  *
- * @section BeispielHeader Beispiel
+ * \param[in] message - Die Ausnahme (Exception) Nachricht ausgehend von e.what().
+ * \section BeispielHeader Beispiel
  * \code{.cpp}
 int foo(void) {
     try {
@@ -179,17 +209,16 @@ int foo(void) {
     }
     catch (exception& e) {
         handle_exception( e.what() );
+        
         return EXIT_FAILURE;
     }   return EXIT_SUCCESS;
 }
  * \endcode
- *
- * \param   message  -  Die Ausnahme-Nachricht e.what().
- * \return  void
+ * \return  void - nichts
  * \endcond
  *
- * \since  dBaseRelease
- * \author paule32
+ * \since  \a_currentVersion
+ * \author \a_currentAuthors
  */
 void handle_exception(const std::string& message) {
     std::string error_message;
@@ -202,78 +231,281 @@ void handle_exception(const std::string& message) {
     << std::endl;
 }
 
-// -----------------------------------------------------------------
-// @brief   get the date/time for local server ...
-//
-// @param  bool mode    -  If mode false, then return date, else time.
-//                         The default mode is false.
-//
-// @return std::string  -  The date or time in std::string format.
-//
-// @since  dBaseRelease
-// @author paule32
-// -----------------------------------------------------------------
-std::string getDateTime(bool mode = false) {
-    auto now = std::chrono::system_clock::now();  // current time
-    std::time_t time = std::chrono::system_clock::to_time_t(now);
-    
-    // -----------------------
-    // Lokale Zeit darstellen
-    // -----------------------
-    std::tm localTime = *std::localtime(&time);
-    
-    // -----------------------------------
-    // Datum aus dem tm-Objekt extrahieren
-    // -----------------------------------
-    int year   = localTime.tm_year + 1900; // tm_year years since 1900
-    int month  = localTime.tm_mon  + 1;    // tm_mon  month 0 to 11
-    int day    = localTime.tm_mday;
-    
-    // -----------------------------------
-    // Zeit aus dem tm-Objekt extrahieren
-    // -----------------------------------
-    int hour   = localTime.tm_hour;
-    int minute = localTime.tm_min;
-    int second = localTime.tm_sec;
-    
-    std::stringstream sd, st;
-    sd  << year                                        << "-"
-        << std::setw(2) << std::setfill('0') << month  << "-"
-        << std::setw(2) << std::setfill('0') << day    ;
+/**
+ * \class  Date
+ * \brief  Informationen für die Klasse Date, die verschiedene Funktionen
+ *         zur Bearbeitung von Datums-Werte bereitstellt.
+ *
+ * \since  \a_currentVersion
+ * \author \a_currentAuthors
+ */
+class Date {
+private:
+    int year ;    // tm_year years since 1900
+    int month;    // tm_mon  month 0 to 11
+    int day  ;
+public:
+    /**
+     * \cond german
+     * \brief Standard C++ Konstruktor für die Klasse "Date" zur statischen
+     *        ermittlung von Datums-Werten.
+     *
+     * Wenn die Klasse "Date" mit den Standard-Konstruktor aufgerufen wird,
+     * werden die aktuellen Daten über das Jahr, Monat, und Tag nur einmal
+     * ermittelt, und stehen so als statische Daten für die Verwendung zur
+     * Verfügung.
+     * Genauere Werte können mit den entsprechenden Funktionen ermittelt
+     * werden.
+     * \endcond
+     *
+     * \cond english
+     * \brief Standard C++ Constructor for class "Date" to get the static
+     *        Date-Informations.
+     *
+     * When you call this Standard-Constructor, all current data about the
+     * year, month, and day will determined only once.
+     * Current or actual values can be get by other Function's.
+     * \endcond
+     *
+     * \see getYear()
+     * \see getMonth()
+     * \see getDay()
+     *
+     * \see getYearNow()
+     * \see getMonthNow()
+     * \see getDayNow()
+     *
+     * \since  \a_currentVersion
+     * \author \a_currentAuthors
+     */
+    Date() {
+        auto now = std::chrono::system_clock::now();  // current time
+        std::time_t time = std::chrono::system_clock::to_time_t(now);
         
-    st  << std::setw(2) << std::setfill('0') << hour   << ":"
-        << std::setw(2) << std::setfill('0') << minute << ":"
-        << std::setw(2) << std::setfill('0') << second ;
+        // -----------------------
+        // Lokale Zeit darstellen
+        // -----------------------
+        std::tm localTime = *std::localtime(&time);
+        
+        // -----------------------------------
+        // Datum aus dem tm-Objekt extrahieren
+        // -----------------------------------
+        year   = localTime.tm_year + 1900;
+        month  = localTime.tm_mon  + 1;
+        day    = localTime.tm_mday;
+    }
     
-    if (!mode)
-    return sd.str();
-    return st.str();
-}
+    /**
+     * \cond german
+     * \brief  Gibt das aktuelle Jahr zurück, das während der
+     *         initializierung des Konstruktors ermittelt wurde.
+     *
+     * \return std::string - Das ermittelte Jahr als std::string.
+     * \endcond
+     *
+     * \cond english
+     * \brief  Return the current year, that was determined at the
+     *         constructing and calling class constructor.
+     * \return std::string - The current year as std::string.
+     * \endcond
+     *
+     * \see getMonth()
+     * \see getDay()
+     *
+     * \see getYearNow()
+     * \see getMonthNow()
+     * \see getDayNow()
+     *
+     * \since  \a_currentVersion
+     * \author \a_currentAuthors
+     */
+    std::string getYear() const {
+        std::stringstream sd, st;
+        ss << year;
+        return ss.str();
+    }
+    
+    /**
+     * \cond german
+     * \brief  Gibt das aktuelle Jahr zurück, das den aktuellen Wert bei
+     *         aufruf der Funktion gemessen wurde.
+     * \return std::string - Das aktuelle Jahr, gemessen im "Jetzt"
+     * \endcond
+     *
+     * \cond english
+     * \brief  Return the current year at the point from "now" by calling
+     *         this Function.
+     * \return std::string - The current year as std::string from "now".
+     * \endcond
+     *
+     * \see getYear()
+     * \see getMonth()
+     * \see getDay()
+     *
+     * \since  \a_currentVersion
+     * \author \a_currentAuthors
+     */
+    std::string getYearNow() const {
+        return std::string("tztz");
+    }
+    
+    /**
+     * \cond german
+     * \brief  Gibt den Monat des aktuellen Jahres zurück, der während
+     *         der initializierung des Konstruktors ermittelt wurde.
+     *
+     * \return std::string - Der ermittelte Monat als std::string.
+     * \endcond
+     *
+     * \cond english
+     * \brief  Return the month of the current year, that was determined
+     *         at the constructing and calling class constructor.
+     *
+     * \return std::string - The current month as std::string.
+     * \endcond
+     *
+     * \see getYear()
+     * \see getDayNow()
+     *
+     * \since  \a_currentVersion
+     * \author \a_currentAuthors
+     */
+    std::string getMonth() const {
+        std::stringstream sd, st;
+        ss  << std::setw(2)
+            << std::setfill('0')
+            << month;
+        return ss.str();
+    }
+    
+    /**
+     * \cond german
+     * \brief  Gibt den Tag des aktuellen Monats zurück, der während
+     *         der initializierung des Konstruktors ermittelt wurde.
+     *
+     * \return std::string - Der ermittelte Tag des Monats als std::string.
+     * \endcond
+     *
+     * \cond english
+     * \brief  Return the current day of month, that was determined
+     *         at the constructing and calling class constructor.
+     *
+     * \return std::string - The current year as std::string.
+     * \endcond
+     *
+     * \see getYearNow()
+     * \see getMonthNow()
+     *
+     * \since  \a_currentVersion
+     * \author \a_currentAuthors
+     */
+    std::string getDay() const {
+        std::stringstream sd, st;
+        ss  << std::setw(2)
+            << std::setfill('0')
+            << day;
+        return ss.str();
+    }
+};
 
-// -----------------------------------------------------------------
-// @brief  Each request, and response send/recieve a header + body.
-//
-// @param  uint32_t bcode   -  The code for the header
-// @param  uint32_t btype   -  The type for the header
-// @param  uint32_t length  -  The length for the body
-//
-// @return std::string      -  The combined header string
-//
-// @since  dBaseRelease
-// @author paule32
-// -----------------------------------------------------------------
+/**
+ * \class  Time
+ * \cond german
+ * \brief  Informationen für die Klasse Date, die verschiedene Funktionen
+ *         zur Bearbeitung von Zeit-Werte bereitstellt.
+ *
+ * \since  \a_currentVersion
+ * \author \a_currentAuthors
+ */
+class Time {
+private:
+    int hour   ;
+    int minute ;
+    int second ;
+public:
+    Time() {
+        auto now = std::chrono::system_clock::now();  // current time
+        std::time_t time = std::chrono::system_clock::to_time_t(now);
+        
+        // -----------------------
+        // Lokale Zeit darstellen
+        // -----------------------
+        std::tm localTime = *std::localtime(&time);
+        
+        // -----------------------------------
+        // Zeit aus dem tm-Objekt extrahieren
+        // -----------------------------------
+        hour   = localTime.tm_hour;
+        minute = localTime.tm_min;
+        second = localTime.tm_sec;
+    }
+    
+    std::string getHour() const {
+        std::stringstream sd, st;
+        ss  << std::setw(2)
+            << std::setfill('0')
+            << hour;
+        return ss.str();
+    }
+
+    std::string getMinute() const {
+        std::stringstream sd, st;
+        ss  << std::setw(2)
+            << std::setfill('0')
+            << minute;
+        return ss.str();
+    }
+
+    std::string getSecond() const {
+        std::stringstream sd, st;
+        ss  << std::setw(2)
+            << std::setfill('0')
+            << second;
+        return ss.str();
+    }
+};
+
+/**
+ * \cond english
+ * \brief  Each request, and response send/recieve a header + body.
+ *
+ * \param[in] uint32_t bcode   -  The code for the header
+ * \param[in] uint32_t btype   -  The type for the header
+ * \param[in] uint32_t length  -  The length for the body
+ *
+ * \return std::string  -  The combined header string
+ * \endcond
+ *
+ * \cond german
+ * \brief  Jede Anfrage und jede Antwort sendet/empfängt einen Header
+ *         und einen Body.
+ *
+ * Im Header stehen informelle Daten über den Body der Nachricht, während
+ * im Body die eigentlichen Daten der Nachricht gesendet bzw. empfangen
+ * werden.
+ *
+ * \param[in] uint32_t bcode   -  Der Code für den Header
+ * \param[in] uint32_t btype   -  Der Typ für den Header
+ * \param[in] uint32_t length  -  Die Länge der Daten
+ * \endcond
+ *
+ * \since  \a_currentVersion
+ * \author \a_currentAuthors
+ */
 std::string responseHeader(
     uint32_t bcode,
     uint32_t btype,
     uint32_t length) {
+    auto * datum = Date();
     std::stringstream hdr;
     hdr << "VERSION 1"          << std::endl
-        << "DATE "   << getDateTime(DT_DATE) << std::endl
-        << "TIME "   << getDateTime(DT_TIME) << std::endl
+        << "DATE "   << datum->getDate() << std::endl
+        << "TIME "   << datum->getTime() << std::endl
         << "CODE "   << bcode   << std::endl
         << "TYPE "   << btype   << std::endl
         << "LENGTH " << length  << std::endl;
 
+    delete datum;
     return hdr.str();
 }
 
@@ -319,9 +551,20 @@ void HandleClient(SOCKET clientSocket) {
     closesocket(clientSocket);
 }
 
-// -----------------------------------------------------------------
-// @brief This class is out main ssl server class ...
-// -----------------------------------------------------------------
+/**
+ * \class  Server
+ * \cond german
+ * \brief  Informationen für die Klasse Server, die verschiedene Funktionen
+ *         zur Bereitstellung von serverbasierten Funktionen bereitstellt.
+ * \endcond
+ *
+ * \cond english
+ * \brief  The Server class for various server based functions.
+ * \endcond
+ *
+ * \since  \a_currentVersion
+ * \author \a_currentAuthors
+ */
 class Server {
 public:
     SSLServer(uint16_t port) {
@@ -394,9 +637,27 @@ private:
 };
 }   // namespace: dBaseRelease
 
-// -----------------------------------------------------------------
-// called function at application end ...
-// -----------------------------------------------------------------
+/**
+ * \cond german
+ * \brief  Diese Funkion wird verwendet, wenn "exit()" oder eine
+ *         Ausnahme (Exception), die EXIT_FAILURE zurückliefert
+ *         aufgerufen.
+ *
+ * \param  keine
+ * \endcond
+ *
+ * \cond english
+ * \brief  This function will be called when the Application throw
+ *         an Exception, and EXIT_FAILURE is returned. Or when the
+ *         "exit()" Function is called.
+ *
+ * \param  nothing
+ * \endcond
+ *
+ * \return void
+ * \since  \a_currentVersion
+ * \author \a_currentAuthors
+ */
 void exitFunction(void) {
     #ifdef __WIN32__
     // WinSock beenden

@@ -727,7 +727,8 @@ function run_build_doc_xml () {
 # -----------------------------------------------------------------
 function run_buld_create_server_documentation ()
 {
-    rm   -rf ${SRC}/dox
+    rm -rf ${SRC}/dox
+    rm -rf ${TMP}/*.tmp
     
     mkdir -p ${SRC}/dox/enu/light
     mkdir -p ${SRC}/dox/enu/dark
@@ -737,6 +738,7 @@ function run_buld_create_server_documentation ()
 
     ${DOXYGEN} ${SRC}/Doxyfile.Server.chm.ENU.light.ini
     ${DOXYGEN} ${SRC}/Doxyfile.Server.chm.ENU.dark.ini
+    #
     ${DOXYGEN} ${SRC}/Doxyfile.Server.chm.DEU.light.ini
     ${DOXYGEN} ${SRC}/Doxyfile.Server.chm.DEU.dark.ini
     
@@ -746,14 +748,16 @@ function run_buld_create_server_documentation ()
     cp ${SRC}/dox/enu/dark/html/server.dark.enu.chm ${SRC}/dox/server.dark.enu.chm
     cp ${SRC}/dox/deu/dark/html/server.dark.deu.chm ${SRC}/dox/server.dark.deu.chm
     
-    cp ${SRC}/dox/enu/light/html/server.light.enu.chi ${SRC}/dox/server.light.enu.chi
-    cp ${SRC}/dox/deu/light/html/server.light.deu.chi ${SRC}/dox/server.light.deu.chi
+    #cp ${SRC}/dox/enu/light/html/server.light.enu.chi ${SRC}/dox/server.light.enu.chi
+    #cp ${SRC}/dox/deu/light/html/server.light.deu.chi ${SRC}/dox/server.light.deu.chi
     
-    cp ${SRC}/dox/enu/dark/html/server.dark.enu.chi ${SRC}/dox/server.dark.enu.chi
-    cp ${SRC}/dox/deu/dark/html/server.dark.deu.chi ${SRC}/dox/server.dark.deu.chi
+    #cp ${SRC}/dox/enu/dark/html/server.dark.enu.chi ${SRC}/dox/server.dark.enu.chi
+    #cp ${SRC}/dox/deu/dark/html/server.dark.deu.chi ${SRC}/dox/server.dark.deu.chi
     
-    rm   -rf ${SRC}/dox/enu
-    rm   -rf ${SRC}/dox/deu
+    rm -rf ${SRC}/dox/enu
+    rm -rf ${SRC}/dox/deu
+
+    rm -rf ${TMP}/*.tmp
 }
 # ----------------------------------------
 # link diss.exe application ...
