@@ -413,6 +413,7 @@ public:
  * \cond german
  * \brief  Informationen für die Klasse Date, die verschiedene Funktionen
  *         zur Bearbeitung von Zeit-Werte bereitstellt.
+ * \endcond
  *
  * \since  \a_currentVersion
  * \author \a_currentAuthors
