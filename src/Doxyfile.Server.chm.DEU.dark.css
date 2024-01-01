@@ -18,11 +18,13 @@ b {
  * \brief This navrpw ID stylesheet blend out the header
  *        navigation tabs on top of each page.
  */
-#navrow1 { display: none; }
-#navrow2 { display: none; }
-#navrow3 { display: none; }
-#navrow4 { display: none; }
-#navrow5 { display: none; }
+#navrow1  { display: none; }
+#navrow2  { display: none; }
+#navrow3  { display: none; }
+#navrow4  { display: none; }
+#navrow5  { display: none; }
+
+#nav-path { display: none; }
 
 /**
  * \brief This stylesheet handle the member-left (the return

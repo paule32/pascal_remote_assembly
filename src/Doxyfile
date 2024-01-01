@@ -1,13 +1,27 @@
-# Doxyfile 1.9.6
+# ------------------------------------------------------------------------
+# File:   Doxyfile.Server.chm.DEU.dark.ini
+# Author: (c) 2023 Jens Kallup - paule32 kallup non-profit software
+#         All rights reserved.
+#
+# This file is part of the BOOST Server Project. Use it only for education
+# and only for non-profit purpose.
+# Commercial usage is not allowed !
+#
+# Optimized for: # Doxyfile 1.10.1
+#
+# doxygen.exe will be use this .ini file to create a Microsoft Windows CHM
+# compiled help file, that can be used for documentation the API or source
+# code of the project.
+# ------------------------------------------------------------------------
 
 DOXYFILE_ENCODING      = UTF-8
 
-PROJECT_NAME           = KAPA
+PROJECT_NAME           = BOOST Server
 PROJECT_NUMBER         = "0.0.1 RC 0.1"
 PROJECT_BRIEF          = paule32
 PROJECT_LOGO           =
 
-OUTPUT_DIRECTORY       = ./dox
+OUTPUT_DIRECTORY       = ./dox/deu/dark
 
 CREATE_SUBDIRS         = YES
 CREATE_SUBDIRS_LEVEL   = 8
@@ -16,7 +30,7 @@ ALLOW_UNICODE_NAMES    = YES
 OUTPUT_LANGUAGE        = German
 
 BRIEF_MEMBER_DESC      = YES
-REPEAT_BRIEF           = NO
+REPEAT_BRIEF           = YES
 
 ABBREVIATE_BRIEF       = "The $name class" \
                          "The $name widget" \
@@ -32,38 +46,40 @@ ABBREVIATE_BRIEF       = "The $name class" \
 
 ALWAYS_DETAILED_SEC    = YES
 INLINE_INHERITED_MEMB  = YES
-FULL_PATH_NAMES        = YES
+FULL_PATH_NAMES        = NO
 
-STRIP_FROM_PATH        =
-STRIP_FROM_INC_PATH    =
+# no no
+STRIP_FROM_PATH        = YES
+STRIP_FROM_INC_PATH    = YES
 SHORT_NAMES            = NO
 
-JAVADOC_AUTOBRIEF      = YES
-JAVADOC_BANNER         = NO
-
-QT_AUTOBRIEF           = NO
 MULTILINE_CPP_IS_BRIEF = NO
-PYTHON_DOCSTRING       = YES
 INHERIT_DOCS           = YES
 SEPARATE_MEMBER_PAGES  = NO
 
 TAB_SIZE               = 8
 
-ALIASES += b_colortext{2}="\htmlonly <font color='\1'><b>\2</b></font>\endhtmlonly"
+ALIASES += a_colortext{2}="\htmlonly <font color='\1'><b>\2</b></font>\endhtmlonly"
+ALIASES += a_colorYellow{1}="\htmlonly <font color='yellow'>\1</font>\endhtmlonly"
+
 ALIASES += myproject="Projekt 1.1"
+ALIASES += a_currentVersion="Version 0.0.1"
+ALIASES += a_currentAuthors="paule32"
+
+ALIASES += "english=\if english" \
+           "endenglish=\endif"   \
+           "german=\if german"   \
+           "endgerman=\endif"
 
 OPTIMIZE_OUTPUT_FOR_C  = YES
 OPTIMIZE_OUTPUT_JAVA   = NO
 OPTIMIZE_FOR_FORTRAN   = NO
-OPTIMIZE_OUTPUT_VHDL   = NO
-OPTIMIZE_OUTPUT_SLICE  = NO
 
 EXTENSION_MAPPING      =
 
-MARKDOWN_SUPPORT       = YES
 TOC_INCLUDE_HEADINGS   = 5
 AUTOLINK_SUPPORT       = YES
-BUILTIN_STL_SUPPORT    = YES
+BUILTIN_STL_SUPPORT    = NO
 CPP_CLI_SUPPORT        = YES
 
 SIP_SUPPORT            = NO
@@ -104,13 +120,14 @@ CASE_SENSE_NAMES       = NO
 HIDE_SCOPE_NAMES       = NO
 HIDE_COMPOUND_REFERENCE= NO
 
-SHOW_HEADERFILE        = YES
-SHOW_INCLUDE_FILES     = YES
+SHOW_HEADERFILE        = NO
+SHOW_INCLUDE_FILES     = NO
 SHOW_GROUPED_MEMB_INC  = NO
 
 FORCE_LOCAL_INCLUDES   = NO
 
-INLINE_INFO            = YES
+# yes
+INLINE_INFO            = NO
 
 SORT_MEMBER_DOCS       = YES
 SORT_BRIEF_DOCS        = YES
@@ -120,21 +137,21 @@ SORT_BY_SCOPE_NAME     = YES
 
 STRICT_PROTO_MATCHING  = NO
 
-GENERATE_TODOLIST      = YES
-GENERATE_TESTLIST      = YES
-GENERATE_BUGLIST       = YES
-GENERATE_DEPRECATEDLIST= YES
+GENERATE_TODOLIST       = YES
+GENERATE_TESTLIST       = YES
+GENERATE_BUGLIST        = YES
+GENERATE_DEPRECATEDLIST = YES
 
-ENABLED_SECTIONS       =
+ENABLED_SECTIONS       = german
 
 MAX_INITIALIZER_LINES  = 30
 
 SHOW_USED_FILES        = YES
-SHOW_FILES             = YES
+# yes
+SHOW_FILES             = NO
 SHOW_NAMESPACES        = YES
 
 FILE_VERSION_FILTER    =
-LAYOUT_FILE            =
 CITE_BIB_FILES         =
 
 QUIET                  = YES
@@ -150,7 +167,10 @@ WARN_FORMAT            = "$file:$line: $text"
 WARN_LINE_FORMAT       = "at line $line of file $file"
 WARN_LOGFILE           = warnings.txt
 
-INPUT                  = ./Application.h
+INPUT = .\\BoostServer.cc  \
+        .\\doc\\CommonC.c   \
+        .\\doc\\std\\string.hpp
+
 INPUT_ENCODING         = UTF-8
 INPUT_FILE_ENCODING    =
 FILE_PATTERNS          = *.c *.cc *.cxx *.cpp *.c++ *.h *.hh *.hxx *.hpp *.h++
@@ -162,7 +182,7 @@ EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       =
 EXCLUDE_SYMBOLS        =
 
-EXAMPLE_PATH           =
+EXAMPLE_PATH           = ./doc ./doc/examples
 EXAMPLE_PATTERNS       = *
 EXAMPLE_RECURSIVE      = NO
 
@@ -175,93 +195,67 @@ FILTER_SOURCE_FILES    = NO
 FILTER_SOURCE_PATTERNS =
 
 USE_MDFILE_AS_MAINPAGE =
-FORTRAN_COMMENT_AFTER  = 72
 
-SOURCE_BROWSER         = YES
+# yes
+SOURCE_BROWSER         = NO
 INLINE_SOURCES         = NO
 STRIP_CODE_COMMENTS    = NO
 
 REFERENCED_BY_RELATION = YES
 
 REFERENCES_RELATION    = YES
-REFERENCES_LINK_SOURCE = YES
 
-SOURCE_TOOLTIPS        = YES
+#yes
+REFERENCES_LINK_SOURCE = NO
+
+#yes
+SOURCE_TOOLTIPS        = NO
 USE_HTAGS              = NO
-VERBATIM_HEADERS       = YES
-
-CLANG_ASSISTED_PARSING = NO
-CLANG_ADD_INC_PATHS    = YES
-CLANG_OPTIONS          =
-CLANG_DATABASE_PATH    =
+VERBATIM_HEADERS       = NO
 
 ALPHABETICAL_INDEX     = YES
 
 IGNORE_PREFIX          =
 
-GENERATE_HTML          = YES
-
 HTML_OUTPUT            = html
 HTML_FILE_EXTENSION    = .html
 
-HTML_HEADER            =
-HTML_FOOTER            =
-HTML_STYLESHEET        =
+HTML_CODE_FOLDING      = NO
+HTML_COPY_CLIPBOARD    = NO
 
-HTML_EXTRA_STYLESHEET  =
+HTML_HEADER            = 
+HTML_FOOTER            = ./empty.html
+HTML_STYLESHEET        = 
+
+HTML_EXTRA_STYLESHEET  = ./Doxyfile.Server.chm.DEU.dark.css
 HTML_EXTRA_FILES       =
 
-HTML_COLORSTYLE        = AUTO_LIGHT
+HTML_COLORSTYLE        = DARK
 HTML_COLORSTYLE_HUE    = 220
 HTML_COLORSTYLE_SAT    = 100
 HTML_COLORSTYLE_GAMMA  = 80
 
-HTML_TIMESTAMP         = NO
-
-HTML_DYNAMIC_MENUS     = YES
+HTML_DYNAMIC_MENUS     = NO
 HTML_DYNAMIC_SECTIONS  = NO
 
 HTML_INDEX_NUM_ENTRIES = 100
 
+GENERATE_LATEX         = NO
+GENERATE_HTML          = YES
+GENERATE_HTMLHELP      = YES
 
-GENERATE_DOCSET        = NO
+HAVE_DOT                = YES
+DOT_PATH                = "E:/Graphviz/bin/dot.exe"
+DIA_PATH                =
 
-DOCSET_FEEDNAME        = "Doxygen generated docs"
-DOCSET_FEEDURL         =
-
-DOCSET_BUNDLE_ID       = org.doxygen.Project
-
-DOCSET_PUBLISHER_ID    = org.doxygen.Publisher
-DOCSET_PUBLISHER_NAME  = Publisher
-
-
-GENERATE_HTMLHELP      = NO
-CHM_FILE               =
-HHC_LOCATION           =
+CHM_FILE               = server.dark.deu.chm
+HHC_LOCATION           = "C:/Program Files (x86)/HTML Help Workshop/hhc.exe"
 GENERATE_CHI           = NO
-CHM_INDEX_ENCODING     =
 BINARY_TOC             = NO
 TOC_EXPAND             = NO
 
-
-GENERATE_QHP           = NO
-QCH_FILE               =
-QHP_NAMESPACE          = org.doxygen.Project
-QHP_VIRTUAL_FOLDER     = doc
-
-QHP_CUST_FILTER_NAME   =
-QHP_CUST_FILTER_ATTRS  =
-
-QHP_SECT_FILTER_ATTRS  =
-QHG_LOCATION           =
-
-
-GENERATE_ECLIPSEHELP   = NO
-ECLIPSE_DOC_ID         = org.doxygen.Project
 DISABLE_INDEX          = NO
-
-
-GENERATE_TREEVIEW      = YES
+GENERATE_TREEVIEW      = NO
 FULL_SIDEBAR           = NO
 
 ENUM_VALUES_PER_LINE   = 4
@@ -283,79 +277,20 @@ MATHJAX_RELPATH        =
 MATHJAX_EXTENSIONS     =
 MATHJAX_CODEFILE       =
 
-SEARCHENGINE           = YES
+SEARCHENGINE           = NO
 
 SERVER_BASED_SEARCH    = NO
 EXTERNAL_SEARCH        = NO
 
-SEARCHENGINE_URL       =
-SEARCHDATA_FILE        = searchdata.xml
-
 EXTERNAL_SEARCH_ID     =
 EXTRA_SEARCH_MAPPINGS  =
 
-
-GENERATE_LATEX         = NO
-
-LATEX_OUTPUT           = latex
-LATEX_CMD_NAME         = latex
-
-MAKEINDEX_CMD_NAME     = makeindex
-LATEX_MAKEINDEX_CMD    = makeindex
-
-COMPACT_LATEX          = NO
-PAPER_TYPE             = a4
-EXTRA_PACKAGES         =
-
-LATEX_HEADER           =
-LATEX_FOOTER           =
-LATEX_EXTRA_STYLESHEET =
-LATEX_EXTRA_FILES      =
-
-PDF_HYPERLINKS         = YES
-USE_PDFLATEX           = YES
-
-LATEX_BATCHMODE        = NO
-LATEX_HIDE_INDICES     = NO
-LATEX_BIB_STYLE        = plain
-LATEX_TIMESTAMP        = NO
-LATEX_EMOJI_DIRECTORY  =
-
-
-GENERATE_RTF           = NO
-RTF_OUTPUT             = rtf
-COMPACT_RTF            = NO
-
-RTF_HYPERLINKS         = NO
-RTF_STYLESHEET_FILE    =
-RTF_EXTENSIONS_FILE    =
-
-
-GENERATE_MAN           = NO
-MAN_OUTPUT             = man
-MAN_EXTENSION          = .3
-MAN_SUBDIR             =
-MAN_LINKS              = NO
-
-GENERATE_XML           = NO
-XML_OUTPUT             = xml
-XML_PROGRAMLISTING     = YES
-XML_NS_MEMB_FILE_SCOPE = NO
-GENERATE_DOCBOOK       = NO
-
-DOCBOOK_OUTPUT         = docbook
-
 GENERATE_AUTOGEN_DEF   = NO
-GENERATE_PERLMOD       = NO
-
-PERLMOD_LATEX          = NO
-PERLMOD_PRETTY         = YES
-PERLMOD_MAKEVAR_PREFIX =
 
 ENABLE_PREPROCESSING   = YES
-
 MACRO_EXPANSION        = YES
 EXPAND_ONLY_PREDEF     = NO
+
 SEARCH_INCLUDES        = NO
 INCLUDE_PATH           =
 INCLUDE_FILE_PATTERNS  =
@@ -368,10 +303,7 @@ ALLEXTERNALS           = NO
 EXTERNAL_GROUPS        = YES
 EXTERNAL_PAGES         = YES
 
-DIA_PATH               =
-
 HIDE_UNDOC_RELATIONS   = NO
-HAVE_DOT               = NO
 DOT_NUM_THREADS        = 0
 
 DOT_COMMON_ATTR        = "fontname=FreeSans,fontsize=10"
@@ -389,7 +321,7 @@ UML_LIMIT_NUM_FIELDS   = 10
 DOT_UML_DETAILS        = NO
 DOT_WRAP_THRESHOLD     = 17
 
-TEMPLATE_RELATIONS     = NO
+TEMPLATE_RELATIONS     = YES
 
 INCLUDE_GRAPH          = YES
 INCLUDED_BY_GRAPH      = YES
@@ -403,17 +335,9 @@ DIR_GRAPH_MAX_DEPTH    = 1
 
 DOT_IMAGE_FORMAT       = png
 
-INTERACTIVE_SVG        = NO
-
-DOT_PATH               =
 DOTFILE_DIRS           =
 MSCFILE_DIRS           =
 DIAFILE_DIRS           =
-
-PLANTUML_JAR_PATH      =
-
-PLANTUML_CFG_FILE      =
-PLANTUML_INCLUDE_PATH  =
 
 DOT_GRAPH_MAX_NODES    = 50
 MAX_DOT_GRAPH_DEPTH    = 1000

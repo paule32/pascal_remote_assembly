@@ -9,6 +9,12 @@
  *
  * \cond german
  * \brief nur für Bildungszwecke, und non-profit Nutzung !
+ *
+ * Für dieses Programm ist die kommerzielle Nutzung nicht gestattet.
+ * Die Lizenzierung ist zwar mit MIT deklariert, die man bei der Nutzung des
+ * github.com Services auferlegt bekommt - jedoch ist eine Eigene Lizenz für
+ * dieses Produkt vorgesehen, da die MIT-Lizenz für mich als Entwickler eine
+ * Art des Schneeball-Systems darstellt, welches ich nicht unterstützen will.
  * \endcond
  */
 
@@ -19,7 +25,7 @@
  * Herzlich Willkommen auf der Hauptseite des BOOST Server Projektes !
  * Diese Dokumentation enthält Informationen zur Anwendung.
  *
- * @section intro Einführung
+ * \section intro Einführung
  * Der BOOST Server hat nicht direkt was mit der C++ BOOST-Bibliothek
  * zu tun. Vielmehr ist es eine Server-Anwendung, die es ermöglicht,
  * Terminal Server Anwendungen remote zu betreiben.
@@ -30,6 +36,15 @@
  *       das keine SSL-Verschlüsselung verwendet wird, um die Verbindung
  *       zwischen Client und Server zu sichern.
  *
+ * \section license1 Lizenz
+ * Bitte lesen Sie diese Lizenz gründlich durch, bevor Sie den BOOST Server
+ * oder Teile dieser Software verwenden wollen. Sollten Sie nicht mit den hier
+ * aufgeführten Bedingungen einverstanden sein, ist die Nutzung oder Verwendung
+ * des Quellcodes zu diesen Produkt (oder auch Teile davon) nicht gestattet.
+ *
+ * Bei der Verwendung darf kein kommerzieller Zweck der Gewinnerzielung entstehen !
+ *
+ * \subsection license2 Geltungsbereich
  * \endcond
  *
  * \cond english
@@ -327,9 +342,9 @@ public:
     
     /**
      * \cond german
-     * \brief  Gibt das aktuelle Jahr zurück, das den aktuellen Wert bei
+     * \brief  Gibt das aktuelle Jahrmit den aktuellen Wert, der bei
      *         aufruf der Funktion gemessen wurde.
-     * \return std::string - Das aktuelle Jahr, gemessen im "Jetzt"
+     * \return std::string  -  Das aktuelle Jahr, gemessen im "Jetzt"
      * \endcond
      *
      * \cond english
@@ -346,7 +361,56 @@ public:
      * \author \a_currentAuthors
      */
     std::string getYearNow() const {
-        return std::string("tztz");
+        auto now = std::chrono::system_clock::now();  // current time
+        std::time_t time = std::chrono::system_clock::to_time_t(now);
+        
+        // -----------------------
+        // Lokale Zeit darstellen
+        // -----------------------
+        std::tm localTime = *std::localtime(&time);
+        year  = localTime.tm_year + 1900;
+        std::stringstream ss; ss << year;
+
+        return ss.str();
+    }
+    
+    /**
+     * \cond german
+     * \brief   Gibt das aktuelle Jahr plus dem im Parameter angebenen "delta"-Jahr
+     *          zurück, der beim aufrufen der Funktion gemessen wurde.
+     *
+     * Gibt den aktuellen Jahres-Werrt plus dem mit den Parameter angegebenen "delta" Jahres-Wert
+     * als std::string zurück, der beim aufruf der Funktion gemessen wurde.
+     * Es handelt sich hierbei um die lokale Server-Zeit.
+     *
+     * \return  std::string  -  Das aktuelle Jahr, gemessen im "Jetzt"
+     * \endcond
+     *
+     * \cond english
+     * \brief  Return the current year at the point from "now" by calling
+     *         this Function.
+     * \return std::string - The current year as std::string from "now".
+     * \endcond
+     *
+     * \see getYear()
+     * \see getMonth()
+     * \see getDay()
+     *
+     * \since  \a_currentVersion
+     * \author \a_currentAuthors
+     */
+    std::string getYearNow(uint16_t delta) const {
+        auto now = std::chrono::system_clock::now();  // current time
+        std::time_t time = std::chrono::system_clock::to_time_t(now);
+        
+        // -----------------------
+        // Lokale Zeit darstellen
+        // -----------------------
+        std::tm localTime = *std::localtime(&time);
+        year  = localTime.tm_year + 1900 + delta;
+        std::stringstream ss; ss << year;
+
+        return ss.str();
     }
     
     /**
@@ -404,6 +468,79 @@ public:
         ss  << std::setw(2)
             << std::setfill('0')
             << day;
+        return ss.str();
+    }
+    
+    /**
+     * \cond german
+     * \brief  Gibt den aktuellen Tag der bei aufruf der Funktion gemessen wurde.
+     *
+     * \return std::string  -  Das aktuelle Jahr, gemessen im "Jetzt"
+     * \endcond
+     *
+     * \cond english
+     * \brief  Return the current day at the point from "now" by calling
+     *         this Function.
+     * \return std::string - The current day as std::string from "now".
+     * \endcond
+     *
+     * \see getYear()
+     * \see getMonth()
+     * \see getDay()
+     *
+     * \since  \a_currentVersion
+     * \author \a_currentAuthors
+     */
+    std::string getDayNow() const {
+        auto now = std::chrono::system_clock::now();  // current time
+        std::time_t time = std::chrono::system_clock::to_time_t(now);
+        
+        // -----------------------
+        // Lokale Zeit darstellen
+        // -----------------------
+        std::tm localTime = *std::localtime(&time);
+        day   = localTime.tm_mday;
+        std::stringstream ss; ss << day;
+
+        return ss.str();
+    }
+    
+    /**
+     * \cond german
+     * \brief   Gibt den aktuellen Tag plus den im Parameter angebenen "delta"-Tag
+     *          zurück, der beim aufrufen der Funktion gemessen wurde.
+     *
+     * Gibt den aktuellen Tages-Wert plus dem mit den im Parameter angegebenen "delta" Tages-Wert
+     * als std::string zurück, der bei aufruf der Funktion gemessen wurde.
+     * Es handelt sich hierbei um die lokale Server-Zeit.
+     *
+     * \return  std::string  -  Der aktuelle Tag + delta, gemessen im "Jetzt"
+     * \endcond
+     *
+     * \cond english
+     * \brief  Return the current day at the point from "now" by calling
+     *         this Function.
+     * \return std::string - The current day as std::string from "now".
+     * \endcond
+     *
+     * \see getYear()
+     * \see getMonth()
+     * \see getDay()
+     *
+     * \since  \a_currentVersion
+     * \author \a_currentAuthors
+     */
+    std::string getDayNow(uint16_t delta) const {
+        auto now = std::chrono::system_clock::now();  // current time
+        std::time_t time = std::chrono::system_clock::to_time_t(now);
+        
+        // -----------------------
+        // Lokale Zeit darstellen
+        // -----------------------
+        std::tm localTime = *std::localtime(&time);
+        day   = localTime.tm_mday + delta;
+        std::stringstream ss; ss << day;
+
         return ss.str();
     }
 };

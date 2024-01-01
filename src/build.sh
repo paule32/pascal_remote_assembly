@@ -738,7 +738,6 @@ function run_buld_create_server_documentation ()
 
     ${DOXYGEN} ${SRC}/Doxyfile.Server.chm.ENU.light.ini
     ${DOXYGEN} ${SRC}/Doxyfile.Server.chm.ENU.dark.ini
-    cp ${SRC}/warnings.txt ${SRC}/warnings.deu.log
     #
     ${DOXYGEN} ${SRC}/Doxyfile.Server.chm.DEU.light.ini
     ${DOXYGEN} ${SRC}/Doxyfile.Server.chm.DEU.dark.ini
