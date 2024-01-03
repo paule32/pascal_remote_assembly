@@ -33,3 +33,4 @@ src/warnings.deu.log
 src/Doxyfile
 src/Doxyfile
 src/warnings.log
+src/filter.py

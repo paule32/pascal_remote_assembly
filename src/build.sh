@@ -754,8 +754,8 @@ function run_buld_create_server_documentation ()
     #cp ${SRC}/dox/enu/dark/html/server.dark.enu.chi ${SRC}/dox/server.dark.enu.chi
     #cp ${SRC}/dox/deu/dark/html/server.dark.deu.chi ${SRC}/dox/server.dark.deu.chi
     
-    rm -rf ${SRC}/dox/enu
-    rm -rf ${SRC}/dox/deu
+    #rm -rf ${SRC}/dox/enu
+    #rm -rf ${SRC}/dox/deu
 
     #rm -rf ${TMP}/*.tmp
 }
